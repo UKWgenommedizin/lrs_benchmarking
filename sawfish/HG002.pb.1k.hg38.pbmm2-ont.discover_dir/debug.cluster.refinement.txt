@@ -1,0 +1,180 @@
+CLUSTER total: 5.026644143s asm: 3.726487919s aln: 1.22648176s score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[432770-434787) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[432770-434787) dir: RightAnchor)
+ insert: SizeRange([0-2619))
+ insert_size: 1309
+is_precise: false
+CLUSTER total: 4.703918068s asm: 8.718352ms aln: 4.293665331s score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[10006-10007) dir: RightAnchor
+ be2: Some(Breakend: Segment: 14:[101980856-101980931) dir: RightAnchor)
+ insert: SizeRange([0-1))
+ insert_size: 0
+is_precise: false
+CLUSTER total: 2.908275057s asm: 8.333527ms aln: 2.488900206s score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[267833-267834) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[585987-585988) dir: RightAnchor)
+ insert: SizeRange([0-1))
+ insert_size: 0
+is_precise: false
+CLUSTER total: 2.830463682s asm: 1.339481592s aln: 1.075956677s score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[180211-181321) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[180529-181449) dir: RightAnchor)
+ insert: SizeRange([0-418))
+ insert_size: 209
+is_precise: false
+CLUSTER total: 2.633171511s asm: 59.346149ms aln: 2.173500997s score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[257781-257782) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[257781-257782) dir: RightAnchor)
+ insert: SizeRange([93-94))
+ insert_size: 93
+is_precise: false
+CLUSTER total: 2.424905584s asm: 8.04469ms aln: 1.70083664s score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 14:[101980927-101980947) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 14:[101980957-101980973) dir: RightAnchor)
+ insert: SizeRange([0-1))
+ insert_size: 0
+is_precise: false
+CLUSTER total: 2.39657963s asm: 174.49664ms aln: 1.820240001s score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[10146-10893) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[10146-10893) dir: RightAnchor)
+ insert: SizeRange([46-135))
+ insert_size: 90
+is_precise: false
+CLUSTER total: 1.885202523s asm: 9.758707ms aln: 1.109195347s score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 14:[101980015-101980016) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 14:[101980193-101980194) dir: RightAnchor)
+ insert: SizeRange([0-1))
+ insert_size: 0
+is_precise: false
+CLUSTER total: 1.747544908s asm: 232.88588ms aln: 1.125412343s score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 19:[61445-61446) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 19:[61445-61446) dir: RightAnchor)
+ insert: SizeRange([1579-1580))
+ insert_size: 1579
+is_precise: false
+CLUSTER total: 1.739068436s asm: 1.103767263s aln: 574.782284ms score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[597816-597894) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[597816-597894) dir: RightAnchor)
+ insert: SizeRange([94-1369))
+ insert_size: 731
+is_precise: false
+CLUSTER total: 1.607357279s asm: 6.777423ms aln: 829.207548ms score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 4:[181385425-181385426) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 4:[181386271-181386272) dir: RightAnchor)
+ insert: SizeRange([0-1))
+ insert_size: 0
+is_precise: false
+CLUSTER total: 1.375006123s asm: 431.333669ms aln: 530.91618ms score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[136553-136934) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[136553-136934) dir: RightAnchor)
+ insert: SizeRange([48-295))
+ insert_size: 171
+is_precise: false
+CLUSTER total: 1.253806763s asm: 224.637801ms aln: 965.186882ms score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[492193-492212) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[492193-492260) dir: RightAnchor)
+ insert: SizeRange([0-1123))
+ insert_size: 561
+is_precise: false
+CLUSTER total: 1.247296486s asm: 3.38254ms aln: 414.413745ms score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 4:[181384094-181384095) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 4:[181384941-181384942) dir: RightAnchor)
+ insert: SizeRange([0-1))
+ insert_size: 0
+is_precise: false
+CLUSTER total: 1.192116314s asm: 27.148845ms aln: 758.002676ms score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[67896-67897) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[68332-68333) dir: RightAnchor)
+ insert: SizeRange([0-1))
+ insert_size: 0
+is_precise: false
+CLUSTER total: 1.080052132s asm: 56.49686ms aln: 617.628119ms score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[66222-66264) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[66222-66264) dir: RightAnchor)
+ insert: SizeRange([246-252))
+ insert_size: 249
+is_precise: false
+CLUSTER total: 854.357005ms asm: 18.056487ms aln: 425.599004ms score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[201399-201400) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[201429-201430) dir: RightAnchor)
+ insert: SizeRange([0-1))
+ insert_size: 0
+is_precise: false
+CLUSTER total: 816.815774ms asm: 9.162208ms aln: 406.142455ms score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[72127-72128) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[72127-72128) dir: RightAnchor)
+ insert: SizeRange([32-33))
+ insert_size: 32
+is_precise: false
+CLUSTER total: 812.986332ms asm: 107.379881ms aln: 635.330727ms score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[598530-598569) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[598530-598569) dir: RightAnchor)
+ insert: SizeRange([611-707))
+ insert_size: 659
+is_precise: false
+CLUSTER total: 791.458921ms asm: 30.435718ms aln: 360.397047ms score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[398124-398125) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[398277-398278) dir: RightAnchor)
+ insert: SizeRange([0-1))
+ insert_size: 0
+is_precise: false
+CLUSTER total: 694.794706ms asm: 106.636969ms aln: 537.988462ms score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[710578-710579) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[710578-710579) dir: RightAnchor)
+ insert: SizeRange([318-322))
+ insert_size: 320
+is_precise: false
+CLUSTER total: 611.956922ms asm: 18.090561ms aln: 195.827687ms score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[144550-144551) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[144576-144577) dir: RightAnchor)
+ insert: SizeRange([0-1))
+ insert_size: 0
+is_precise: false
+CLUSTER total: 525.077603ms asm: 285.874797ms aln: 185.523756ms score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[610099-610652) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[610367-610652) dir: RightAnchor)
+ insert: SizeRange([0-207))
+ insert_size: 103
+is_precise: false
+CLUSTER total: 505.857532ms asm: 269.687185ms aln: 186.645483ms score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[669610-669790) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[669610-669790) dir: RightAnchor)
+ insert: SizeRange([225-233))
+ insert_size: 229
+is_precise: false
+CLUSTER total: 470.712377ms asm: 25.09168ms aln: 370.467333ms score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[714323-714362) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[714373-714411) dir: RightAnchor)
+ insert: SizeRange([0-1))
+ insert_size: 0
+is_precise: false
+CLUSTER total: 424.286725ms asm: 15.366506ms aln: 58.759µs score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[180089-180336) dir: RightAnchor
+ be2: Some(Breakend: Segment: 2:[10653-10983) dir: LeftAnchor)
+ insert: SizeRange([0-1))
+ insert_size: 0
+is_precise: false
+CLUSTER total: 410.573554ms asm: 3.443594ms aln: 258.951µs score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[180087-180088) dir: RightAnchor
+ be2: Some(Breakend: Segment: 2:[198173102-198173331) dir: RightAnchor)
+ insert: SizeRange([0-1))
+ insert_size: 0
+is_precise: false
+CLUSTER total: 402.431403ms asm: 691ns aln: 33.903µs score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[30907-30908) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[30932-30933) dir: RightAnchor)
+ insert: SizeRange([0-1))
+ insert_size: 0
+is_precise: false
+CLUSTER total: 62.197963ms asm: 481ns aln: 24.906µs score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[525790-525791) dir: LeftAnchor
+ be2: Some(Breakend: Segment: 0:[525790-525791) dir: RightAnchor)
+ insert: SizeRange([25-26))
+ insert_size: 25
+is_precise: false
+CLUSTER total: 44.02009ms asm: 781ns aln: 153.766µs score: 0ns bp: Breakpoint:
+ be1: Breakend: Segment: 0:[248945546-248945815) dir: RightAnchor
+ be2: Some(Breakend: Segment: 2:[10001-10178) dir: RightAnchor)
+ insert: SizeRange([0-1))
+ insert_size: 0
+is_precise: false

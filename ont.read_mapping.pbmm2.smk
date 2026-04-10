@@ -1,0 +1,228 @@
+# ************************************************************************************************
+# 
+# ************************************************************************************************
+
+#################
+# Include header
+
+include: "header.smk"
+
+
+#VarCAD_db processing version
+VARCAD_DB_VERSION="1.0.0"
+print("VarCAD_db procssing version: " + VARCAD_DB_VERSION)
+
+
+# Create wildcards
+DATASETS_FASTQ, = glob_wildcards(CWD + "/fastq/{dataset, [A-Za-z0-9\-\_\.]+}.fastq.gz")
+DATASETS_BAM, = glob_wildcards(CWD + "/bam_unmapped/{dataset, [A-Za-z0-9\-\_\.]+}.bam")
+
+DATASETS = DATASETS_FASTQ + DATASETS_BAM
+
+
+# *** Define Output
+OUTPUT = []
+
+OUTPUT = OUTPUT + expand(CWD + "/cram/{dataset}." + VARCAD_GENOME_BUILD + ".pbmm2-ont.cram", zip, dataset=DATASETS)
+
+#OUTPUT = OUTPUT + expand(CWD + "/cram/{dataset}." + VARCAD_GENOME_BUILD + ".pbmm2-ont.cram.md5", zip, dataset=DATASETS)
+
+OUTPUT = OUTPUT + expand(CWD + "/cram/{dataset}." + VARCAD_GENOME_BUILD + ".pbmm2-ont.cram.idxstats", zip, dataset=DATASETS)
+
+#OUTPUT = OUTPUT + expand(CWD + "/cram/{dataset}." + VARCAD_GENOME_BUILD + ".pbmm2-ont.cram.flagstat", zip, dataset=DATASETS)
+
+OUTPUT = OUTPUT + expand(CWD + "/cram/{dataset}." + VARCAD_GENOME_BUILD + ".pbmm2-ont.cram.stats", zip, dataset=DATASETS)
+
+
+# ************************************************************************************************
+
+
+rule all:
+    input: OUTPUT
+
+rule test:
+    shell:  print(OUTPUT) # print(DATASETS),
+
+
+# ************************************************************************************************	
+# Rules
+# ************************************************************************************************		
+
+
+ruleorder: pbmm2_ont_unmapped_bam > pbmm2_ont_fastq
+
+
+rule pbmm2_ont_fastq:
+	input:	fastq="{cwd}/fastq/{dataset}.fastq.gz",
+		fasta=VARCAD_DB_PATH + "/{genome_build}/Reference_sequence/" + VARCAD_DB_VERSION + "/{genome_build}.fasta.gz"
+	output:	cram="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram"
+	params:	prefix="{cwd}/cram/tmp/{dataset}.{genome_build}.pbmm2-ont"
+	log:	"{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.log"
+	message:"executing {rule} with output {output} and input {input}"
+	threads:64
+	resources:
+		mem_gb=128
+	shell:	"umask 0027; \
+		mkdir -p $(dirname {output.cram})/tmp; \
+		srun -p all -c {threads} --mem={resources.mem_gb}GB /bin/bash -c \" \
+			printf 'Container ID:\\t'; hostname; \
+			printf 'Start time:\\t'; date; \
+			umask 0027; \
+			$VARCAD_PATH/bin/pbmm2 align \
+				-j {threads} \
+				--preset SUBREAD \
+				--log-level INFO \
+				--unmapped \
+				--rg '@RG\\tID:{wildcards.dataset}\\tSM:{wildcards.dataset}' \
+				{input.fasta} \
+				{input.fastq} | \
+			\\$VARCAD_PATH/bin/samtools sort \
+				-@ {threads} \
+				--reference {input.fasta} \
+				-m 1G \
+				-T {params.prefix} \
+				--no-PG \
+				-O cram \
+				-o {output.cram} \
+				-; \
+			[[ \$(du -b {output.cram} | cut -f 1) -le 64 ]] && exit 101 || echo 'File size: OK'; \
+			\\$VARCAD_PATH/bin/samtools index -@ {threads} {output.cram}; \
+			printf 'End time:\\t'; date; \" \
+		&> {log};"
+
+#grep -v '^@PG' | \
+
+
+rule pbmm2_ont_unmapped_bam:
+	input:	unmapped_bam="{cwd}/bam_unmapped/{dataset}.bam",
+		fasta=VARCAD_DB_PATH + "/{genome_build}/Reference_sequence/" + VARCAD_DB_VERSION + "/{genome_build}.fasta.gz"
+	output:	cram="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram"
+	params:	prefix="{cwd}/cram/tmp/{dataset}.{genome_build}.pbmm2-ont"
+	log:	"{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.log"
+	message:"executing {rule} with output {output} and input {input}"
+	threads:64
+	resources:
+		mem_gb=128
+	shell:	"umask 0027; \
+		mkdir -p $(dirname {output.cram})/tmp; \
+		srun -p all -c {threads} --mem={resources.mem_gb}GB /bin/bash -c \" \
+			printf 'Container ID:\\t'; hostname; \
+			printf 'Start time:\\t'; date; \
+			umask 0027; \
+			$VARCAD_PATH/bin/pbmm2 align \
+				-j {threads} \
+				--preset SUBREAD \
+				--log-level INFO \
+				--unmapped \
+				--rg '@RG\\tID:{wildcards.dataset}\\tSM:{wildcards.dataset}' \
+				{input.fasta} \
+				{input.unmapped_bam} | \
+			\\$VARCAD_PATH/bin/samtools sort \
+				-@ {threads} \
+				-m 1G \
+				-T {params.prefix} \
+				--no-PG \
+				--reference {input.fasta} \
+				-O cram \
+				-o {output.cram} \
+				-; \
+			[[ \$(du -b {output.cram} | cut -f 1) -le 64 ]] && exit 101 || echo 'File size: OK'; \
+			\\$VARCAD_PATH/bin/samtools index -@ {threads} {output.cram}; \
+			printf 'End time:\\t'; date; \" \
+		&> {log};"
+
+#grep -v '^@PG' | \
+
+
+rule md5sum_cram:
+	input:	cram="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram"
+	output:	md5="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.md5"
+	log:	"{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.md5.log"
+	message:"executing {rule} with output {output} and input {input}"
+	threads:1
+	resources:
+		mem_gb=2
+	shell:	"umask 0027; \
+		mkdir -p $(dirname {output}); \
+		srun -p all -c {threads} --mem={resources.mem_gb}GB \
+		docker run --cpus {threads} -m {resources.mem_gb}g -u $UID:1002 --workdir /tmp --rm -v {CWD}:{CWD} -v {VARCAD_DB_PATH}:{VARCAD_DB_PATH}:ro {DOCKER_VARCAD} /bin/bash -c \" \
+			printf 'Container ID:\\t'; hostname; \
+			printf 'Start time:\\t'; date; \
+			umask 0027; \
+			md5sum {input.cram} | awk '{{print \\$1}}' > {output.md5}; \
+			printf 'End time:\\t'; date; \" \
+		&> {log};"
+
+
+rule samtools_idxstats:
+	input:	cram="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram"
+	output:	idxstats="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.idxstats"
+	log:	"{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.idxstats.log"
+	message:"executing {rule} with output {output} and input {input}"
+	threads:2
+	resources:
+		mem_gb=4
+	shell:	"umask 0027; \
+		srun -p all -c {threads} --mem={resources.mem_gb}GB \
+		docker run --cpus {threads} -m {resources.mem_gb}g -u $UID:1002 --workdir /tmp --rm -v {CWD}:{CWD} -v {VARCAD_DB_PATH}:{VARCAD_DB_PATH}:ro {DOCKER_VARCAD} /bin/bash -c \" \
+			printf 'Container ID:\\t'; hostname; \
+			printf 'Start time:\\t'; date; \
+			umask 0027; \
+			\\$VARCAD_PATH/bin/samtools idxstats \
+				-@ {threads} \
+				{input.cram} \
+				> {output.idxstats}; \
+			[[ \$(du -b {output.idxstats} | cut -f 1) -le 0 ]] && exit 101 || echo 'File size: OK'; \
+			printf 'End time:\\t'; date; \" \
+		&> {log};"
+
+
+rule samtools_flagstat:
+	input:	cram="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram"
+	output:	flagstat="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.flagstat"
+	log:	"{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.flagstat.log"
+	message:"executing {rule} with output {output} and input {input}"
+	threads:2
+	resources:
+		mem_gb=4
+	shell:	"umask 0027; \
+		srun -p all -c {threads} --mem={resources.mem_gb}GB \
+		docker run --cpus {threads} -m {resources.mem_gb}g -u $UID:1002 --workdir /tmp --rm -v {CWD}:{CWD} -v {VARCAD_DB_PATH}:{VARCAD_DB_PATH}:ro {DOCKER_VARCAD} /bin/bash -c \" \
+			printf 'Container ID:\\t'; hostname; \
+			printf 'Start time:\\t'; date; \
+			umask 0027; \
+			\\$VARCAD_PATH/bin/samtools idxstats \
+				-@ {threads} \
+				{input.cram} \
+				> {output.flagstat}; \
+			[[ \$(du -b {output.flagstat} | cut -f 1) -le 0 ]] && exit 101 || echo 'File size: OK'; \
+			printf 'End time:\\t'; date; \" \
+		&> {log};"
+
+
+rule samtools_stats:
+	input:	cram="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram",
+		fasta=VARCAD_DB_PATH + "/{genome_build}/Reference_sequence/" + VARCAD_DB_VERSION + "/{genome_build}.fasta.gz"
+	output:	stats="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.stats"
+	log:	"{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.stats.log"
+	message:"executing {rule} with output {output} and input {input}"
+	threads:16
+	resources:
+		mem_gb=32
+	shell:	"umask 0027; \
+		srun -p all -c {threads} --mem={resources.mem_gb}GB /bin/bash -c \" \
+			printf 'Container ID:\\t'; hostname; \
+			printf 'Start time:\\t'; date; \
+			umask 0027; \
+			\\$VARCAD_PATH/bin/samtools stats \
+				-@ {threads} \
+				--reference {input.fasta} \
+				--remove-overlaps \
+				{input.cram} \
+				> {output.stats}; \
+			[[ \$(du -b {output.stats} | cut -f 1) -lt 5000 ]] && exit 101 || echo 'File size: OK'; \
+			printf 'End time:\\t'; date; \" \
+		&> {log};"
+
+
+# ************************************************************************************************

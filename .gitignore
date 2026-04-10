@@ -1,0 +1,45 @@
+# Directories
+clair3_models/
+cram/
+fastq/
+happy_data/
+old/
+tmp/
+
+
+# Files
+
+# Genomics & Index Files
+*.bai
+*.bam
+*.bcf
+*.bed
+*.bedgraph
+*.bw
+*.crai
+*.cram
+*.csi
+*.idx
+*.idxstats
+*.index
+*.stats
+*.tbi
+*.vcf
+
+# Data & Large Model Shards
+*.data-00000-of-00001
+*.data-00000-of-00002
+*.data-00001-of-00002
+*.mpack
+*.pack
+
+# Documentation & Logs
+*log
+*log.txt
+*.json
+
+# Compressed Files
+*.gz
+
+# Scripts & Pipelines
+*.sample
