@@ -1,0 +1,119 @@
+Container ID:	storage-node
+Start time:	Wed Mar 11 12:06:09 PM CET 2026
+[W::hts_idx_load3] The index file is older than the data file: /mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/sniffles2/HG002.pb.30x.hg38.pbmm2-pb.sniffles2.vcf.gz.tbi
+2026-03-11 12:06:12,442 [INFO] Truvari v5.4.0
+2026-03-11 12:06:12,443 [INFO] Command /mnt/storage/groups/genetics/VarCAD-dev/external/Miniforge3/envs/truvari/bin/truvari bench --reference /mnt/storage/db/references/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta --includebed /mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/GRCh38_HG2-T2TQ100-V1.1_stvar.benchmark.only_autosomes.bed --base /mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/GRCh38_HG2-T2TQ100-V1.1_stvar.svtype.vcf.gz --comp /mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/sniffles2/HG002.pb.30x.hg38.pbmm2-pb.sniffles2.vcf.gz --output /mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/truvari/HG002.pb.30x.hg38.pbmm2-pb.sniffles2 --passonly --pick ac --dup-to-ins --refine
+2026-03-11 12:06:12,443 [INFO] Params:
+{
+    "base": "/mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/GRCh38_HG2-T2TQ100-V1.1_stvar.svtype.vcf.gz",
+    "comp": "/mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/sniffles2/HG002.pb.30x.hg38.pbmm2-pb.sniffles2.vcf.gz",
+    "output": "/mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/truvari/HG002.pb.30x.hg38.pbmm2-pb.sniffles2",
+    "includebed": "/mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/GRCh38_HG2-T2TQ100-V1.1_stvar.benchmark.only_autosomes.bed",
+    "extend": 0,
+    "debug": false,
+    "reference": "/mnt/storage/db/references/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta",
+    "refdist": 500,
+    "pctseq": 0.7,
+    "pctsize": 0.7,
+    "pctovl": 0.0,
+    "typeignore": false,
+    "no_roll": false,
+    "chunksize": 1000,
+    "bSample": "HG002",
+    "cSample": "SAMPLE",
+    "dup_to_ins": true,
+    "bnddist": 100,
+    "sizemin": 50,
+    "sizefilt": 30,
+    "sizemax": 50000,
+    "passonly": true,
+    "no_ref": false,
+    "pick": "ac",
+    "ignore_monref": true,
+    "check_multi": true,
+    "check_monref": true,
+    "no_single_bnd": true,
+    "write_resolved": false,
+    "decompose": true,
+    "short_circuit": false,
+    "skip_gt": false,
+    "max_resolve": 25000
+}
+[W::hts_idx_load3] The index file is older than the data file: /mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/sniffles2/HG002.pb.30x.hg38.pbmm2-pb.sniffles2.vcf.gz.tbi
+[W::hts_idx_load3] The index file is older than the data file: /mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/sniffles2/HG002.pb.30x.hg38.pbmm2-pb.sniffles2.vcf.gz.tbi
+2026-03-11 12:06:12,578 [WARNING] 1 contigs present in comparison VCF header are not in baseline VCF.
+2026-03-11 12:06:12,706 [INFO] Including 9268 bed regions
+2026-03-11 12:06:27,188 [INFO] Zipped 83379 variants Counter({'base': 62953, 'comp': 20426})
+2026-03-11 12:06:27,189 [INFO] 18193 chunks of 83379 variants Counter({'__filtered': 35901, 'base': 27205, 'comp': 20273})
+2026-03-11 12:06:29,426 [INFO] Stats: {
+    "TP-base": 19950,
+    "TP-comp": 18201,
+    "FP": 1465,
+    "FN": 7255,
+    "precision": 0.9255059493542154,
+    "recall": 0.7333210806836978,
+    "f1": 0.8182806412843576,
+    "base cnt": 27205,
+    "comp cnt": 19666,
+    "TP-comp_TP-gt": 15589,
+    "TP-comp_FP-gt": 2612,
+    "TP-base_TP-gt": 15590,
+    "TP-base_FP-gt": 4360,
+    "gt_concordance": 0.8564914015713422,
+    "gt_matrix": {
+        "(1, 1)": {
+            "(1, 1)": 4105,
+            "(0, 1)": 431
+        },
+        "(1, 0)": {
+            "(0, 1)": 5668,
+            "(1, 1)": 1959
+        },
+        "(0, 1)": {
+            "(0, 1)": 5817,
+            "(1, 1)": 1970
+        }
+    }
+}
+2026-03-11 12:06:29,426 [INFO] Finished bench
+2026-03-11 12:06:29,429 [INFO] Truvari v5.4.0
+2026-03-11 12:06:29,429 [INFO] Command /mnt/storage/groups/genetics/VarCAD-dev/external/Miniforge3/envs/truvari/bin/truvari bench --reference /mnt/storage/db/references/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta --includebed /mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/GRCh38_HG2-T2TQ100-V1.1_stvar.benchmark.only_autosomes.bed --base /mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/GRCh38_HG2-T2TQ100-V1.1_stvar.svtype.vcf.gz --comp /mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/sniffles2/HG002.pb.30x.hg38.pbmm2-pb.sniffles2.vcf.gz --output /mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/truvari/HG002.pb.30x.hg38.pbmm2-pb.sniffles2 --passonly --pick ac --dup-to-ins --refine
+2026-03-11 12:06:29,429 [INFO] Params:
+{
+    "benchdir": "/mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/truvari/HG002.pb.30x.hg38.pbmm2-pb.sniffles2",
+    "align": "poa",
+    "use_original_vcfs": false,
+    "write_phab": false,
+    "threads": 4,
+    "buffer": 100,
+    "reference": "/mnt/storage/db/references/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta",
+    "regions": "/mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/truvari/HG002.pb.30x.hg38.pbmm2-pb.sniffles2/candidate.refine.bed",
+    "coords": "R",
+    "subset": false,
+    "mafft_params": "--auto --thread 1",
+    "debug": false
+}
+2026-03-11 12:06:29,429 [INFO] Setting up regions
+2026-03-11 12:06:29,670 [INFO] 4231 --regions reduced to 4231 after intersecting with 9268 from --includebed
+2026-03-11 12:06:29,670 [INFO] Extending the regions by 100 bases
+2026-03-11 12:06:34,108 [INFO] 2746 regions to be refined
+2026-03-11 12:06:34,137 [INFO] Preparing reference/regions
+2026-03-11 12:06:34,253 [INFO] Building haplotypes
+2026-03-11 12:06:35,656 [INFO] Harmonizing variants
+2026-03-11 12:09:03,373 [INFO] Running bench
+2026-03-11 12:09:03,418 [INFO] Including 2746 bed regions
+2026-03-11 12:09:15,808 [INFO] Zipped 229156 variants Counter({'base': 114578, 'comp': 114578})
+2026-03-11 12:09:15,808 [INFO] 2819 chunks of 229156 variants Counter({'__filtered': 217076, 'base': 7384, 'comp': 4696})
+2026-03-11 12:09:26,986 [INFO] Stats: {
+    "TP-base": 21553,
+    "TP-comp": 18661,
+    "FP": 1005,
+    "FN": 5652,
+    "precision": 0.9488965727651785,
+    "recall": 0.7922440727807388,
+    "f1": 0.8635232166663522,
+    "base cnt": 27205,
+    "comp cnt": 19666
+}
+2026-03-11 12:09:26,987 [INFO] Finished refine
+End time:	Wed Mar 11 12:09:27 PM CET 2026

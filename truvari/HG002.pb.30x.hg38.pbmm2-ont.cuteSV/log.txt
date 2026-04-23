@@ -1,0 +1,113 @@
+2026-03-12 06:35:14,284 [INFO] Truvari v5.4.0
+2026-03-12 06:35:14,284 [INFO] Command /mnt/storage/groups/genetics/VarCAD-dev/external/Miniforge3/envs/truvari/bin/truvari bench --reference /mnt/storage/db/references/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta --includebed /mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/GRCh38_HG2-T2TQ100-V1.1_stvar.benchmark.only_autosomes.bed --base /mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/GRCh38_HG2-T2TQ100-V1.1_stvar.svtype.vcf.gz --comp /mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/cuteSV/HG002.pb.30x.hg38.pbmm2-ont.cuteSV.vcf.gz --output /mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/truvari/HG002.pb.30x.hg38.pbmm2-ont.cuteSV --passonly --pick ac --dup-to-ins --refine
+2026-03-12 06:35:14,285 [INFO] Params:
+{
+    "base": "/mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/GRCh38_HG2-T2TQ100-V1.1_stvar.svtype.vcf.gz",
+    "comp": "/mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/cuteSV/HG002.pb.30x.hg38.pbmm2-ont.cuteSV.vcf.gz",
+    "output": "/mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/truvari/HG002.pb.30x.hg38.pbmm2-ont.cuteSV",
+    "includebed": "/mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/GRCh38_HG2-T2TQ100-V1.1_stvar.benchmark.only_autosomes.bed",
+    "extend": 0,
+    "debug": false,
+    "reference": "/mnt/storage/db/references/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta",
+    "refdist": 500,
+    "pctseq": 0.7,
+    "pctsize": 0.7,
+    "pctovl": 0.0,
+    "typeignore": false,
+    "no_roll": false,
+    "chunksize": 1000,
+    "bSample": "HG002",
+    "cSample": "HG002.pb.30x",
+    "dup_to_ins": true,
+    "bnddist": 100,
+    "sizemin": 50,
+    "sizefilt": 30,
+    "sizemax": 50000,
+    "passonly": true,
+    "no_ref": false,
+    "pick": "ac",
+    "ignore_monref": true,
+    "check_multi": true,
+    "check_monref": true,
+    "no_single_bnd": true,
+    "write_resolved": false,
+    "decompose": true,
+    "short_circuit": false,
+    "skip_gt": false,
+    "max_resolve": 25000
+}
+2026-03-12 06:35:14,405 [WARNING] 194 contigs present in comparison VCF header are not in baseline VCF.
+2026-03-12 06:35:14,507 [INFO] Including 9268 bed regions
+2026-03-12 06:35:29,151 [INFO] Zipped 90234 variants Counter({'base': 62953, 'comp': 27281})
+2026-03-12 06:35:29,152 [INFO] 24687 chunks of 90234 variants Counter({'__filtered': 36213, 'base': 27205, 'comp': 26816})
+2026-03-12 06:35:31,122 [INFO] Stats: {
+    "TP-base": 19218,
+    "TP-comp": 16838,
+    "FP": 1391,
+    "FN": 7987,
+    "precision": 0.9236930166218662,
+    "recall": 0.7064142620841757,
+    "f1": 0.8005729797700134,
+    "base cnt": 27205,
+    "comp cnt": 18229,
+    "TP-comp_TP-gt": 13818,
+    "TP-comp_FP-gt": 3020,
+    "TP-base_TP-gt": 13817,
+    "TP-base_FP-gt": 5401,
+    "gt_concordance": 0.8206437819218434,
+    "gt_matrix": {
+        "(1, 1)": {
+            "(1, 1)": 4444,
+            "(0, 1)": 104
+        },
+        "(0, 1)": {
+            "(0, 1)": 4723,
+            "(1, 1)": 2642
+        },
+        "(1, 0)": {
+            "(1, 1)": 2655,
+            "(0, 1)": 4650
+        }
+    }
+}
+2026-03-12 06:35:31,122 [INFO] Finished bench
+2026-03-12 06:35:31,124 [INFO] Truvari v5.4.0
+2026-03-12 06:35:31,124 [INFO] Command /mnt/storage/groups/genetics/VarCAD-dev/external/Miniforge3/envs/truvari/bin/truvari bench --reference /mnt/storage/db/references/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta --includebed /mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/GRCh38_HG2-T2TQ100-V1.1_stvar.benchmark.only_autosomes.bed --base /mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/GRCh38_HG2-T2TQ100-V1.1_stvar.svtype.vcf.gz --comp /mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/cuteSV/HG002.pb.30x.hg38.pbmm2-ont.cuteSV.vcf.gz --output /mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/truvari/HG002.pb.30x.hg38.pbmm2-ont.cuteSV --passonly --pick ac --dup-to-ins --refine
+2026-03-12 06:35:31,125 [INFO] Params:
+{
+    "benchdir": "/mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/truvari/HG002.pb.30x.hg38.pbmm2-ont.cuteSV",
+    "align": "poa",
+    "use_original_vcfs": false,
+    "write_phab": false,
+    "threads": 4,
+    "buffer": 100,
+    "reference": "/mnt/storage/db/references/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta",
+    "regions": "/mnt/storage/genetic_data/WGS_LR/Tests/lrs_benchmarking/truvari/HG002.pb.30x.hg38.pbmm2-ont.cuteSV/candidate.refine.bed",
+    "coords": "R",
+    "subset": false,
+    "mafft_params": "--auto --thread 1",
+    "debug": false
+}
+2026-03-12 06:35:31,125 [INFO] Setting up regions
+2026-03-12 06:35:31,569 [INFO] 12323 --regions reduced to 12323 after intersecting with 9268 from --includebed
+2026-03-12 06:35:31,569 [INFO] Extending the regions by 100 bases
+2026-03-12 06:35:37,027 [INFO] 2052 regions to be refined
+2026-03-12 06:35:37,055 [INFO] Preparing reference/regions
+2026-03-12 06:35:37,169 [INFO] Building haplotypes
+2026-03-12 06:35:38,247 [INFO] Harmonizing variants
+2026-03-12 06:37:33,329 [INFO] Running bench
+2026-03-12 06:37:33,399 [INFO] Including 2052 bed regions
+2026-03-12 06:37:43,638 [INFO] Zipped 176674 variants Counter({'base': 88337, 'comp': 88337})
+2026-03-12 06:37:43,638 [INFO] 2116 chunks of 176674 variants Counter({'__filtered': 167049, 'base': 5940, 'comp': 3685})
+2026-03-12 06:37:53,904 [INFO] Stats: {
+    "TP-base": 20434,
+    "TP-comp": 17226,
+    "FP": 1003,
+    "FN": 6771,
+    "precision": 0.9449777826540129,
+    "recall": 0.7511119279544202,
+    "f1": 0.8369652616414138,
+    "base cnt": 27205,
+    "comp cnt": 18229
+}
+2026-03-12 06:37:53,904 [INFO] Finished refine

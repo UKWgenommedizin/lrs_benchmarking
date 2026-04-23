@@ -44,4 +44,6 @@ tmp/
 # Scripts & Pipelines
 *.sample
 
-!truvari
+# whitelist the truvari directory and its contents
+!/truvari/
+!/truvari/**
