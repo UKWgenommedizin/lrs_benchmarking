@@ -26,7 +26,7 @@ This constitution establishes the governing principles, architectural rules, nam
 
 **I.6.** Shared configuration lives in `header.smk`. All workflow files must include `header.smk` as their first executable line.
 
-**I.7.** The constitution resides in `CONSTITUTION.md` at the repository root. It is immutable except by amendment per Article IX.
+**I.7.** The constitution resides in `CONSTITUTION.md` at the repository root. It is immutable except by amendment per Article X.
 
 **I.8.** Documentation lives in `docs/`. Analysis notebooks and figures live in `figures/`.
 
@@ -50,20 +50,19 @@ This constitution establishes the governing principles, architectural rules, nam
 
 ## Article III — Input, Output, and Reference Data Locations
 
-**III.1.** All data lives on the group SMB share, mounted at `/mnt/storage/`. The three distinct path categories are:
+**III.1.** All data resides on the group SMB share, accessible only from the remote workstation **`genmedbfx`** via the `~/smb/` mount point. The paths below are valid on that machine only. The three distinct path categories are:
 
-### Reference database — `/mnt/storage/db/`
-Contains the reference genome and associated resources:
+### Reference database — `~/smb/Analyses/Reference_sequence/hg38_KGGM/`
+Contains the reference genome:
 
 | Resource | Path |
 |---|---|
-| Reference FASTA (hg38) | `/mnt/storage/db/references/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta` |
-| Alternative FASTA for hap.py | `/mnt/storage/db/deepvariant/GRCh38_hs38d1.fa` |
-| SDF template for hap.py (vcfeval) | `/mnt/storage/db/deepvariant/GRCh38_hs38d1.fa.sdf` |
-| GIAB stratification BEDs | `/mnt/storage/db/GIAB/hg38/genome-stratifications/v3.1/` |
+| Reference FASTA (hg38) | `~/smb/Analyses/Reference_sequence/hg38_KGGM/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta` |
 
-### Raw sequence data — `/mnt/storage/genetic_data/WGS_LR/`
-Contains FASTQ files for the benchmarking samples. The expected input pattern in the workflows is:
+Other reference-associated files (alternative FASTA, SDF template, stratification BEDs) were used in the original `run_happy.smk` workflow at paths under `/mnt/storage/db/` — these will need to be located or re-configured for the new benchmarking runs.
+
+### Raw sequence data — `~/smb/Bioinformatics/lrs_benchmarking/fastq/`
+Contains FASTQ files for the benchmarking samples. The expected input pattern in workflows is:
 ```
 fastq/<dataset>.fastq.gz
 ```
