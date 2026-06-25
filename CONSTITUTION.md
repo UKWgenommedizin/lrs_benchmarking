@@ -239,12 +239,12 @@ Each stage is optional. Any workflow may be run independently if its inputs alre
 
 ---
 
-## Article X — Amendment Process
+## Article X — Binding Nature and Amendment
 
-**X.1.** This constitution may be amended only by pull request with explicit approval.
+**X.1.** This constitution is binding on the AI agent (Cline). It exists to constrain the agent's behavior, prevent hallucinated decisions, and enforce adherence to documented rules and patterns.
 
-**X.2.** Amendments must be documented with the rationale and date of change in the commit message.
+**X.2.** The AI agent may not deviate from or override any article in this constitution under any circumstances, unless explicitly instructed to do so by the human user in a direct message.
 
-**X.3.** Temporary deviations require a documented exception with an expiration date, filed as a GitHub issue referencing the specific constitution article being deviated from.
+**X.3.** Human users may amend or override the constitution at any time by direct instruction. No pull request or formal process is required for human-initiated changes.
 
-**X.4.** The constitution is the immutable ground truth for all project work. All specifications, implementations, and reviews are measured against it.
+**X.4.** The constitution is the immutable ground truth for all agent-driven work. All specifications, implementations, and reviews produced by the agent are measured against it.
