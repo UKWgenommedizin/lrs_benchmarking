@@ -8,19 +8,23 @@
 
 # ---------- minimap2 (ONT: mm2-ont, PB: mm2-pb) ----------
 docker run --rm -it -v $PWD:/data --entrypoint minimap2 schimar/lrs-minimap2-ntlink:latest --help
+# version 2.28-r1209
 # ONT: snakemake -s ont.read_mapping.minimap2.smk
 # PB:  snakemake -s pb.read_mapping.minimap2.smk
 
 # ---------- ntLink (ONT: ntlink-ont, PB: ntlink-pb) ----------
 docker run --rm -it -v $PWD:/data --entrypoint ntLink schimar/lrs-minimap2-ntlink:latest --help
+# v1.3.9
 # ONT: snakemake -s ont.read_mapping.ntlink.smk
 # PB:  snakemake -s pb.read_mapping.ntlink.smk
 
 # ---------- ParaHAT (ONT: parahat-ont, PB: parahat-pb) ----------
 # Index first:
 docker run --rm -it -v $PWD:/data --entrypoint ParaHAT-indexer schimar/lrs-parahat:latest <ref.fa> <index_dir>
+# v0.1.1
 # Align:
 docker run --rm -it -v $PWD:/data schimar/lrs-parahat:latest -n 4 ParaHAT-aligner -t 8 <index_dir> <reads.fastq> <ref.fa>
+# 0.1.1 
 # ONT: snakemake -s ont.read_mapping.parahat.smk
 # PB:  snakemake -s pb.read_mapping.parahat.smk
 
