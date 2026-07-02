@@ -1,0 +1,214 @@
+---
+title: "Benchmarking of long-read sequencing analysis packages"
+author: "Jiangyan Yu (jiangyan.yu@ukw.de)"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: hide
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+editor_options: 
+  chunk_output_type: inline
+---
+
+# library
+
+```{r,include=FALSE}
+lapply(c("data.table","magrittr","ggplot2","dplyr"), require, character.only = TRUE)
+```
+
+## working dir
+
+```{r}
+working_dir = "/Users/Yu_J/Library/CloudStorage/Nextcloud-yu_j@ukw․de@share․ukw․de/Personal\ Content/Yu_J/manuscript/FA-NIVA/"
+
+```
+
+
+
+
+# 30x alignment overview
+
+```{r}
+aln_files = list.files(paste0(working_dir,"/samtools_stats_30x_Christian"))
+aln = lapply(aln_files,FUN = function(x){
+  df = read.csv(file = paste0(working_dir,"/samtools_stats_30x_Christian/",x),header = FALSE,sep = "\t")
+  df$file = x
+  df$file = gsub(pattern = ".cram.stats.SN.txt",replacement = "",df$file)
+  df$sample = stringr::str_split_fixed(df$file,pattern = "_",n=3)[,1]
+  df$lr_tech = stringr::str_split_fixed(df$file,pattern = "_",n=3)[,2]
+  df$alignment = stringr::str_split_fixed(df$file,pattern = "_",n=3)[,3]
+  df$alignment = stringr::str_replace(df$alignment,pattern = "30x.hg38.",replacement = "")
+  df$aligner = stringr::str_split_fixed(df$alignment,pattern = "-",n=2)[,1]
+  df$aligner_setting = stringr::str_split_fixed(df$alignment,pattern = "-",n=2)[,2]
+  df$orig_file = paste0(df$sample,"_",df$lr_tech)
+  return(df)
+})
+
+aln = do.call(rbind,aln)
+```
+
+
+# Error rate
+
+
+```{r}
+
+plot_data = aln[aln$V2 %like% "error rate:",]
+colnames(plot_data)[3] = "error_rate"
+plot_data = plot_data[order(plot_data$alignment),]
+
+p1 = ggplot(subset(plot_data,lr_tech == "ont"),aes(x=alignment,y=error_rate))+
+  geom_boxplot()+
+  geom_point(aes(x=alignment,y=error_rate,color=orig_file))+
+  geom_line(aes(group = orig_file),colour="grey",linetype="dotted")+
+  labs(y = "Error rate",x="")+
+  # facet_wrap(vars(lr_tech))+
+  # theme_classic()+
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size=15))
+
+p1
+```
+
+# deepvariant
+
+```{r}
+report_files = list.files(path = paste0(working_dir,"/deepvariant/"))
+report_files = paste0(paste0(working_dir,"/deepvariant/"),report_files)
+
+# Read and combine all files with filename as a new column
+combined_df <- do.call(rbind, lapply(report_files, function(file) {
+  df <- read.csv(file, stringsAsFactors = FALSE)
+  df$filename <- basename(file)  # Add filename as a column
+  
+  df$filename = gsub(pattern = ".summary.csv",replacement = "",x=df$filename)
+  
+  parts = strsplit(df$filename, "\\.")[[1]]
+  df$sample = parts[1]
+  df$seq_tech = parts[2]
+  df$aligner = parts[5]
+  df$var_caller = parts[6]
+  
+  return(df)
+}))
+
+rm(report_files)
+```
+
+
+```{r}
+plot_data = subset(combined_df, Filter == "PASS" & seq_tech == "ont" & var_caller != "dv-wgs-woPG")
+# rownames(plot_data) = plot_data$filename
+
+ggplot(plot_data,aes(x=METRIC.Recall,y=METRIC.Precision,colour = aligner)) +
+  geom_point()+
+  # geom_text_repel(size=1,max.overlaps = Inf)+
+  theme_minimal()+
+  facet_wrap(vars(Type),scale = "free")
+```
+
+# sawfish
+
+```{r}
+files = list.files(paste0(working_dir,"/truvari"))
+
+files = files[files %like% "30x"]
+files = files[!files %like% "log"]
+f1 = lapply(files, FUN= function(f){
+
+  df = read.csv(paste0(working_dir,"/truvari/",f,"/log.txt"),header = FALSE)
+  
+  ## take the last 10 rows
+  df = df[(nrow(df)-9):(nrow(df)-3),]
+  ## remove space 
+  df = df %>% mutate(V1 = str_replace_all(V1, " ", ""))
+  df$parameter = str_split_fixed(df$V1, ":", n = 2)[,1]
+  df$value = str_split_fixed(df$V1, ":", n = 2)[,2] %>% as.numeric()
+  
+  df1 = data.frame(setting = f,
+                   precision = df[df$parameter == "precision", "value"],
+                   recall = df[df$parameter == "recall", "value"],
+                   F1 = df[df$parameter == "f1", "value"],
+                   FP = df[df$parameter == "FP", "value"],
+                   FN = df[df$parameter == "FN", "value"])
+  
+  df1$seq_tech = str_split_fixed(df1$setting, "\\.", n = 6)[,2]
+  df1$aligner = str_split_fixed(df1$setting, "\\.", n = 6)[,5]
+  df1$SVcaller = str_split_fixed(df1$setting, "\\.", n = 6)[,6]
+  
+  df1$tech_aligner = paste0(df1$seq_tech,"_",df1$aligner)
+  
+  return(df1)
+  
+}) %>% do.call(rbind,.)
+```
+
+```{r}
+plot_data = subset(f1, seq_tech == "ont" )
+# rownames(plot_data) = plot_data$filename
+
+p2= ggplot(plot_data,aes(x=SVcaller,y=F1, fill = SVcaller)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_bw() +
+  # coord_cartesian(xlim = c(0.8, 1)) +
+  # geom_hline(yintercept = 0.9, linetype = "dashed", color = "red") +
+  theme(text = element_text(size = 12),
+        strip.text.y = element_text(angle = 0),
+        legend.position = "none") +
+  labs(x = "", y = "F1 score")+
+  facet_grid(~aligner)
+
+```
+
+# figure
+
+```{r}
+library(cowplot)
+
+my_theme <- theme_bw() +
+  theme(
+    panel.border = element_rect(
+      colour = "black",
+      fill = NA,
+      linewidth = 0.8
+    ),
+    axis.text.x = element_text(angle = 90, hjust = 1),
+    panel.grid = element_blank(),
+    axis.line = element_blank(),
+    axis.text = element_text(size = 12, colour = "black"),
+    axis.title = element_text(size = 14),
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 11)
+  )
+
+
+
+pdf(paste0(working_dir,"/minimap2_pbmm2.pdf"),width = 8.27, height = 3)
+plot_grid(
+  p1 + my_theme, 
+  p2 + my_theme + theme(legend.position = "none"),
+  labels = c("A", "B"),
+  rel_widths = c(1.2, 1.8),
+  label_size = 14,
+  label_fontface = "bold",
+  ncol = 2
+)
+dev.off()
+```
+
+
+# session info
+
+```{r}
+sessionInfo()
+```
+
+
+
+
