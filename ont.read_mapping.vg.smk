@@ -1,29 +1,59 @@
 ##
 # ont.read_mapping.vg.smk
-# Read mapping workflow for ONT data using VG (vg giraffe / vg map)
+# Read mapping workflow for ONT data using VG Giraffe (long-read mode)
 # mapper_tag: vg-ont
 # Constitution: Articles I–VIII
 #
-# VG requires a graph index (GBZ/XG/GCSA2/dist) in addition to the
-# linear reference. This workflow uses `vg giraffe` for speed on
-# ONT reads. If you prefer `vg map`, replace the giraffe block with
-# the vg map equivalent and provide the appropriate index files.
+# VG Giraffe long-read CLI (from github.com/vgteam/vg, v1.63.0+):
 #
-# Required index files (place under vg_index/ in CWD):
-#   vg_index/hg38.giraffe.gbz
-#   vg_index/hg38.dist
-#   vg_index/hg38.min
+#   vg giraffe -Z <graph.giraffe.gbz> \
+#              -b long \
+#              -f <reads.fastq.gz> \
+#              -o SAM \
+#              -t <threads> \
+#              --read-group "ID:<dataset>  SM:<dataset>" \
+#              --sample <dataset>
+#
+#   Key flags:
+#     -Z / --gbz-name           GBZ pangenome graph (required)
+#     -b / --parameter-preset   "long" for long reads (v1.63.0+; replaces -b hifi
+#                               for ONT; use "hifi" for PacBio HiFi)
+#     -f / --fastq-in           input FASTQ (gzipped ok)
+#     -o / --output-format      SAM for piping to samtools; default is GAM
+#     -t / --threads            number of mapping threads
+#     --read-group              SAM @RG header string (tab-separated fields)
+#     --sample                  SM tag shortcut
+#     -m / --minimizer-name     pre-built long-read minimizer index (optional;
+#                               vg will auto-build if absent)
+#     -d / --dist-name          distance index (optional; auto-built if absent)
+#
+# Required indexes (pre-build with: vg autoindex --workflow lr-giraffe ...):
+#   vg_index/hg38.giraffe.gbz              (GBZ pangenome graph)
+#   vg_index/hg38.dist                     (distance index)
+#   vg_index/hg38.longread.withzip.min     (long-read minimizer index)
+#   vg_index/hg38.longread.zipcodes        (zipcode file for long-read mode)
+#
+# NOTE on long-read support:
+#   Long-read mode (-b long) was released in vg v1.63.0.
+#   The minimizer index for long reads uses the suffix .longread.withzip.min
+#   (NOT .shortread.withzip.min or .min from older docs).
+#   Ensure your vg Docker image is v1.63.0 or later.
+#
+# NOTE on SAM output performance:
+#   Per vg docs (v1.49.0+), there can be performance issues writing SAM/BAM
+#   directly. If you observe slow output, add -x <path-to-xg-graph> to the
+#   giraffe call, or use vg surject in a separate step on the GAM output.
 ##
 
 include: "header.smk"
 
 ####################
-# Docker image
+# Docker image (must be v1.63.0+ for long-read mode)
 
-DOCKER_VG = "schimar/lrs-vg:latest"
+DOCKER_VG = "quay.io/vgteam/vg:v1.63.0"
 
 ####################
-# Reference / index paths
+# Reference & index paths
 
 REF = os.path.expanduser(
     "~/smb/Analyses/Reference_sequence/hg38_KGGM/"
@@ -33,64 +63,17 @@ REF = os.path.expanduser(
 VG_INDEX_DIR = CWD + "/vg_index"
 VG_GBZ       = VG_INDEX_DIR + "/hg38.giraffe.gbz"
 VG_DIST      = VG_INDEX_DIR + "/hg38.dist"
-VG_MIN       = VG_INDEX_DIR + "/hg38.min"
+VG_MIN       = VG_INDEX_DIR + "/hg38.longread.withzip.min"
+VG_ZIPCODES  = VG_INDEX_DIR + "/hg38.longread.zipcodes"
 
 MAPPER_TAG = "vg-ont"
 REFERENCE  = "hg38"
-
-####################
-# Samtools utility image (bundled in vg image)
-
-DOCKER_SAMTOOLS = DOCKER_VG
 
 ####################
 # Discover inputs
 
 FASTQ_DIR = "fastq"
 DATASETS, = glob_wildcards(FASTQ_DIR + "/{dataset}.fastq.gz")
-
-####################
-# Rule: build VG index if not present
-
-rule build_vg_index:
-    input:
-        ref = REF,
-    output:
-        gbz  = VG_GBZ,
-        dist = VG_DIST,
-        min_ = VG_MIN,
-    log:
-        VG_INDEX_DIR + "/build_index.log",
-    threads: 16
-    shell:
-        """
-        (
-        echo "[$(date -Is)] START build_vg_index" >&2
-        mkdir -p {VG_INDEX_DIR}
-
-        docker run --rm \
-            --workdir /tmp \
-            -u $UID:$(id -g) \
-            --cpus {threads} \
-            -m 64g \
-            -v {CWD}:{CWD} \
-            -v {input.ref}:{input.ref}:ro \
-            --entrypoint vg \
-            {DOCKER_VG} \
-            autoindex \
-            --workflow giraffe \
-            --ref {input.ref} \
-            --prefix {VG_INDEX_DIR}/hg38 \
-            --threads {threads}
-
-        # Verify outputs exist
-        for f in {VG_GBZ} {VG_DIST} {VG_MIN}; do
-            [[ -s "$f" ]] || { echo "Missing/empty: $f"; exit 101; }
-        done
-
-        echo "[$(date -Is)] END build_vg_index" >&2
-        ) > {log} 2>&1
-        """
 
 ####################
 # Targets
@@ -119,11 +102,12 @@ rule all:
 
 rule vg_map_sort:
     input:
-        fastq = FASTQ_DIR + "/{dataset}.fastq.gz",
-        ref   = REF,
-        gbz   = VG_GBZ,
-        dist  = VG_DIST,
-        min_  = VG_MIN,
+        fastq    = FASTQ_DIR + "/{dataset}.fastq.gz",
+        ref      = REF,
+        gbz      = VG_GBZ,
+        dist     = VG_DIST,
+        min_idx  = VG_MIN,
+        zipcodes = VG_ZIPCODES,
     output:
         cram  = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram",
         crai  = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram.crai",
@@ -135,7 +119,8 @@ rule vg_map_sort:
         (
         echo "[$(date -Is)] START vg_map_sort {wildcards.dataset}" >&2
 
-        # vg giraffe → surject to linear reference → SAM → samtools sort → CRAM
+        # vg giraffe (long-read mode, -b long, requires v1.63.0+)
+        # → SAM stdout → samtools sort → CRAM
         docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
@@ -147,12 +132,15 @@ rule vg_map_sort:
             {DOCKER_VG} \
             giraffe \
             -t {threads} \
-            -Z {input.gbz} \
-            -d {input.dist} \
-            -m {input.min_} \
+            -Z {CWD}/{input.gbz} \
+            -d {CWD}/{input.dist} \
+            -m {CWD}/{input.min_idx} \
+            -z {CWD}/{input.zipcodes} \
+            -b long \
             -f {CWD}/{input.fastq} \
-            --read-group "ID:{wildcards.dataset}\\tSM:{wildcards.dataset}" \
-            --output-format SAM \
+            -o SAM \
+            --read-group "ID:{wildcards.dataset}\tSM:{wildcards.dataset}" \
+            --sample {wildcards.dataset} \
         | docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
@@ -161,7 +149,7 @@ rule vg_map_sort:
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint samtools \
-            {DOCKER_SAMTOOLS} \
+            {DOCKER_VG} \
             sort \
             -@ 4 \
             -O CRAM \
@@ -177,10 +165,9 @@ rule vg_map_sort:
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint samtools \
-            {DOCKER_SAMTOOLS} \
+            {DOCKER_VG} \
             index {CWD}/{output.cram}
 
-        # Validate CRAM size
         [[ $(du -b {output.cram} | cut -f 1) -le 64 ]] && exit 101
 
         echo "[$(date -Is)] END vg_map_sort {wildcards.dataset}" >&2
@@ -210,7 +197,7 @@ rule vg_idxstats:
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint samtools \
-            {DOCKER_SAMTOOLS} \
+            {DOCKER_VG} \
             idxstats {CWD}/{input.cram} \
             > {output.idxstats}
 
@@ -243,7 +230,7 @@ rule vg_stats:
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint samtools \
-            {DOCKER_SAMTOOLS} \
+            {DOCKER_VG} \
             stats \
             --reference {input.ref} \
             {CWD}/{input.cram} \

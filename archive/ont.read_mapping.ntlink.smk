@@ -1,191 +1,50 @@
 ##
 # ont.read_mapping.ntlink.smk
-# Read mapping workflow for ONT data using ntLink
 # mapper_tag: ntlink-ont
-# Constitution: Articles I–VIII
 #
-# NOTE: ntLink is primarily a scaffolding/linking tool but can be used for
-# long-read alignment. This workflow invokes ntLink's mapping mode.
-# Adjust the entrypoint/flags below to match your specific ntLink build.
-##
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# BLOCKER — HUMAN REVIEW REQUIRED BEFORE THIS FILE CAN BE IMPLEMENTED
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#
+# ntLink (github.com/bcgsc/ntLink) is a genome assembly *scaffolder*, not a
+# read-to-reference mapper.
+#
+# ntLink maps long reads to *draft assembly contigs* (in order to scaffold
+# them), not to a fixed linear reference genome like hg38.  It operates via
+# a Makefile interface (ntLink scaffold target=<assembly> reads=<reads>),
+# outputs a scaffolded FASTA and a PAF-like mapping TSV, and has no concept
+# of producing a CRAM, BAM, or SAM against a reference genome.
+#
+# It therefore cannot fulfill the Art. VIII.2 output requirements:
+#   cram/<dataset>.hg38.ntlink-ont.cram
+#   cram/<dataset>.hg38.ntlink-ont.cram.crai
+#   etc.
+#
+# Possible resolutions — please choose one and update this file:
+#
+#   (A) The intended tool is a different aligner with a similar name (e.g.
+#       ntJoin, ntHits, or another BCGSC tool that does reference mapping).
+#       → Provide the correct tool name and GitHub URL.
+#
+#   (B) ntLink is in your benchmarking project in a different capacity
+#       (e.g. assembly quality evaluation, not read mapping). In that case
+#       the mapper_tag "ntlink-ont" should be removed from Art. IV.4 and
+#       this smk file should not exist.
+#
+#   (C) You want to benchmark ntLink's *pair*-mode PAF mappings indirectly
+#       by piping them through a conversion step. If so, the workflow
+#       approach changes substantially from the standard CRAM pipeline.
+#       → Describe the intended evaluation approach.
+#
+# This file is intentionally a stub so that snakemake -n will fail loudly.
+#
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 include: "header.smk"
 
-####################
-# Docker image
-
-DOCKER_NTLINK = "schimar/lrs-minimap2-ntlink:latest"
-
-####################
-# Reference
-
-REF = os.path.expanduser(
-    "~/smb/Analyses/Reference_sequence/hg38_KGGM/"
-    "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta"
+raise WorkflowError(
+    "ont.read_mapping.ntlink.smk: ntLink is a genome assembly scaffolder, "
+    "not a read-to-reference mapper. This workflow cannot be executed until the "
+    "correct tool or use-case is identified. See the BLOCKER comment at the top "
+    "of this file for resolution options."
 )
-
-MAPPER_TAG = "ntlink-ont"
-REFERENCE  = "hg38"
-
-####################
-# Discover inputs
-
-FASTQ_DIR = "fastq"
-DATASETS, = glob_wildcards(FASTQ_DIR + "/{dataset}.fastq.gz")
-
-####################
-# Targets
-
-rule all:
-    input:
-        expand(
-            "cram/{dataset}.{ref}.{tag}.cram",
-            dataset=DATASETS, ref=REFERENCE, tag=MAPPER_TAG
-        ),
-        expand(
-            "cram/{dataset}.{ref}.{tag}.cram.crai",
-            dataset=DATASETS, ref=REFERENCE, tag=MAPPER_TAG
-        ),
-        expand(
-            "cram/{dataset}.{ref}.{tag}.cram.idxstats",
-            dataset=DATASETS, ref=REFERENCE, tag=MAPPER_TAG
-        ),
-        expand(
-            "cram/{dataset}.{ref}.{tag}.cram.stats",
-            dataset=DATASETS, ref=REFERENCE, tag=MAPPER_TAG
-        ),
-
-####################
-# Rules
-
-rule ntlink_map_sort:
-    input:
-        fastq = FASTQ_DIR + "/{dataset}.fastq.gz",
-        ref   = REF,
-    output:
-        cram  = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram",
-        crai  = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram.crai",
-    log:
-        "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".map_sort.log",
-    threads: 16
-    shell:
-        """
-        (
-        echo "[$(date -Is)] START ntlink_map_sort {wildcards.dataset}" >&2
-
-        # ntLink mapping mode → SAM → samtools sort → CRAM
-        docker run --rm \
-            --workdir /tmp \
-            -u $UID:$(id -g) \
-            --cpus {threads} \
-            -m 48g \
-            -v {CWD}:{CWD} \
-            -v {input.ref}:{input.ref}:ro \
-            --entrypoint ntlink \
-            {DOCKER_NTLINK} \
-            map \
-            -t {threads} \
-            -a {input.ref} \
-            -q {CWD}/{input.fastq} \
-            --rg "@RG\\tID:{wildcards.dataset}\\tSM:{wildcards.dataset}" \
-        | docker run --rm \
-            --workdir /tmp \
-            -u $UID:$(id -g) \
-            --cpus 4 \
-            -m 16g \
-            -v {CWD}:{CWD} \
-            -v {input.ref}:{input.ref}:ro \
-            --entrypoint samtools \
-            {DOCKER_NTLINK} \
-            sort \
-            -@ 4 \
-            -O CRAM \
-            --reference {input.ref} \
-            -o {CWD}/{output.cram} \
-            -
-
-        docker run --rm \
-            --workdir /tmp \
-            -u $UID:$(id -g) \
-            --cpus 4 \
-            -m 8g \
-            -v {CWD}:{CWD} \
-            -v {input.ref}:{input.ref}:ro \
-            --entrypoint samtools \
-            {DOCKER_NTLINK} \
-            index {CWD}/{output.cram}
-
-        # Validate CRAM size
-        [[ $(du -b {output.cram} | cut -f 1) -le 64 ]] && exit 101
-
-        echo "[$(date -Is)] END ntlink_map_sort {wildcards.dataset}" >&2
-        ) > {log} 2>&1
-        """
-
-rule ntlink_idxstats:
-    input:
-        cram = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram",
-        crai = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram.crai",
-        ref  = REF,
-    output:
-        idxstats = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram.idxstats",
-    log:
-        "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".idxstats.log",
-    threads: 2
-    shell:
-        """
-        (
-        echo "[$(date -Is)] START ntlink_idxstats {wildcards.dataset}" >&2
-
-        docker run --rm \
-            --workdir /tmp \
-            -u $UID:$(id -g) \
-            --cpus {threads} \
-            -m 4g \
-            -v {CWD}:{CWD} \
-            -v {input.ref}:{input.ref}:ro \
-            --entrypoint samtools \
-            {DOCKER_NTLINK} \
-            idxstats {CWD}/{input.cram} \
-            > {output.idxstats}
-
-        [[ $(du -b {output.idxstats} | cut -f 1) -lt 5000 ]] && exit 101
-
-        echo "[$(date -Is)] END ntlink_idxstats {wildcards.dataset}" >&2
-        ) > {log} 2>&1
-        """
-
-rule ntlink_stats:
-    input:
-        cram = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram",
-        crai = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram.crai",
-        ref  = REF,
-    output:
-        stats = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram.stats",
-    log:
-        "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".stats.log",
-    threads: 4
-    shell:
-        """
-        (
-        echo "[$(date -Is)] START ntlink_stats {wildcards.dataset}" >&2
-
-        docker run --rm \
-            --workdir /tmp \
-            -u $UID:$(id -g) \
-            --cpus {threads} \
-            -m 8g \
-            -v {CWD}:{CWD} \
-            -v {input.ref}:{input.ref}:ro \
-            --entrypoint samtools \
-            {DOCKER_NTLINK} \
-            stats \
-            --reference {input.ref} \
-            {CWD}/{input.cram} \
-            > {output.stats}
-
-        [[ $(du -b {output.stats} | cut -f 1) -lt 5000 ]] && exit 101
-
-        echo "[$(date -Is)] END ntlink_stats {wildcards.dataset}" >&2
-        ) > {log} 2>&1
-        """

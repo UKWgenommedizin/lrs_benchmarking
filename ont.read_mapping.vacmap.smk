@@ -3,14 +3,32 @@
 # Read mapping workflow for ONT data using VACmap
 # mapper_tag: vacmap-ont
 # Constitution: Articles I–VIII
+#
+# VACmap CLI (from github.com/micahvista/VACmap, v1.0.0):
+#   vacmap -ref <ref.fasta> -read <reads.fastq.gz> -mode H -t <threads> \
+#          --rg-id <ID> --rg-sm <SM> | samtools sort ...
+#
+#   -mode H  = high error rate long reads (ONT / PacBio CLR)  ← correct for ONT
+#   -mode L  = low error rate (HiFi)
+#   -mode S  = increased sensitivity for small variants
+#
+#   Read-group flags (all separate, unlike minimap2's single --rg string):
+#     --rg-id <string>   RG ID tag
+#     --rg-sm <string>   RG SM (sample) tag
+#
+#   Output: SAM to stdout by default; pipe to samtools sort → CRAM.
+#
+# NOTE: VACmap is a Python tool. The Docker image must have Python + VACmap
+#       installed (conda env or pip install from source), plus samtools/bcftools.
 ##
 
 include: "header.smk"
 
 ####################
 # Docker image
+# Must contain: vacmap (Python), samtools, bcftools (Art. VII.1)
 
-DOCKER_VACMAP = "schimar/lrs-vacmap:latest"
+DOCKER_VACMAP = "storage-node:5000/own/vacmap:1.0.0"
 
 ####################
 # Reference
@@ -69,21 +87,24 @@ rule vacmap_map_sort:
         (
         echo "[$(date -Is)] START vacmap_map_sort {wildcards.dataset}" >&2
 
-        # Map with VACmap, pipe to samtools sort → CRAM
+        # VACmap → SAM stdout → samtools sort → CRAM
+        # -mode H: high error rate ONT reads
+        # --rg-id / --rg-sm: per-field RG tags (VACmap has no single --rg string)
         docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus {threads} \
-            -m 48g \
+            -m 24g \
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint vacmap \
             {DOCKER_VACMAP} \
+            -ref {input.ref} \
+            -read {CWD}/{input.fastq} \
+            -mode H \
             -t {threads} \
-            -x ont \
-            --rg "@RG\\tID:{wildcards.dataset}\\tSM:{wildcards.dataset}" \
-            {input.ref} \
-            {CWD}/{input.fastq} \
+            --rg-id {wildcards.dataset} \
+            --rg-sm {wildcards.dataset} \
         | docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
@@ -111,7 +132,6 @@ rule vacmap_map_sort:
             {DOCKER_VACMAP} \
             index {CWD}/{output.cram}
 
-        # Validate CRAM size
         [[ $(du -b {output.cram} | cut -f 1) -le 64 ]] && exit 101
 
         echo "[$(date -Is)] END vacmap_map_sort {wildcards.dataset}" >&2
