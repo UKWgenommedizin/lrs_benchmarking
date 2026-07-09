@@ -33,7 +33,7 @@ DOCKER_VACMAP = "schimar/lrs-vacmap:v1.2.0"
 ####################
 # Reference
 
-REF = ("/home/schilling_m1/smb/Analyses/Reference_sequence/hg38_KGGM/"
+REF = (CWD + "/ref/"
     "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta")
 
 MAPPER_TAG = "vacmap-ont"
