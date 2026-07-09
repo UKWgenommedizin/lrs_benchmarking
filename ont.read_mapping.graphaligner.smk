@@ -7,28 +7,18 @@
 # GraphAligner CLI (github.com/maickrau/GraphAligner):
 #   GraphAligner -g <graph.gfa> -f <reads.fastq.gz> -a <out.gaf> -x vg -t N
 #
-#   Mandatory flags:
-#     -g / --graph          input graph (.gfa or .vg)   ← NOT a raw FASTA
-#     -f / --reads          input reads (fastq/fasta, gzipped ok)
-#     -a / --alignments-out output file (.gaf / .gam / .json)
-#     -x vg                 preset for variation graphs
-#     -t                    aligner threads
-#     --precise-clipping    identity threshold for alignment end clipping
-#                           (0.75 recommended for ONT)
-#
 #   There is NO --read-group / --rg flag in GraphAligner.
 #   Output is GAF (Graph Alignment Format), not SAM/BAM/CRAM.
 #
-# Pipeline overview:
-#   Step 1  vg convert  : hg38.fasta → hg38.gfa  (one-time, done once per ref)
-#   Step 2  GraphAligner: reads + hg38.gfa → GAF
-#   Step 3  vg surject  : GAF + hg38.gfa → linear SAM
+# Pipeline (file-based, no docker pipes):
+#   Step 1  vg convert  : hg38.fasta → hg38.gfa  (once per ref)
+#   Step 2  GraphAligner: reads + hg38.gfa → GAF file
+#   Step 3  vg surject  : GAF + hg38.gfa → SAM file
 #   Step 4  samtools    : addreplacerg → sort → CRAM → index
 #
 # Required Docker images:
 #   DOCKER_GRAPHALIGNER  must contain: GraphAligner binary
 #   DOCKER_VG            must contain: vg binary + samtools + bcftools
-#                        (vg image ships samtools; bcftools may need adding)
 ##
 
 include: "header_mapper.smk"
@@ -37,7 +27,7 @@ include: "header_mapper.smk"
 # Docker images
 
 DOCKER_GRAPHALIGNER = "schimar/lrs-graphaligner:v1.0.20"
-DOCKER_VG           = "schimar/lrs-vg:v1.73.0"   # ships samtools
+DOCKER_VG           = "schimar/lrs-vg:v1.73.0"
 
 ####################
 # Reference
@@ -86,12 +76,7 @@ rule all:
 # Rules
 
 rule ref_to_gfa:
-    """
-    Convert the linear hg38 FASTA to a single-path GFA using vg convert.
-    GraphAligner requires a graph input; a single-path GFA is the simplest
-    valid graph for linear reference mapping.
-    Run once per reference; output is reused by all dataset mapping rules.
-    """
+    """Convert the linear hg38 FASTA to a single-path GFA (run once)."""
     input:
         ref = REF,
     output:
@@ -126,11 +111,7 @@ rule ref_to_gfa:
         """
 
 rule graphaligner_map:
-    """
-    Align ONT reads to the hg38 GFA graph with GraphAligner.
-    --precise-clipping 0.75 is the recommended value for ONT reads.
-    Output: GAF (Graph Alignment Format).
-    """
+    """Align ONT reads to the hg38 GFA → GAF file."""
     input:
         fastq = FASTQ_DIR + "/{dataset}.fastq.gz",
         gfa   = GRAPH_GFA,
@@ -167,11 +148,7 @@ rule graphaligner_map:
         """
 
 rule graphaligner_surject_sort:
-    """
-    Surject GAF alignments onto the linear reference (vg surject → SAM),
-    inject @RG header (samtools addreplacerg; GraphAligner has no --rg flag),
-    sort and write CRAM.
-    """
+    """Surject GAF → SAM → addreplacerg → sort → CRAM → index (file-based)."""
     input:
         gaf = "cram/tmp/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".gaf",
         gfa = GRAPH_GFA,
@@ -186,9 +163,12 @@ rule graphaligner_surject_sort:
         """
         (
         echo "[$(date -Is)] START graphaligner_surject_sort {wildcards.dataset}" >&2
+        mkdir -p "{CWD}/cram/tmp"
 
-        # vg surject: project graph alignments back to linear SAM
-        # -s = SAM output, -G = GAF input
+        TMP_SAM="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.raw.sam"
+        TMP_RG="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.rg.sam"
+
+        # vg surject: GAF → SAM
         docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
@@ -203,7 +183,10 @@ rule graphaligner_surject_sort:
             -G \
             -s \
             {CWD}/{input.gaf} \
-        | docker run --rm \
+            > "$TMP_SAM"
+
+        # samtools addreplacerg (inject @RG) 
+        docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus 2 \
@@ -214,8 +197,13 @@ rule graphaligner_surject_sort:
             {DOCKER_VG} \
             addreplacerg \
             -r "@RG\\tID:{wildcards.dataset}\\tSM:{wildcards.dataset}" \
-            - \
-        | docker run --rm \
+            -o "$TMP_RG" \
+            "$TMP_SAM"
+
+        rm -f "$TMP_SAM"
+
+        # samtools sort → CRAM
+        docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus 4 \
@@ -229,7 +217,9 @@ rule graphaligner_surject_sort:
             -O CRAM \
             --reference {input.ref} \
             -o {CWD}/{output.cram} \
-            -
+            "$TMP_RG"
+
+        rm -f "$TMP_RG"
 
         docker run --rm \
             --workdir /tmp \

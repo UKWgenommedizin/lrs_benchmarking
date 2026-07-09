@@ -1,18 +1,17 @@
 ##
 # pb.read_mapping.vg.smk
-# Read mapping workflow for PacBio HiFi data using VG (vg giraffe / vg map)
+# Read mapping workflow for PacBio HiFi data using VG Giraffe
 # mapper_tag: vg-pb
 # Constitution: Articles I–VIII
 #
-# VG requires a graph index (GBZ/XG/GCSA2/dist) in addition to the
-# linear reference. This workflow uses `vg giraffe` for speed on
-# ONT reads. If you prefer `vg map`, replace the giraffe block with
-# the vg map equivalent and provide the appropriate index files.
+# VG Giraffe long-read CLI (vgteam/vg v1.63.0+):
+#   vg giraffe -Z <gbz> -b hifi -f <fastq> -o SAM -t N -R <rg> -N <sample>
 #
-# Required index files (place under vg_index/ in CWD):
+# Required indexes (pre-build with: vg autoindex --workflow lr-giraffe ...):
 #   vg_index/hg38.giraffe.gbz
 #   vg_index/hg38.dist
-#   vg_index/hg38.min
+#   vg_index/hg38.longread.withzip.min
+#   vg_index/hg38.longread.zipcodes
 ##
 
 include: "header_mapper.smk"
@@ -138,8 +137,11 @@ rule vg_map_sort:
         """
         (
         echo "[$(date -Is)] START vg_map_sort {wildcards.dataset}" >&2
+        mkdir -p "{CWD}/cram/tmp"
 
-        # vg giraffe → surject to linear reference → SAM → samtools sort → CRAM
+        TMP_SAM="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.sam"
+
+        # vg giraffe → SAM file
         docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
@@ -157,10 +159,13 @@ rule vg_map_sort:
             -z {input.zipcodes} \
             -b hifi \
             -f {CWD}/{input.fastq} \
+            --output-format SAM \
             -R "ID:{wildcards.dataset}\tSM:{wildcards.dataset}" \
             -N {wildcards.dataset} \
-            --output-format SAM \
-        | docker run --rm \
+            > "$TMP_SAM"
+
+        # samtools sort SAM → CRAM
+        docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus 4 \
@@ -174,7 +179,9 @@ rule vg_map_sort:
             -O CRAM \
             --reference {input.ref} \
             -o {CWD}/{output.cram} \
-            -
+            "$TMP_SAM"
+
+        rm -f "$TMP_SAM"
 
         docker run --rm \
             --workdir /tmp \
@@ -187,7 +194,6 @@ rule vg_map_sort:
             {DOCKER_SAMTOOLS} \
             index {CWD}/{output.cram}
 
-        # Validate CRAM size
         [[ $(du -b {output.cram} | cut -f 1) -le 64 ]] && exit 101
 
         echo "[$(date -Is)] END vg_map_sort {wildcards.dataset}" >&2
