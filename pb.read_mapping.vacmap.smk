@@ -26,6 +26,8 @@ REFERENCE  = "hg38"
 
 FASTQ_DIR = "fastq"
 DATASETS, = glob_wildcards(FASTQ_DIR + "/{dataset}.fastq.gz")
+if DATASET_FILTER:
+    DATASETS = [d for d in DATASETS if DATASET_FILTER in d]
 
 ####################
 # Targets
@@ -77,11 +79,12 @@ rule vacmap_map_sort:
             -v {input.ref}:{input.ref}:ro \
             --entrypoint vacmap \
             {DOCKER_VACMAP} \
+            -ref {input.ref} \
+            -read {CWD}/{input.fastq} \
+            -mode L \
             -t {threads} \
-            -x hifi \
-            --rg "@RG\\tID:{wildcards.dataset}\\tSM:{wildcards.dataset}" \
-            {input.ref} \
-            {CWD}/{input.fastq} \
+            --rg-id {wildcards.dataset} \
+            --rg-sm {wildcards.dataset} \
         | docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
