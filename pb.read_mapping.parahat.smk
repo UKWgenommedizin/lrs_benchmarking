@@ -15,10 +15,8 @@ DOCKER_PARAHAT = "schimar/lrs-parahat:v1.0.0-cuda"
 ####################
 # Reference
 
-REF = os.path.expanduser(
-    "~/smb/Analyses/Reference_sequence/hg38_KGGM/"
-    "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta"
-)
+REF = ("/home/schilling_m1/smb/Analyses/Reference_sequence/hg38_KGGM/"
+    "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta")
 
 MAPPER_TAG = "parahat-pb"
 REFERENCE  = "hg38"

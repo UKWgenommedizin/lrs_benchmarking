@@ -55,10 +55,8 @@ DOCKER_VG = "schimar/lrs-vg:v1.73.0"
 ####################
 # Reference & index paths
 
-REF = os.path.expanduser(
-    "~/smb/Analyses/Reference_sequence/hg38_KGGM/"
-    "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta"
-)
+REF = ("/home/schilling_m1/smb/Analyses/Reference_sequence/hg38_KGGM/"
+    "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta")
 
 VG_INDEX_DIR = CWD + "/vg_index"
 VG_GBZ       = VG_INDEX_DIR + "/hg38.giraffe.gbz"
