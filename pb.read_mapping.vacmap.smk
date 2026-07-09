@@ -67,6 +67,7 @@ rule vacmap_map_sort:
     shell:
         """
         (
+        set -o pipefail
         echo "[$(date -Is)] START vacmap_map_sort {wildcards.dataset}" >&2
 
         # Map with VACmap, pipe to samtools sort → CRAM
