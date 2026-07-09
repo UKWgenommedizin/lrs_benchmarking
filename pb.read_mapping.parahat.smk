@@ -5,7 +5,7 @@
 # Constitution: Articles I–VIII
 ##
 
-include: "header.smk"
+include: "header_mapper.smk"
 
 ####################
 # Docker image

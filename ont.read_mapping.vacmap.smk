@@ -22,7 +22,7 @@
 #       installed (conda env or pip install from source), plus samtools/bcftools.
 ##
 
-include: "header.smk"
+include: "header_mapper.smk"
 
 ####################
 # Docker image

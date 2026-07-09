@@ -10,7 +10,7 @@
 # and preset (-x) flags to match your GraphAligner build.
 ##
 
-include: "header.smk"
+include: "header_mapper.smk"
 
 ####################
 # Docker image

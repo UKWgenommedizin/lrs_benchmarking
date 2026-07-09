@@ -31,7 +31,7 @@
 #                        (vg image ships samtools; bcftools may need adding)
 ##
 
-include: "header.smk"
+include: "header_mapper.smk"
 
 ####################
 # Docker images
