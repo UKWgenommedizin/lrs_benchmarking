@@ -20,12 +20,15 @@ REF = (CWD + "/ref/"
 
 MAPPER_TAG = "parahat-pb"
 REFERENCE  = "hg38"
+PARAHAT_INDEX_DIR = CWD + "/parahat_index"
 
 ####################
 # Discover inputs
 
 FASTQ_DIR = "fastq"
 DATASETS, = glob_wildcards(FASTQ_DIR + "/{dataset}.fastq.gz")
+if DATASET_FILTER:
+    DATASETS = [d for d in DATASETS if DATASET_FILTER in d]
 
 ####################
 # Targets
@@ -52,13 +55,47 @@ rule all:
 ####################
 # Rules
 
+rule parahat_index:
+    """Build the ParaHAT hash index for the reference (run once)."""
+    input:
+        ref = REF,
+    output:
+        sentinel = PARAHAT_INDEX_DIR + "/parahat_index.done",
+    log:
+        PARAHAT_INDEX_DIR + "/parahat_index.log",
+    threads: 1
+    shell:
+        """
+        (
+        echo "[$(date -Is)] START parahat_index" >&2
+        mkdir -p {PARAHAT_INDEX_DIR}
+
+        docker run --rm \
+            --workdir /tmp \
+            -u $UID:$(id -g) \
+            --cpus {threads} \
+            -m 32g \
+            -v {CWD}:{CWD} \
+            -v {input.ref}:{input.ref}:ro \
+            --entrypoint ./ParaHAT-indexer \
+            {DOCKER_PARAHAT} \
+            -k 13 \
+            {PARAHAT_INDEX_DIR} \
+            {input.ref}
+
+        touch {output.sentinel}
+        echo "[$(date -Is)] END parahat_index" >&2
+        ) > {log} 2>&1
+        """
+
 rule parahat_map_sort:
     input:
-        fastq = FASTQ_DIR + "/{dataset}.fastq.gz",
-        ref   = REF,
+        fastq   = FASTQ_DIR + "/{dataset}.fastq.gz",
+        ref     = REF,
+        idx_done = PARAHAT_INDEX_DIR + "/parahat_index.done",
     output:
-        cram  = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram",
-        crai  = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram.crai",
+        cram = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram",
+        crai = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram.crai",
     log:
         "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".map_sort.log",
     threads: 16
@@ -67,7 +104,8 @@ rule parahat_map_sort:
         (
         echo "[$(date -Is)] START parahat_map_sort {wildcards.dataset}" >&2
 
-        # Map with ParaHAT, pipe to samtools sort → CRAM
+        # ParaHAT-aligner → samtools addreplacerg (inject @RG) → samtools sort → CRAM
+        # ParaHAT outputs SAM to stdout; it has no native --rg flag.
         docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
@@ -75,13 +113,25 @@ rule parahat_map_sort:
             -m 48g \
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
-            --entrypoint parahat \
+            --entrypoint mpirun \
             {DOCKER_PARAHAT} \
+            -n 1 ./ParaHAT-aligner \
             -t {threads} \
-            -x hifi \
-            --rg "@RG\\tID:{wildcards.dataset}\\tSM:{wildcards.dataset}" \
-            {input.ref} \
+            {PARAHAT_INDEX_DIR} \
             {CWD}/{input.fastq} \
+            {input.ref} \
+        | docker run --rm \
+            --workdir /tmp \
+            -u $UID:$(id -g) \
+            --cpus 4 \
+            -m 8g \
+            -v {CWD}:{CWD} \
+            -v {input.ref}:{input.ref}:ro \
+            --entrypoint samtools \
+            {DOCKER_PARAHAT} \
+            addreplacerg \
+            -r "@RG\\tID:{wildcards.dataset}\\tSM:{wildcards.dataset}" \
+            - \
         | docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
@@ -109,7 +159,6 @@ rule parahat_map_sort:
             {DOCKER_PARAHAT} \
             index {CWD}/{output.cram}
 
-        # Validate CRAM size
         [[ $(du -b {output.cram} | cut -f 1) -le 64 ]] && exit 101
 
         echo "[$(date -Is)] END parahat_map_sort {wildcards.dataset}" >&2

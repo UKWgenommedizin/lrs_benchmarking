@@ -47,6 +47,8 @@ DOCKER_SAMTOOLS = DOCKER_VG
 
 FASTQ_DIR = "fastq"
 DATASETS, = glob_wildcards(FASTQ_DIR + "/{dataset}.fastq.gz")
+if DATASET_FILTER:
+    DATASETS = [d for d in DATASETS if DATASET_FILTER in d]
 
 ####################
 # Rule: build VG index if not present
@@ -154,7 +156,8 @@ rule vg_map_sort:
             -z {input.zipcodes} \
             -b hifi \
             -f {CWD}/{input.fastq} \
-            --read-group "ID:{wildcards.dataset}\\tSM:{wildcards.dataset}" \
+            --read-group "ID:{wildcards.dataset}\tSM:{wildcards.dataset}" \
+            --sample {wildcards.dataset} \
             --output-format SAM \
         | docker run --rm \
             --workdir /tmp \
