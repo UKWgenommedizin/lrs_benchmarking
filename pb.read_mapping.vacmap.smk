@@ -70,6 +70,7 @@ rule vacmap_map_sort:
         (
         set -o pipefail
         echo "[$(date -Is)] START vacmap_map_sort {wildcards.dataset}" >&2
+        mkdir -p "{CWD}/cram/tmp"
 
         # VACmap → temp SAM file (pipe breaks occur with docker | docker)
         TMP_SAM="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.sam"

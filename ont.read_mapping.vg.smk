@@ -4,45 +4,14 @@
 # mapper_tag: vg-ont
 # Constitution: Articles I–VIII
 #
-# VG Giraffe long-read CLI (from github.com/vgteam/vg, v1.63.0+):
-#
-#   vg giraffe -Z <graph.giraffe.gbz> \
-#              -b r10 \
-#              -f <reads.fastq.gz> \
-#              -o SAM \
-#              -t <threads> \
-#              --read-group "ID:<dataset>  SM:<dataset>" \
-#              --sample <dataset>
-#
-#   Key flags:
-#     -Z / --gbz-name           GBZ pangenome graph (required)
-#     -b / --parameter-preset   "long" for long reads (v1.63.0+; replaces -b hifi
-#                               for ONT; use "hifi" for PacBio HiFi)
-#     -f / --fastq-in           input FASTQ (gzipped ok)
-#     -o / --output-format      SAM for piping to samtools; default is GAM
-#     -t / --threads            number of mapping threads
-#     --read-group              SAM @RG header string (tab-separated fields)
-#     --sample                  SM tag shortcut
-#     -m / --minimizer-name     pre-built long-read minimizer index (optional;
-#                               vg will auto-build if absent)
-#     -d / --dist-name          distance index (optional; auto-built if absent)
+# VG Giraffe long-read CLI (vgteam/vg v1.63.0+):
+#   vg giraffe -Z <gbz> -b r10 -f <fastq> -o SAM -t N -R <rg> -N <sample>
 #
 # Required indexes (pre-build with: vg autoindex --workflow lr-giraffe ...):
-#   vg_index/hg38.giraffe.gbz              (GBZ pangenome graph)
-#   vg_index/hg38.dist                     (distance index)
-#   vg_index/hg38.longread.withzip.min     (long-read minimizer index)
-#   vg_index/hg38.longread.zipcodes        (zipcode file for long-read mode)
-#
-# NOTE on long-read support:
-#   Long-read mode (-b long) was released in vg v1.63.0.
-#   The minimizer index for long reads uses the suffix .longread.withzip.min
-#   (NOT .shortread.withzip.min or .min from older docs).
-#   Ensure your vg Docker image is v1.63.0 or later.
-#
-# NOTE on SAM output performance:
-#   Per vg docs (v1.49.0+), there can be performance issues writing SAM/BAM
-#   directly. If you observe slow output, add -x <path-to-xg-graph> to the
-#   giraffe call, or use vg surject in a separate step on the GAM output.
+#   vg_index/hg38.giraffe.gbz
+#   vg_index/hg38.dist
+#   vg_index/hg38.longread.withzip.min
+#   vg_index/hg38.longread.zipcodes
 ##
 
 include: "header_mapper.smk"
@@ -163,9 +132,11 @@ rule vg_map_sort:
         """
         (
         echo "[$(date -Is)] START vg_map_sort {wildcards.dataset}" >&2
+        mkdir -p "{CWD}/cram/tmp"
 
-        # vg giraffe (long-read mode, -b long, requires v1.63.0+)
-        # → SAM stdout → samtools sort → CRAM
+        TMP_SAM="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.sam"
+
+        # vg giraffe → SAM file
         docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
@@ -181,12 +152,15 @@ rule vg_map_sort:
             -d {CWD}/{input.dist} \
             -m {CWD}/{input.min_idx} \
             -z {CWD}/{input.zipcodes} \
-            -b long \
+            -b r10 \
             -f {CWD}/{input.fastq} \
             -o SAM \
             -R "ID:{wildcards.dataset}\tSM:{wildcards.dataset}" \
             -N {wildcards.dataset} \
-        | docker run --rm \
+            > "$TMP_SAM"
+
+        # samtools sort SAM → CRAM
+        docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus 4 \
@@ -200,7 +174,9 @@ rule vg_map_sort:
             -O CRAM \
             --reference {input.ref} \
             -o {CWD}/{output.cram} \
-            -
+            "$TMP_SAM"
+
+        rm -f "$TMP_SAM"
 
         docker run --rm \
             --workdir /tmp \

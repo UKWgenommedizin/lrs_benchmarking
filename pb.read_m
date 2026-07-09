@@ -1,35 +1,33 @@
 ##
-# ont.read_mapping.parahat.smk
-# Read mapping workflow for ONT data using ParaHAT
-# mapper_tag: parahat-ont
+# pb.read_mapping.graphaligner.smk
+# Read mapping workflow for PacBio HiFi data using GraphAligner
+# mapper_tag: ga-pb
 # Constitution: Articles I–VIII
 #
-# ParaHAT CLI (from github.com/nudt-bioinfo/ParaHAT):
-#   Step 1 (indexing):  ParaHAT-indexer [-k kmerSize] <HashIndexDir> <Reference>
-#   Step 2 (alignment): mpirun -n <N> ParaHAT-aligner [-t threadNumber] <HashIndexDir> <ReadFile> <Reference>
+# GraphAligner CLI (github.com/maickrau/GraphAligner):
+#   GraphAligner -g <graph.gfa> -f <reads.fastq.gz> -a <out.gaf> -x vg -t N
 #
-# NOTE: ParaHAT does NOT support:
-#   - A read-group (--rg / @RG) flag in its aligner CLI
-#   - A preset/platform flag (no -x ont)
-#   - CRAM output (it produces SAM; samtools is used to add RG, sort, and convert)
+#   There is NO --read-group / --rg flag in GraphAligner.
+#   Output is GAF (Graph Alignment Format), not SAM/BAM/CRAM.
 #
-# @RG header injection:
-#   ParaHAT outputs SAM without @RG. This workflow adds the RG header and tag
-#   via `samtools addreplacerg` in the sort-to-CRAM step.
+# Pipeline (file-based, no docker pipes):
+#   Step 1  vg convert  : hg38.fasta → hg38.gfa  (once per ref)
+#   Step 2  GraphAligner: reads + hg38.gfa → GAF file
+#   Step 3  vg surject  : GAF + hg38.gfa → SAM file
+#   Step 4  samtools    : addreplacerg → sort → CRAM → index
 #
-# MPI note: This workflow calls `mpirun -n 1` (single-node, multi-thread).
-#   For multi-node MPI you must bind-mount MPI libraries into the container
-#   and adjust -n accordingly — out of scope for this single-node setup.
+# Required Docker images:
+#   DOCKER_GRAPHALIGNER  must contain: GraphAligner binary
+#   DOCKER_VG            must contain: vg binary + samtools + bcftools
 ##
 
 include: "header_mapper.smk"
 
 ####################
-# Docker image
-# Image must contain: ParaHAT-indexer, ParaHAT-aligner (via mpirun),
-#                     samtools, bcftools (Art. VII.1)
+# Docker images
 
-DOCKER_PARAHAT = "schimar/lrs-parahat:v1.0.0-cuda"
+DOCKER_GRAPHALIGNER = "schimar/lrs-graphaligner:v1.0.20"
+DOCKER_VG           = "schimar/lrs-vg:v1.73.0"
 
 ####################
 # Reference
@@ -37,16 +35,18 @@ DOCKER_PARAHAT = "schimar/lrs-parahat:v1.0.0-cuda"
 REF = (CWD + "/ref/"
     "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta")
 
-MAPPER_TAG = "parahat-ont"
+# GFA derived from REF — built once by rule ref_to_gfa below
+GRAPH_GFA = CWD + "/graphaligner_graph/hg38.gfa"
+
+MAPPER_TAG = "ga-pb"
 REFERENCE  = "hg38"
-PARAHAT_INDEX_DIR = CWD + "/parahat_index"
 
 ####################
 # Discover inputs
 
 FASTQ_DIR = "fastq"
 DATASETS, = glob_wildcards(FASTQ_DIR + "/{dataset}.fastq.gz")
-DATASETS = [d for d in DATASETS if ".ont." in d]
+DATASETS = [d for d in DATASETS if ".pb." in d]
 if DATASET_FILTER:
     DATASETS = [d for d in DATASETS if DATASET_FILTER in d]
 
@@ -75,21 +75,99 @@ rule all:
 ####################
 # Rules
 
-rule parahat_index:
-    """Build the ParaHAT hash index for the reference (run once)."""
+rule ref_to_gfa:
+    """Convert the linear hg38 FASTA to a single-path GFA (run once)."""
     input:
         ref = REF,
     output:
-        sentinel = PARAHAT_INDEX_DIR + "/parahat_index.done",
+        gfa = GRAPH_GFA,
     log:
-        PARAHAT_INDEX_DIR + "/parahat_index.log",
-    threads: 1
+        CWD + "/graphaligner_graph/ref_to_gfa.log",
+    threads: 4
     shell:
         """
         (
-        echo "[$(date -Is)] START parahat_index" >&2
-        mkdir -p {PARAHAT_INDEX_DIR}
+        echo "[$(date -Is)] START ref_to_gfa" >&2
+        mkdir -p {CWD}/graphaligner_graph
 
+        docker run --rm \
+            --workdir /tmp \
+            -u $UID:$(id -g) \
+            --cpus {threads} \
+            -m 16g \
+            -v {CWD}:{CWD} \
+            -v {input.ref}:{input.ref}:ro \
+            --entrypoint vg \
+            {DOCKER_VG} \
+            convert \
+            --gfa-out \
+            {input.ref} \
+            > {output.gfa}
+
+        [[ ! -s {output.gfa} ]] && exit 101
+
+        echo "[$(date -Is)] END ref_to_gfa" >&2
+        ) > {log} 2>&1
+        """
+
+rule graphaligner_map:
+    """Align HiFi reads to the hg38 GFA → GAF file."""
+    input:
+        fastq = FASTQ_DIR + "/{dataset}.fastq.gz",
+        gfa   = GRAPH_GFA,
+    output:
+        gaf   = temp("cram/tmp/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".gaf"),
+    log:
+        "cram/tmp/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".graphaligner.log",
+    threads: 16
+    shell:
+        """
+        (
+        echo "[$(date -Is)] START graphaligner_map {wildcards.dataset}" >&2
+        mkdir -p cram/tmp
+
+        docker run --rm \
+            --workdir /tmp \
+            -u $UID:$(id -g) \
+            --cpus {threads} \
+            -m 64g \
+            -v {CWD}:{CWD} \
+            --entrypoint GraphAligner \
+            {DOCKER_GRAPHALIGNER} \
+            -g {CWD}/{input.gfa} \
+            -f {CWD}/{input.fastq} \
+            -a {CWD}/{output.gaf} \
+            -x vg \
+            -t {threads} \
+
+        [[ ! -s {output.gaf} ]] && exit 101
+
+        echo "[$(date -Is)] END graphaligner_map {wildcards.dataset}" >&2
+        ) > {log} 2>&1
+        """
+
+rule graphaligner_surject_sort:
+    """Surject GAF → SAM → addreplacerg → sort → CRAM → index (file-based)."""
+    input:
+        gaf = "cram/tmp/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".gaf",
+        gfa = GRAPH_GFA,
+        ref = REF,
+    output:
+        cram = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram",
+        crai = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram.crai",
+    log:
+        "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".surject_sort.log",
+    threads: 8
+    shell:
+        """
+        (
+        echo "[$(date -Is)] START graphaligner_surject_sort {wildcards.dataset}" >&2
+        mkdir -p "{CWD}/cram/tmp"
+
+        TMP_SAM="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.raw.sam"
+        TMP_RG="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.rg.sam"
+
+        # vg surject: GAF → SAM
         docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
@@ -97,70 +175,33 @@ rule parahat_index:
             -m 32g \
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
-            --entrypoint ParaHAT-indexer \
-            {DOCKER_PARAHAT} \
-            -k 13 \
-            {PARAHAT_INDEX_DIR} \
-            {input.ref}
-
-        touch {output.sentinel}
-        echo "[$(date -Is)] END parahat_index" >&2
-        ) > {log} 2>&1
-        """
-
-rule parahat_map_sort:
-    input:
-        fastq   = FASTQ_DIR + "/{dataset}.fastq.gz",
-        ref     = REF,
-        idx_done = PARAHAT_INDEX_DIR + "/parahat_index.done",
-    output:
-        cram = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram",
-        crai = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram.crai",
-    log:
-        "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".map_sort.log",
-    threads: 16
-    shell:
-        """
-        (
-        echo "[$(date -Is)] START parahat_map_sort {wildcards.dataset}" >&2
-        mkdir -p "{CWD}/cram/tmp"
-
-        # ParaHAT-aligner → raw SAM file (no RG tag)
-        TMP_SAM="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.raw.sam"
-
-        docker run --rm \
-            --workdir /tmp \
-            -u $UID:$(id -g) \
-            --cpus {threads} \
-            -m 48g \
-            -v {CWD}:{CWD} \
-            -v {input.ref}:{input.ref}:ro \
-            --entrypoint mpirun \
-            {DOCKER_PARAHAT} \
-            --allow-run-as-root -n 1 ParaHAT-aligner \
-            -t {threads} \
-            {PARAHAT_INDEX_DIR} \
-            {CWD}/{input.fastq} \
-            {input.ref} \
+            --entrypoint vg \
+            {DOCKER_VG} \
+            surject \
+            -x {CWD}/{input.gfa} \
+            -G \
+            -s \
+            {CWD}/{input.gaf} \
             > "$TMP_SAM"
 
-        # samtools addreplacerg (inject @RG) → sort → CRAM
+        # samtools addreplacerg (inject @RG) 
         docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
-            --cpus 4 \
-            -m 8g \
+            --cpus 2 \
+            -m 4g \
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint samtools \
-            {DOCKER_PARAHAT} \
+            {DOCKER_VG} \
             addreplacerg \
             -r "@RG\\tID:{wildcards.dataset}\\tSM:{wildcards.dataset}" \
-            -o "{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.rg.sam" \
+            -o "$TMP_RG" \
             "$TMP_SAM"
 
         rm -f "$TMP_SAM"
 
+        # samtools sort → CRAM
         docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
@@ -169,15 +210,15 @@ rule parahat_map_sort:
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint samtools \
-            {DOCKER_PARAHAT} \
+            {DOCKER_VG} \
             sort \
             -@ 4 \
             -O CRAM \
             --reference {input.ref} \
             -o {CWD}/{output.cram} \
-            "{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.rg.sam"
+            "$TMP_RG"
 
-        rm -f "{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.rg.sam"
+        rm -f "$TMP_RG"
 
         docker run --rm \
             --workdir /tmp \
@@ -187,16 +228,16 @@ rule parahat_map_sort:
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint samtools \
-            {DOCKER_PARAHAT} \
+            {DOCKER_VG} \
             index {CWD}/{output.cram}
 
         [[ $(du -b {output.cram} | cut -f 1) -le 64 ]] && exit 101
 
-        echo "[$(date -Is)] END parahat_map_sort {wildcards.dataset}" >&2
+        echo "[$(date -Is)] END graphaligner_surject_sort {wildcards.dataset}" >&2
         ) > {log} 2>&1
         """
 
-rule parahat_idxstats:
+rule graphaligner_idxstats:
     input:
         cram = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram",
         crai = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram.crai",
@@ -209,7 +250,7 @@ rule parahat_idxstats:
     shell:
         """
         (
-        echo "[$(date -Is)] START parahat_idxstats {wildcards.dataset}" >&2
+        echo "[$(date -Is)] START graphaligner_idxstats {wildcards.dataset}" >&2
 
         docker run --rm \
             --workdir /tmp \
@@ -219,17 +260,17 @@ rule parahat_idxstats:
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint samtools \
-            {DOCKER_PARAHAT} \
+            {DOCKER_VG} \
             idxstats {CWD}/{input.cram} \
             > {output.idxstats}
 
         [[ $(du -b {output.idxstats} | cut -f 1) -lt 5000 ]] && exit 101
 
-        echo "[$(date -Is)] END parahat_idxstats {wildcards.dataset}" >&2
+        echo "[$(date -Is)] END graphaligner_idxstats {wildcards.dataset}" >&2
         ) > {log} 2>&1
         """
 
-rule parahat_stats:
+rule graphaligner_stats:
     input:
         cram = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram",
         crai = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram.crai",
@@ -242,7 +283,7 @@ rule parahat_stats:
     shell:
         """
         (
-        echo "[$(date -Is)] START parahat_stats {wildcards.dataset}" >&2
+        echo "[$(date -Is)] START graphaligner_stats {wildcards.dataset}" >&2
 
         docker run --rm \
             --workdir /tmp \
@@ -252,7 +293,7 @@ rule parahat_stats:
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint samtools \
-            {DOCKER_PARAHAT} \
+            {DOCKER_VG} \
             stats \
             --reference {input.ref} \
             {CWD}/{input.cram} \
@@ -260,6 +301,6 @@ rule parahat_stats:
 
         [[ $(du -b {output.stats} | cut -f 1) -lt 5000 ]] && exit 101
 
-        echo "[$(date -Is)] END parahat_stats {wildcards.dataset}" >&2
+        echo "[$(date -Is)] END graphaligner_stats {wildcards.dataset}" >&2
         ) > {log} 2>&1
         """

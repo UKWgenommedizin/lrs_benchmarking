@@ -87,6 +87,7 @@ rule vacmap_map_sort:
         """
         (
         echo "[$(date -Is)] START vacmap_map_sort {wildcards.dataset}" >&2
+        mkdir -p "{CWD}/cram/tmp"
 
         # VACmap → temp SAM file (pipe breaks occur with docker | docker)
         # -mode H: high error rate ONT reads
