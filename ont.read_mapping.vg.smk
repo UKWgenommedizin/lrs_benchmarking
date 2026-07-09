@@ -7,7 +7,7 @@
 # VG Giraffe long-read CLI (from github.com/vgteam/vg, v1.63.0+):
 #
 #   vg giraffe -Z <graph.giraffe.gbz> \
-#              -b long \
+#              -b r10 \
 #              -f <reads.fastq.gz> \
 #              -o SAM \
 #              -t <threads> \
@@ -183,8 +183,8 @@ rule vg_map_sort:
             -b long \
             -f {CWD}/{input.fastq} \
             -o SAM \
-            --read-group "ID:{wildcards.dataset}\tSM:{wildcards.dataset}" \
-            --sample {wildcards.dataset} \
+            -R "ID:{wildcards.dataset}\tSM:{wildcards.dataset}" \
+            -N {wildcards.dataset} \
         | docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
