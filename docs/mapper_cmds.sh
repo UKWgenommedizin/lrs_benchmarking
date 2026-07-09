@@ -12,11 +12,6 @@ docker run --rm -it -v $PWD:/data --entrypoint minimap2 schimar/lrs-minimap2-ntl
 # ONT: snakemake -s ont.read_mapping.minimap2.smk
 # PB:  snakemake -s pb.read_mapping.minimap2.smk
 
-# ---------- ntLink (ONT: ntlink-ont, PB: ntlink-pb) ----------
-docker run --rm -it -v $PWD:/data --entrypoint ntLink schimar/lrs-minimap2-ntlink:v2.28-1.3.9 --help
-# ONT: snakemake -s ont.read_mapping.ntlink.smk
-# PB:  snakemake -s pb.read_mapping.ntlink.smk
-
 # ---------- ParaHAT (ONT: parahat-ont, PB: parahat-pb) ----------
 # Index first:
 docker run --rm -it -v $PWD:/data --entrypoint ParaHAT-indexer schimar/lrs-parahat:v1.0.0-cuda <ref.fa> <index_dir>
@@ -24,12 +19,6 @@ docker run --rm -it -v $PWD:/data --entrypoint ParaHAT-indexer schimar/lrs-parah
 docker run --rm -it -v $PWD:/data schimar/lrs-parahat:v1.0.0-cuda -n 4 ParaHAT-aligner -t 8 <index_dir> <reads.fastq> <ref.fa>
 # ONT: snakemake -s ont.read_mapping.parahat.smk
 # PB:  snakemake -s pb.read_mapping.parahat.smk
-
-# ---------- QuickEd (ONT: quicked-ont, PB: quicked-pb) ----------
-docker run --rm -it -v $PWD:/data schimar/lrs-quicked:v0.1.0 --help
-docker run --rm -it -v $PWD:/data --entrypoint generate_dataset schimar/lrs-quicked:v0.1.0 --help
-# ONT: snakemake -s ont.read_mapping.quicked.smk
-# PB:  snakemake -s pb.read_mapping.quicked.smk
 
 # ---------- VACmap (ONT: vacmap-ont, PB: vacmap-pb) ----------
 docker run --rm -it -v $PWD:/data schimar/lrs-vacmap:v1.2.0 --help
