@@ -71,7 +71,9 @@ rule vacmap_map_sort:
         set -o pipefail
         echo "[$(date -Is)] START vacmap_map_sort {wildcards.dataset}" >&2
 
-        # Map with VACmap, pipe to samtools sort → CRAM
+        # VACmap → temp SAM file (pipe breaks occur with docker | docker)
+        TMP_SAM="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.sam"
+
         docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
@@ -87,7 +89,10 @@ rule vacmap_map_sort:
             -t {threads} \
             --rg-id {wildcards.dataset} \
             --rg-sm {wildcards.dataset} \
-        | docker run --rm \
+            -o "$TMP_SAM"
+
+        # samtools sort SAM → CRAM
+        docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus 4 \
@@ -101,7 +106,9 @@ rule vacmap_map_sort:
             -O CRAM \
             --reference {input.ref} \
             -o {CWD}/{output.cram} \
-            -
+            "$TMP_SAM"
+
+        rm -f "$TMP_SAM"
 
         docker run --rm \
             --workdir /tmp \
