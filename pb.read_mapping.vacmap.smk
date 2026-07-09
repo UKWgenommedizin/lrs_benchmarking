@@ -10,7 +10,7 @@ include: "header.smk"
 ####################
 # Docker image
 
-DOCKER_VACMAP = "schimar/lrs-vacmap:latest"
+DOCKER_VACMAP = "schimar/lrs-vacmap:v1.2.0"
 
 ####################
 # Reference

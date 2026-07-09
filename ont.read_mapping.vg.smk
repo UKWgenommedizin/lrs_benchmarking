@@ -50,7 +50,7 @@ include: "header.smk"
 ####################
 # Docker image (must be v1.63.0+ for long-read mode)
 
-DOCKER_VG = "quay.io/vgteam/vg:v1.63.0"
+DOCKER_VG = "schimar/lrs-vg:v1.73.0"
 
 ####################
 # Reference & index paths
@@ -68,6 +68,50 @@ VG_ZIPCODES  = VG_INDEX_DIR + "/hg38.longread.zipcodes"
 
 MAPPER_TAG = "vg-ont"
 REFERENCE  = "hg38"
+
+####################
+# Rule: build VG long-read indexes (run once)
+
+rule build_vg_index:
+    """Build VG giraffe long-read indexes from the reference FASTA."""
+    input:
+        ref = REF,
+    output:
+        gbz      = VG_GBZ,
+        dist     = VG_DIST,
+        min_idx  = VG_MIN,
+        zipcodes = VG_ZIPCODES,
+    log:
+        VG_INDEX_DIR + "/build_index.log",
+    threads: 16
+    shell:
+        """
+        (
+        echo "[$(date -Is)] START build_vg_index" >&2
+        mkdir -p {VG_INDEX_DIR}
+
+        docker run --rm \
+            --workdir /tmp \
+            -u $UID:$(id -g) \
+            --cpus {threads} \
+            -m 64g \
+            -v {CWD}:{CWD} \
+            -v {input.ref}:{input.ref}:ro \
+            --entrypoint vg \
+            {DOCKER_VG} \
+            autoindex \
+            --workflow lr-giraffe \
+            --ref {input.ref} \
+            --prefix {VG_INDEX_DIR}/hg38 \
+            --threads {threads}
+
+        for f in {VG_GBZ} {VG_DIST} {VG_MIN} {VG_ZIPCODES}; do
+            [[ -s "$f" ]] || {{ echo "Missing/empty: $f"; exit 101; }}
+        done
+
+        echo "[$(date -Is)] END build_vg_index" >&2
+        ) > {log} 2>&1
+        """
 
 ####################
 # Discover inputs

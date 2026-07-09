@@ -36,8 +36,8 @@ include: "header.smk"
 ####################
 # Docker images
 
-DOCKER_GRAPHALIGNER = "storage-node:5000/own/graphaligner:1.0.17"
-DOCKER_VG           = "quay.io/vgteam/vg:v1.63.0"   # ships samtools
+DOCKER_GRAPHALIGNER = "schimar/lrs-graphaligner:v1.0.20"
+DOCKER_VG           = "schimar/lrs-vg:v1.73.0"   # ships samtools
 
 ####################
 # Reference
