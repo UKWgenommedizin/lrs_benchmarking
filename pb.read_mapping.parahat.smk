@@ -27,6 +27,7 @@ PARAHAT_INDEX_DIR = CWD + "/parahat_index"
 
 FASTQ_DIR = "fastq"
 DATASETS, = glob_wildcards(FASTQ_DIR + "/{dataset}.fastq.gz")
+DATASETS = [d for d in DATASETS if ".pb." in d]
 if DATASET_FILTER:
     DATASETS = [d for d in DATASETS if DATASET_FILTER in d]
 
