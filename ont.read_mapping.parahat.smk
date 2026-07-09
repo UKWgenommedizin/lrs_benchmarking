@@ -32,7 +32,7 @@ include: "header.smk"
 # Image must contain: ParaHAT-indexer, ParaHAT-aligner (via mpirun),
 #                     samtools, bcftools (Art. VII.1)
 
-DOCKER_PARAHAT = "storage-node:5000/own/parahat:1.0.0"
+DOCKER_PARAHAT = "schimar/lrs-parahat:v1.0.0-cuda"
 
 ####################
 # Reference

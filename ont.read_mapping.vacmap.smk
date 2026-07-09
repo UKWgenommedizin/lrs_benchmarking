@@ -28,7 +28,7 @@ include: "header.smk"
 # Docker image
 # Must contain: vacmap (Python), samtools, bcftools (Art. VII.1)
 
-DOCKER_VACMAP = "storage-node:5000/own/vacmap:1.0.0"
+DOCKER_VACMAP = "schimar/lrs-vacmap:v1.2.0"
 
 ####################
 # Reference

@@ -15,7 +15,7 @@ include: "header.smk"
 ####################
 # Docker image
 
-DOCKER_GRAPHALIGNER = "schimar/lrs-graphaligner:latest"
+DOCKER_GRAPHALIGNER = "schimar/lrs-graphaligner:v1.0.20"
 
 ####################
 # Reference

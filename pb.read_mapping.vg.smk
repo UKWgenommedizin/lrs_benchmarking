@@ -20,7 +20,7 @@ include: "header.smk"
 ####################
 # Docker image
 
-DOCKER_VG = "schimar/lrs-vg:latest"
+DOCKER_VG = "schimar/lrs-vg:v1.73.0"
 
 ####################
 # Reference / index paths
@@ -33,7 +33,8 @@ REF = os.path.expanduser(
 VG_INDEX_DIR = CWD + "/vg_index"
 VG_GBZ       = VG_INDEX_DIR + "/hg38.giraffe.gbz"
 VG_DIST      = VG_INDEX_DIR + "/hg38.dist"
-VG_MIN       = VG_INDEX_DIR + "/hg38.min"
+VG_MIN       = VG_INDEX_DIR + "/hg38.longread.withzip.min"
+VG_ZIPCODES  = VG_INDEX_DIR + "/hg38.longread.zipcodes"
 
 MAPPER_TAG = "vg-pb"
 REFERENCE  = "hg38"
@@ -53,12 +54,14 @@ DATASETS, = glob_wildcards(FASTQ_DIR + "/{dataset}.fastq.gz")
 # Rule: build VG index if not present
 
 rule build_vg_index:
+    """Build VG giraffe long-read indexes from the reference FASTA."""
     input:
         ref = REF,
     output:
-        gbz  = VG_GBZ,
-        dist = VG_DIST,
-        min_ = VG_MIN,
+        gbz      = VG_GBZ,
+        dist     = VG_DIST,
+        min_idx  = VG_MIN,
+        zipcodes = VG_ZIPCODES,
     log:
         VG_INDEX_DIR + "/build_index.log",
     threads: 16
@@ -78,14 +81,13 @@ rule build_vg_index:
             --entrypoint vg \
             {DOCKER_VG} \
             autoindex \
-            --workflow giraffe \
+            --workflow lr-giraffe \
             --ref {input.ref} \
             --prefix {VG_INDEX_DIR}/hg38 \
             --threads {threads}
 
-        # Verify outputs exist
-        for f in {VG_GBZ} {VG_DIST} {VG_MIN}; do
-            [[ -s "$f" ]] || { echo "Missing/empty: $f"; exit 101; }
+        for f in {VG_GBZ} {VG_DIST} {VG_MIN} {VG_ZIPCODES}; do
+            [[ -s "$f" ]] || {{ echo "Missing/empty: $f"; exit 101; }}
         done
 
         echo "[$(date -Is)] END build_vg_index" >&2
@@ -123,7 +125,8 @@ rule vg_map_sort:
         ref   = REF,
         gbz   = VG_GBZ,
         dist  = VG_DIST,
-        min_  = VG_MIN,
+        min_idx = VG_MIN,
+        zipcodes = VG_ZIPCODES,
     output:
         cram  = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram",
         crai  = "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram.crai",
@@ -149,7 +152,8 @@ rule vg_map_sort:
             -t {threads} \
             -Z {input.gbz} \
             -d {input.dist} \
-            -m {input.min_} \
+            -m {input.min_idx} \
+            -z {input.zipcodes} \
             -f {CWD}/{input.fastq} \
             --read-group "ID:{wildcards.dataset}\\tSM:{wildcards.dataset}" \
             --output-format SAM \
