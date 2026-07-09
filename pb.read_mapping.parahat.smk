@@ -77,7 +77,7 @@ rule parahat_index:
             -m 32g \
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
-            --entrypoint ./ParaHAT-indexer \
+            --entrypoint ParaHAT-indexer \
             {DOCKER_PARAHAT} \
             -k 13 \
             {PARAHAT_INDEX_DIR} \
@@ -115,7 +115,7 @@ rule parahat_map_sort:
             -v {input.ref}:{input.ref}:ro \
             --entrypoint mpirun \
             {DOCKER_PARAHAT} \
-            -n 1 ./ParaHAT-aligner \
+            --allow-run-as-root -n 1 ParaHAT-aligner \
             -t {threads} \
             {PARAHAT_INDEX_DIR} \
             {CWD}/{input.fastq} \
