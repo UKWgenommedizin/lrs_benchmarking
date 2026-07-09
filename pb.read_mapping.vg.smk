@@ -15,7 +15,7 @@
 #   vg_index/hg38.min
 ##
 
-include: "header.smk"
+include: "header_mapper.smk"
 
 ####################
 # Docker image
@@ -154,6 +154,7 @@ rule vg_map_sort:
             -d {input.dist} \
             -m {input.min_idx} \
             -z {input.zipcodes} \
+            -b hifi \
             -f {CWD}/{input.fastq} \
             --read-group "ID:{wildcards.dataset}\\tSM:{wildcards.dataset}" \
             --output-format SAM \

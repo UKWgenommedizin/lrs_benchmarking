@@ -45,7 +45,7 @@
 #   giraffe call, or use vg surject in a separate step on the GAM output.
 ##
 
-include: "header.smk"
+include: "header_mapper.smk"
 
 ####################
 # Docker image (must be v1.63.0+ for long-read mode)

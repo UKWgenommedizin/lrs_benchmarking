@@ -25,7 +25,7 @@
 #   and adjust -n accordingly — out of scope for this single-node setup.
 ##
 
-include: "header.smk"
+include: "header_mapper.smk"
 
 ####################
 # Docker image
