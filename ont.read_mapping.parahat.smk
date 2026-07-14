@@ -26,8 +26,6 @@ include: "header_mapper.smk"
 
 ####################
 # Docker image
-# Image must contain: ParaHAT-indexer, ParaHAT-aligner (via mpirun),
-#                     samtools, bcftools (Art. VII.1)
 
 DOCKER_PARAHAT = "schimar/lrs-parahat:v1.0.0-cuda"
 
@@ -122,6 +120,7 @@ rule parahat_map_sort:
     shell:
         """
         (
+        set -eo pipefail
         echo "[$(date -Is)] START parahat_map_sort {wildcards.dataset}" >&2
         mkdir -p "{CWD}/cram/tmp"
 
@@ -143,6 +142,8 @@ rule parahat_map_sort:
             {CWD}/{input.fastq} \
             {input.ref} \
             > "$TMP_SAM"
+
+        [[ -s "$TMP_SAM" ]] || {{ echo "ERROR: ParaHAT produced empty/missing $TMP_SAM"; exit 101; }}
 
         # samtools addreplacerg (inject @RG) → sort → CRAM
         docker run --rm \

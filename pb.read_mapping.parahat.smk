@@ -7,7 +7,13 @@
 
 include: "header_mapper.smk"
 
+####################
+# Docker image
+
 DOCKER_PARAHAT = "schimar/lrs-parahat:v1.0.0-cuda"
+
+####################
+# Reference
 
 REF = (CWD + "/ref/"
     "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta")
@@ -16,29 +22,23 @@ MAPPER_TAG = "parahat-pb"
 REFERENCE  = "hg38"
 PARAHAT_INDEX_DIR = CWD + "/parahat_index"
 
+####################
+# Discover inputs
+
 FASTQ_DIR = "fastq"
 DATASETS, = glob_wildcards(FASTQ_DIR + "/{dataset}.fastq.gz")
 DATASETS = [d for d in DATASETS if ".pb." in d]
 if DATASET_FILTER:
     DATASETS = [d for d in DATASETS if DATASET_FILTER in d]
 
+####################
+# Targets
+
 rule all:
     input:
-        expand("cram/{dataset}.{ref}.{tag}.cram", dataset=DATASETS, ref=REFERENCE, tag=MAPPER_TAG),
-        expand("cram/{dataset}.{ref}.{tag}.cram.crai", dataset=DATASETS, ref=REFERENCE, tag=MAPPER_TAG),
-        expand("cram/{dataset}.{ref}.{tag}.cram.idxstats", dataset=DATASETS, ref=REFERENCE, tag=MAPPER_TAG),
-        expand("cram/{dataset}.{ref}.{tag}.cram.stats", dataset=DATASETS, ref=REFERENCE, tag=MAPPER_TAG),
-
-rule parahat_index:
-    input:  ref = REF
-    output: sentinel = PARAHAT_INDEX_DIR + "/parahat_index.done"
-    log:    PARAHAT_INDEX_DIR + "/parahat_index.log"
-    threads: 1
-    shell:
-        """
-        (
-        echo "[$(date -Is)] START parahat_index"
-        mkdir -p {PARAHAT_INDEX_DIR}
+        expand(
+            "cram/{dataset}.{ref}.{tag}.cram",
+            dataset=DATASETS, ref=REFERENCE, tag=MAPPER_TAG
         ),
         expand(
             "cram/{dataset}.{ref}.{tag}.cram.crai",
@@ -103,10 +103,13 @@ rule parahat_map_sort:
     shell:
         """
         (
+        set -eo pipefail
         echo "[$(date -Is)] START parahat_map_sort {wildcards.dataset}" >&2
+        mkdir -p "{CWD}/cram/tmp"
 
-        # ParaHAT-aligner → samtools addreplacerg (inject @RG) → samtools sort → CRAM
-        # ParaHAT outputs SAM to stdout; it has no native --rg flag.
+        # ParaHAT-aligner → raw SAM file (no RG tag)
+        TMP_SAM="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.raw.sam"
+
         docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
@@ -121,7 +124,12 @@ rule parahat_map_sort:
             {PARAHAT_INDEX_DIR} \
             {CWD}/{input.fastq} \
             {input.ref} \
-        | docker run --rm \
+            > "$TMP_SAM"
+
+        [[ -s "$TMP_SAM" ]] || {{ echo "ERROR: ParaHAT produced empty/missing $TMP_SAM"; exit 101; }}
+
+        # samtools addreplacerg (inject @RG) → sort → CRAM
+        docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus 4 \
@@ -132,8 +140,12 @@ rule parahat_map_sort:
             {DOCKER_PARAHAT} \
             addreplacerg \
             -r "@RG\\tID:{wildcards.dataset}\\tSM:{wildcards.dataset}" \
-            - \
-        | docker run --rm \
+            -o "{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.rg.sam" \
+            "$TMP_SAM"
+
+        rm -f "$TMP_SAM"
+
+        docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus 4 \
@@ -147,7 +159,9 @@ rule parahat_map_sort:
             -O CRAM \
             --reference {input.ref} \
             -o {CWD}/{output.cram} \
-            -
+            "{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.rg.sam"
+
+        rm -f "{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.rg.sam"
 
         docker run --rm \
             --workdir /tmp \

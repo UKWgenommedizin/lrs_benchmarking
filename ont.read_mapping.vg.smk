@@ -131,6 +131,7 @@ rule vg_map_sort:
     shell:
         """
         (
+        set -eo pipefail
         echo "[$(date -Is)] START vg_map_sort {wildcards.dataset}" >&2
         mkdir -p "{CWD}/cram/tmp"
 
@@ -158,6 +159,8 @@ rule vg_map_sort:
             -R "ID:{wildcards.dataset}\tSM:{wildcards.dataset}" \
             -N {wildcards.dataset} \
             > "$TMP_SAM"
+
+        [[ -s "$TMP_SAM" ]] || {{ echo "ERROR: vg giraffe produced empty/missing $TMP_SAM"; exit 101; }}
 
         # samtools sort SAM → CRAM
         docker run --rm \
