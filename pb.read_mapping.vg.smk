@@ -51,6 +51,28 @@ if DATASET_FILTER:
     DATASETS = [d for d in DATASETS if DATASET_FILTER in d]
 
 ####################
+# Targets
+
+rule all:
+    input:
+        expand(
+            "cram/{dataset}.{ref}.{tag}.cram",
+            dataset=DATASETS, ref=REFERENCE, tag=MAPPER_TAG
+        ),
+        expand(
+            "cram/{dataset}.{ref}.{tag}.cram.crai",
+            dataset=DATASETS, ref=REFERENCE, tag=MAPPER_TAG
+        ),
+        expand(
+            "cram/{dataset}.{ref}.{tag}.cram.idxstats",
+            dataset=DATASETS, ref=REFERENCE, tag=MAPPER_TAG
+        ),
+        expand(
+            "cram/{dataset}.{ref}.{tag}.cram.stats",
+            dataset=DATASETS, ref=REFERENCE, tag=MAPPER_TAG
+        ),
+
+####################
 # Rule: build VG index if not present
 
 rule build_vg_index:
@@ -67,9 +89,9 @@ rule build_vg_index:
     threads: 16
     shell:
         """
+        mkdir -p {VG_INDEX_DIR}
         (
         echo "[$(date -Is)] START build_vg_index" >&2
-        mkdir -p {VG_INDEX_DIR}
 
         docker run --rm \
             --workdir /tmp \
@@ -93,28 +115,6 @@ rule build_vg_index:
         echo "[$(date -Is)] END build_vg_index" >&2
         ) > {log} 2>&1
         """
-
-####################
-# Targets
-
-rule all:
-    input:
-        expand(
-            "cram/{dataset}.{ref}.{tag}.cram",
-            dataset=DATASETS, ref=REFERENCE, tag=MAPPER_TAG
-        ),
-        expand(
-            "cram/{dataset}.{ref}.{tag}.cram.crai",
-            dataset=DATASETS, ref=REFERENCE, tag=MAPPER_TAG
-        ),
-        expand(
-            "cram/{dataset}.{ref}.{tag}.cram.idxstats",
-            dataset=DATASETS, ref=REFERENCE, tag=MAPPER_TAG
-        ),
-        expand(
-            "cram/{dataset}.{ref}.{tag}.cram.stats",
-            dataset=DATASETS, ref=REFERENCE, tag=MAPPER_TAG
-        ),
 
 ####################
 # Rules

@@ -84,9 +84,9 @@ rule parahat_index:
     threads: 1
     shell:
         """
+        mkdir -p {PARAHAT_INDEX_DIR}
         (
         echo "[$(date -Is)] START parahat_index" >&2
-        mkdir -p {PARAHAT_INDEX_DIR}
 
         docker run --rm \
             --workdir /tmp \
@@ -132,6 +132,7 @@ rule parahat_map_sort:
             -u $UID:$(id -g) \
             --cpus {threads} \
             -m 48g \
+            --gpus all \
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint mpirun \
