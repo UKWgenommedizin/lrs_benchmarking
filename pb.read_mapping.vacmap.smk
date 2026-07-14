@@ -68,7 +68,7 @@ rule vacmap_map_sort:
     shell:
         """
         (
-        set -o pipefail
+        set -eo pipefail
         echo "[$(date -Is)] START vacmap_map_sort {wildcards.dataset}" >&2
         mkdir -p "{CWD}/cram/tmp"
 
@@ -91,6 +91,8 @@ rule vacmap_map_sort:
             --rg-id {wildcards.dataset} \
             --rg-sm {wildcards.dataset} \
             -o "$TMP_SAM"
+
+        [[ -s "$TMP_SAM" ]] || {{ echo "ERROR: VACmap produced empty/missing $TMP_SAM"; exit 101; }}
 
         # samtools sort SAM → CRAM
         docker run --rm \

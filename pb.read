@@ -254,6 +254,7 @@ rule graphaligner_idxstats:
         """
         (
         echo "[$(date -Is)] START graphaligner_idxstats {wildcards.dataset}" >&2
+
         docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
@@ -265,7 +266,9 @@ rule graphaligner_idxstats:
             {DOCKER_VG} \
             idxstats {CWD}/{input.cram} \
             > {output.idxstats}
+
         [[ $(du -b {output.idxstats} | cut -f 1) -lt 5000 ]] && exit 101
+
         echo "[$(date -Is)] END graphaligner_idxstats {wildcards.dataset}" >&2
         ) > {log} 2>&1
         """
@@ -284,6 +287,7 @@ rule graphaligner_stats:
         """
         (
         echo "[$(date -Is)] START graphaligner_stats {wildcards.dataset}" >&2
+
         docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
@@ -297,7 +301,9 @@ rule graphaligner_stats:
             --reference {input.ref} \
             {CWD}/{input.cram} \
             > {output.stats}
+
         [[ $(du -b {output.stats} | cut -f 1) -lt 5000 ]] && exit 101
+
         echo "[$(date -Is)] END graphaligner_stats {wildcards.dataset}" >&2
         ) > {log} 2>&1
         """

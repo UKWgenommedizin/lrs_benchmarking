@@ -162,6 +162,7 @@ rule graphaligner_surject_sort:
     shell:
         """
         (
+        set -eo pipefail
         echo "[$(date -Is)] START graphaligner_surject_sort {wildcards.dataset}" >&2
         mkdir -p "{CWD}/cram/tmp"
 
@@ -185,7 +186,9 @@ rule graphaligner_surject_sort:
             {CWD}/{input.gaf} \
             > "$TMP_SAM"
 
-        # samtools addreplacerg (inject @RG) 
+        [[ -s "$TMP_SAM" ]] || {{ echo "ERROR: vg surject produced empty/missing $TMP_SAM"; exit 101; }}
+
+        # samtools addreplacerg (inject @RG)
         docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
