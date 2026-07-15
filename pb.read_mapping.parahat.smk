@@ -108,14 +108,17 @@ rule parahat_map_sort:
         mkdir -p "{CWD}/cram/tmp"
 
         # ParaHAT-aligner → raw SAM file (no RG tag)
+        # Decompress FASTQ first: ParaHAT does not handle .gz
+        TMP_FASTQ="{CWD}/cram/tmp/{wildcards.dataset}.fastq"
         TMP_SAM="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.raw.sam"
+
+        zcat {CWD}/{input.fastq} > "$TMP_FASTQ"
 
         docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus {threads} \
             -m 48g \
-            --gpus all \
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint mpirun \
@@ -123,9 +126,11 @@ rule parahat_map_sort:
             --allow-run-as-root -n 1 ParaHAT-aligner \
             -t {threads} \
             {PARAHAT_INDEX_DIR} \
-            {CWD}/{input.fastq} \
+            "$TMP_FASTQ" \
             {input.ref} \
             > "$TMP_SAM"
+
+        rm -f "$TMP_FASTQ"
 
         [[ -s "$TMP_SAM" ]] || {{ echo "ERROR: ParaHAT produced empty/missing $TMP_SAM"; exit 101; }}
 
