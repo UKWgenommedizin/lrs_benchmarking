@@ -87,6 +87,8 @@ rule build_vg_index:
     log:
         VG_INDEX_DIR + "/build_index.log",
     threads: 16
+    resources:
+        mem_mb = 131072,
     shell:
         """
         mkdir -p {VG_INDEX_DIR}
@@ -98,7 +100,7 @@ rule build_vg_index:
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus {threads} \
-            -m 128g \
+            -m 120g \
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint vg \
