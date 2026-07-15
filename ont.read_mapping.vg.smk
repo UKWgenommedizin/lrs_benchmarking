@@ -173,6 +173,7 @@ rule build_vg_index:
         """
         mkdir -p {VG_INDEX_DIR}
         (
+        set -eo pipefail
         echo "[$(date -Is)] START build_vg_index" >&2
 
         docker run --rm \
