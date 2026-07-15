@@ -28,7 +28,7 @@ REF = (CWD + "/ref/"
     "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta")
 
 VG_INDEX_DIR = CWD + "/vg_index"
-VG_GBZ       = VG_INDEX_DIR + "/hg38.giraffe.gbz"
+VG_GBZ       = VG_INDEX_DIR + "/hg38.gbz"
 VG_DIST      = VG_INDEX_DIR + "/hg38.dist"
 VG_MIN       = VG_INDEX_DIR + "/hg38.longread.withzip.min"
 VG_ZIPCODES  = VG_INDEX_DIR + "/hg38.longread.zipcodes"
@@ -170,7 +170,7 @@ rule build_vg_index:
         VG_INDEX_DIR + "/build_index.log",
     threads: 16
     resources:
-        mem_mb = 131072,    
+        mem_mb = 131072,
     shell:
         """
         mkdir -p {VG_INDEX_DIR}
@@ -183,6 +183,7 @@ rule build_vg_index:
             -u $UID:$(id -g) \
             --cpus {threads} \
             -m 120g \
+            --memory-swap 120g \
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint vg \
@@ -192,7 +193,6 @@ rule build_vg_index:
             --ref {input.ref} \
             --prefix {VG_INDEX_DIR}/hg38 \
             --threads {threads}
-            --target-mem 100g
 
         for f in {VG_GBZ} {VG_DIST} {VG_MIN} {VG_ZIPCODES}; do
             [[ -s "$f" ]] || {{ echo "Missing/empty: $f"; exit 101; }}
