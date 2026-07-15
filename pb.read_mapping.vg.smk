@@ -100,7 +100,7 @@ rule vg_map_sort:
 
         # vg giraffe → SAM file
         docker run --rm \
-            --workdir /tmp \
+            --tmpfs /tmp:size=50g,exec \
             -u $UID:$(id -g) \
             --cpus {threads} \
             -m 64g \
@@ -179,11 +179,12 @@ rule build_vg_index:
     shell:
         """
         mkdir -p {VG_INDEX_DIR}
-        exec 3>&1 4>&2 1> >(tee -a {log}) 2>&1
-        echo "[$(date -Is)] START build_vg_index"
+        (
+        set -eo pipefail
+        echo "[$(date -Is)] START build_vg_index" >&2
 
         docker run --rm \
-            --workdir /tmp \
+            --tmpfs /tmp:size=50g,exec \
             -u $UID:$(id -g) \
             --cpus {threads} \
             -m 120g \
@@ -198,24 +199,12 @@ rule build_vg_index:
             --prefix {VG_INDEX_DIR}/hg38 \
             --target-mem 100G \
             --threads {threads}
-        DOCKER_EXIT=$?
-        echo "[$(date -Is)] docker exit code: $DOCKER_EXIT"
-
-        if [[ $DOCKER_EXIT -ne 0 ]]; then
-            echo "ERROR: vg autoindex failed with exit code $DOCKER_EXIT"
-            exit $DOCKER_EXIT
-        fi
-
         for f in {VG_GBZ} {VG_DIST} {VG_MIN} {VG_ZIPCODES}; do
-            if [[ -s "$f" ]]; then
-                echo "OK: $f ($(du -h "$f" | cut -f 1))"
-            else
-                echo "MISSING/EMPTY: $f"
-                exit 101
-            fi
+            [[ -s "$f" ]] || {{ echo "Missing/empty: $f"; exit 101; }}
         done
 
-        echo "[$(date -Is)] END build_vg_index"
+        echo "[$(date -Is)] END build_vg_index" >&2
+        ) > {log} 2>&1
         """
 
 rule vg_idxstats:
