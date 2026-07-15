@@ -98,7 +98,7 @@ rule build_vg_index:
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus {threads} \
-            -m 64g \
+            -m 128g \
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint vg \
