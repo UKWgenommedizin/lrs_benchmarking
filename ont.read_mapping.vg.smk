@@ -192,7 +192,7 @@ rule build_vg_index:
             --workflow lr-giraffe \
             --ref {input.ref} \
             --prefix {VG_INDEX_DIR}/hg38 \
-            --target-mem 100g \
+            --target-mem 107374182400 \
             --threads {threads}
 
         for f in {VG_GBZ} {VG_DIST} {VG_MIN} {VG_ZIPCODES}; do
