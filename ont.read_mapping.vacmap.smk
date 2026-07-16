@@ -110,6 +110,7 @@ rule vacmap_map_sort:
             -t {threads} \
             --rg-id {wildcards.dataset} \
             --rg-sm {wildcards.dataset} \
+            --force \
             -o "$TMP_SAM"
 
         [[ -s "$TMP_SAM" ]] || {{ echo "ERROR: VACmap produced empty/missing $TMP_SAM"; exit 101; }}
