@@ -96,10 +96,10 @@ rule vacmap_map_sort:
         TMP_SAM="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.sam"
 
         docker run --rm \
-            --workdir /tmp \
+            --tmpfs /tmp:size=50g,exec \
             -u $UID:$(id -g) \
             --cpus {threads} \
-            -m 24g \
+            -m 48g \
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint vacmap \
