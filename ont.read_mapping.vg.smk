@@ -215,6 +215,7 @@ rule vg_idxstats:
     shell:
         """
         (
+        set -eo pipefail
         echo "[$(date -Is)] START vg_idxstats {wildcards.dataset}" >&2
 
         docker run --rm \
@@ -248,6 +249,7 @@ rule vg_stats:
     shell:
         """
         (
+        set -eo pipefail
         echo "[$(date -Is)] START vg_stats {wildcards.dataset}" >&2
 
         docker run --rm \

@@ -87,6 +87,7 @@ rule ref_to_gfa:
     shell:
         """
         (
+        set -eo pipefail
         echo "[$(date -Is)] START ref_to_gfa" >&2
         mkdir -p {CWD}/graphaligner_graph
 
@@ -123,6 +124,7 @@ rule graphaligner_map:
     shell:
         """
         (
+        set -eo pipefail
         echo "[$(date -Is)] START graphaligner_map {wildcards.dataset}" >&2
         mkdir -p cram/tmp
 
@@ -254,6 +256,7 @@ rule graphaligner_idxstats:
     shell:
         """
         (
+        set -eo pipefail
         echo "[$(date -Is)] START graphaligner_idxstats {wildcards.dataset}" >&2
 
         docker run --rm \
@@ -287,6 +290,7 @@ rule graphaligner_stats:
     shell:
         """
         (
+        set -eo pipefail
         echo "[$(date -Is)] START graphaligner_stats {wildcards.dataset}" >&2
 
         docker run --rm \
