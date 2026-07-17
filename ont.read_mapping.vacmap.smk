@@ -164,6 +164,7 @@ rule vacmap_idxstats:
     shell:
         """
         (
+        set -eo pipefail
         echo "[$(date -Is)] START vacmap_idxstats {wildcards.dataset}" >&2
 
         docker run --rm \
@@ -197,6 +198,7 @@ rule vacmap_stats:
     shell:
         """
         (
+        set -eo pipefail
         echo "[$(date -Is)] START vacmap_stats {wildcards.dataset}" >&2
 
         docker run --rm \

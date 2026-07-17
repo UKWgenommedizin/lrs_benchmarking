@@ -199,6 +199,7 @@ rule parahat_idxstats:
     shell:
         """
         (
+        set -eo pipefail
         echo "[$(date -Is)] START parahat_idxstats {wildcards.dataset}" >&2
 
         docker run --rm \
@@ -232,6 +233,7 @@ rule parahat_stats:
     shell:
         """
         (
+        set -eo pipefail
         echo "[$(date -Is)] START parahat_stats {wildcards.dataset}" >&2
 
         docker run --rm \
