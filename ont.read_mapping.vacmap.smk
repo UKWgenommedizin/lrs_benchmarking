@@ -205,7 +205,7 @@ rule vacmap_stats:
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus {threads} \
-            -m 8g \
+            -m 16g \
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint samtools \
