@@ -100,11 +100,7 @@ rule ref_to_gfa:
             -v {input.ref}:{input.ref}:ro \
             --entrypoint vg \
             {DOCKER_VG} \
-            construct \
-            -r {input.ref} \
-            --gfa-out \
-            {input.ref} \
-            > {output.gfa}
+            -c "vg construct -r {input.ref} | vg convert --gfa-out - > {output.gfa}"
 
         [[ ! -s {output.gfa} ]] && exit 101
 
