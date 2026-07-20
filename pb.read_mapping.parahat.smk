@@ -118,14 +118,12 @@ rule parahat_map_sort:
             --tmpfs /tmp:size=50g,exec \
             --shm-size 1g \
             --ulimit stack=-1 \
-            -u $UID:$(id -g) \
             --cpus {threads} \
             -m 48g \
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
-            --entrypoint mpirun \
             {DOCKER_PARAHAT} \
-            --allow-run-as-root -n 1 ParaHAT-aligner \
+            -n 1 ParaHAT-aligner \
             -t 4 \
             {PARAHAT_INDEX_DIR} \
             "$TMP_FASTQ" \
