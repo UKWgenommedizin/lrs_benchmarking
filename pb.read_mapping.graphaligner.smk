@@ -95,7 +95,7 @@ rule ref_to_gfa:
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus {threads} \
-            -m 16g \
+            -m 32g \
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint /bin/sh \
