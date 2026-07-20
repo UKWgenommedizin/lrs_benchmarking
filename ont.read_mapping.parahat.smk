@@ -142,7 +142,7 @@ rule parahat_map_sort:
             -v {input.ref}:{input.ref}:ro \
             --entrypoint mpirun \
             {DOCKER_PARAHAT} \
-            -n 1 ParaHAT-aligner \
+            --allow-run-as-root -n 1 ParaHAT-aligner \
             -t {threads} \
             {PARAHAT_INDEX_DIR} \
             "$TMP_FASTQ" \
