@@ -133,6 +133,8 @@ rule parahat_map_sort:
 
         docker run --rm \
             --tmpfs /tmp:size=50g,exec \
+            --shm-size 1g \
+            --ulimit stack=-1 \
             -u $UID:$(id -g) \
             --cpus {threads} \
             -m 48g \
@@ -140,7 +142,7 @@ rule parahat_map_sort:
             -v {input.ref}:{input.ref}:ro \
             --entrypoint mpirun \
             {DOCKER_PARAHAT} \
-            --allow-run-as-root -n 1 ParaHAT-aligner \
+            -n 1 ParaHAT-aligner \
             -t {threads} \
             {PARAHAT_INDEX_DIR} \
             "$TMP_FASTQ" \
