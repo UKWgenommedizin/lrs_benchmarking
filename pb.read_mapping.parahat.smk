@@ -123,7 +123,7 @@ rule parahat_map_sort:
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             {DOCKER_PARAHAT} \
-            -n 1 ParaHAT-aligner \
+            --allow-run-as-root -n 1 ParaHAT-aligner \
             -t 4 \
             {PARAHAT_INDEX_DIR} \
             "$TMP_FASTQ" \
