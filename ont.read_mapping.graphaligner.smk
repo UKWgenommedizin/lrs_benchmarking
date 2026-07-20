@@ -98,7 +98,7 @@ rule ref_to_gfa:
             -m 16g \
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
-            --entrypoint vg \
+            --entrypoint /bin/sh \
             {DOCKER_VG} \
             -c "vg construct -r {input.ref} | vg convert --gfa-out - > {output.gfa}"
 
