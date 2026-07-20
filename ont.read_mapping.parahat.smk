@@ -132,7 +132,7 @@ rule parahat_map_sort:
         zcat {CWD}/{input.fastq} > "$TMP_FASTQ"
 
         docker run --rm \
-            --workdir /tmp \
+            --tmpfs /tmp:size=50g,exec \
             -u $UID:$(id -g) \
             --cpus {threads} \
             -m 48g \
