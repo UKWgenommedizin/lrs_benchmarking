@@ -122,9 +122,15 @@ rule graphaligner_map:
         (
         set -eo pipefail
         echo "[$(date -Is)] START graphaligner_map {wildcards.dataset}" >&2
-        mkdir -p cram/tmp
+        mkdir -p "{CWD}/cram/tmp"
+
+        # Decompress FASTQ first: GraphAligner may not handle .gz
+        TMP_FASTQ="{CWD}/cram/tmp/{wildcards.dataset}.fastq"
+        zcat {CWD}/{input.fastq} > "$TMP_FASTQ"
 
         docker run --rm \
+            --security-opt apparmor=unconfined \
+            -e OMP_STACKSIZE=64M \
             --tmpfs /tmp:size=50g,exec \
             --shm-size 1g \
             --ulimit stack=-1 \
@@ -135,10 +141,12 @@ rule graphaligner_map:
             --entrypoint GraphAligner \
             {DOCKER_GRAPHALIGNER} \
             -g {CWD}/{input.gfa} \
-            -f {CWD}/{input.fastq} \
+            -f "$TMP_FASTQ" \
             -a {CWD}/{output.gaf} \
             -x vg \
             -t {threads}
+
+        rm -f "$TMP_FASTQ"
 
         [[ ! -s {output.gaf} ]] && exit 101
 
