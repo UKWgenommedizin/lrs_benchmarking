@@ -100,7 +100,7 @@ rule ref_to_gfa:
             -v {input.ref}:{input.ref}:ro \
             --entrypoint /bin/sh \
             {DOCKER_VG} \
-            -c "vg construct -r {input.ref} -m 1000 | vg convert --gfa-out - > {output.gfa}"
+            -c "vg construct -r {input.ref} -m 1000 | vg convert --gfa-out - | grep -v '^P' | grep -v '^W' > {output.gfa}"
 
         [[ ! -s {output.gfa} ]] && exit 101
 
