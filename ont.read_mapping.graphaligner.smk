@@ -126,10 +126,10 @@ rule graphaligner_map:
         mkdir -p cram/tmp
 
         docker run --rm \
-            --workdir /tmp \
+            --tmpfs /tmp:size=50g,exec \
             -u $UID:$(id -g) \
             --cpus {threads} \
-            -m 64g \
+            -m 96g \
             -v {CWD}:{CWD} \
             --entrypoint GraphAligner \
             {DOCKER_GRAPHALIGNER} \
