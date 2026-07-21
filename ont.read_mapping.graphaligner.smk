@@ -127,6 +127,8 @@ rule graphaligner_map:
 
         docker run --rm \
             --tmpfs /tmp:size=50g,exec \
+            --shm-size 1g \
+            --ulimit stack=-1 \
             -u $UID:$(id -g) \
             --cpus {threads} \
             -m 96g \

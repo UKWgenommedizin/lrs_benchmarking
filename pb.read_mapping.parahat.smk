@@ -10,7 +10,7 @@ include: "header_mapper.smk"
 ####################
 # Docker image
 
-DOCKER_PARAHAT = "schimar/lrs-parahat:v1.0.0-cuda"
+DOCKER_PARAHAT = "schimar/lrs-parahat:1.0.1-maxchr2048"
 
 ####################
 # Reference
