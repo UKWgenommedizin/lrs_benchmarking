@@ -116,7 +116,7 @@ rule graphaligner_map:
         gaf   = temp("cram/tmp/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".gaf"),
     log:
         "cram/tmp/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".graphaligner.log",
-    threads: 1
+    threads: 16
     shell:
         """
         (
