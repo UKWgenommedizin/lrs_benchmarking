@@ -175,7 +175,7 @@ rule build_vg_index:
         VG_INDEX_DIR + "/build_index.log",
     threads: 16
     resources:
-        mem_mb = 131072,
+        mem_mb = 225280,
     shell:
         """
         mkdir -p {VG_INDEX_DIR}
@@ -187,8 +187,7 @@ rule build_vg_index:
             --tmpfs /tmp:size=50g,exec \
             -u $UID:$(id -g) \
             --cpus {threads} \
-            -m 120g \
-            --memory-swap 120g \
+            -m 220g \
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint vg \
@@ -197,7 +196,7 @@ rule build_vg_index:
             --workflow lr-giraffe \
             --ref {input.ref} \
             --prefix {VG_INDEX_DIR}/hg38 \
-            --target-mem 100G \
+            --target-mem 200G \
             --threads {threads}
         for f in {VG_GBZ} {VG_DIST} {VG_MIN} {VG_ZIPCODES}; do
             [[ -s "$f" ]] || {{ echo "Missing/empty: $f"; exit 101; }}
