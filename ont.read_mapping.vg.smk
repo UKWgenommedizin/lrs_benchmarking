@@ -193,6 +193,7 @@ rule build_vg_index:
             --prefix {VG_INDEX_DIR}/hg38 \
             --target-mem 200G \
             --threads {threads}
+        sync  # flush Docker bind-mount buffers to host filesystem
         # Large indexes (.gbz ~2.3GB) may not be visible immediately after docker exits
         # due to fsync/buffering on bind mounts. Poll with backoff.
         for attempt in $(seq 1 30); do
