@@ -28,7 +28,7 @@ REF = (CWD + "/ref/"
     "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta")
 
 VG_INDEX_DIR = CWD + "/vg_index"
-VG_GBZ       = VG_INDEX_DIR + "/hg38.gbz"
+VG_GBZ       = VG_INDEX_DIR + "/hg38.giraffe.gbz"
 VG_DIST      = VG_INDEX_DIR + "/hg38.dist"
 VG_MIN       = VG_INDEX_DIR + "/hg38.longread.withzip.min"
 VG_ZIPCODES  = VG_INDEX_DIR + "/hg38.longread.zipcodes"
@@ -198,20 +198,8 @@ rule build_vg_index:
             --prefix {VG_INDEX_DIR}/hg38 \
             --target-mem 200G \
             --threads {threads}
-        sync  # flush Docker bind-mount buffers to host filesystem
-        # Large indexes (.gbz ~2.3GB) may not be visible immediately after docker exits
-        # due to fsync/buffering on bind mounts. Poll with backoff.
-        for attempt in $(seq 1 30); do
-            missing=0
-            for f in {VG_GBZ} {VG_DIST} {VG_MIN} {VG_ZIPCODES}; do
-                [[ -s "$f" ]] || missing=1
-            done
-            [[ $missing -eq 0 ]] && break
-            echo "Waiting for index files to flush (attempt $attempt)..." >&2
-            sleep 2
-        done
         for f in {VG_GBZ} {VG_DIST} {VG_MIN} {VG_ZIPCODES}; do
-            [[ -s "$f" ]] || {{ echo "Missing/empty after 30 retries: $f"; exit 101; }}
+            [[ -s "$f" ]] || {{ echo "Missing/empty: $f"; exit 101; }}
         done
 
         echo "[$(date -Is)] END build_vg_index" >&2
