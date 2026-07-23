@@ -105,10 +105,10 @@ rule vg_map_sort:
             {DOCKER_VG} \
             giraffe \
             -t {threads} \
-            -Z {CWD}/{input.gbz} \
-            -d {CWD}/{input.dist} \
-            -m {CWD}/{input.min_idx} \
-            -z {CWD}/{input.zipcodes} \
+            -Z {input.gbz} \
+            -d {input.dist} \
+            -m {input.min_idx} \
+            -z {input.zipcodes} \
             -b r10 \
             -f {CWD}/{input.fastq} \
             -o SAM \
