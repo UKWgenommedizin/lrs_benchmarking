@@ -42,7 +42,7 @@ This constitution establishes the governing principles, architectural rules, nam
 
 **II.4.** Resource constraints (CPU, memory) are specified via Docker flags `--cpus` and `-m`.
 
-**II.5.** Each rule must set `--rm`, `--workdir /tmp`, and bind-mount `{CWD}:{CWD}` at minimum. Reference databases are mounted read-only.
+**II.5.** Each rule must set `--rm`, `--tmpfs /tmp:size=50g,exec`, and bind-mount `{CWD}:{CWD}` at minimum. Reference databases are mounted read-only.
 
 **II.6.** The user ID and group ID must be propagated via `-u $UID:$(id -g)` to ensure file ownership matches the host user.
 
@@ -168,7 +168,7 @@ Each stage is optional. Any workflow may be run independently if its inputs alre
 
 ## Article VI — Quality and Validation
 
-**VI.1.** Every output-producing rule must include a post-execution validation check that causes the rule to fail (non-zero exit code) if the output is empty, truncated, or otherwise invalid.
+**VI.1.** Every output-producing rule must use `set -eo pipefail` at the top of its shell block to ensure Docker and pipeline failures are surfaced, and must include a post-execution validation check that causes the rule to fail (non-zero exit code) if the output is empty, truncated, or otherwise invalid.
 
 **VI.2.** Mandatory validation checks:
 - **CRAM**: `[[ $(du -b {output.cram} | cut -f 1) -le 64 ]] && exit 101`
