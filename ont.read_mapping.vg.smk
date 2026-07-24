@@ -93,7 +93,7 @@ rule vg_map_sort:
 
         TMP_BAM="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.bam"
 
-        # vg giraffe → pipe to samtools view -b (ONT r10 SAM has malformed aux tags)
+        # vg giraffe → BAM directly (ONT r10 produces malformed SAM aux tags)
         docker run --rm \
             --tmpfs /tmp:size=50g,exec \
             -u $UID:$(id -g) \
@@ -111,18 +111,10 @@ rule vg_map_sort:
             -z {input.zipcodes} \
             -b r10 \
             -f {CWD}/{input.fastq} \
-            -o SAM \
+            -o BAM \
             -R "ID:{wildcards.dataset}\tSM:{wildcards.dataset}" \
             -N {wildcards.dataset} \
-            | docker run --rm -i \
-            --workdir /tmp \
-            -u $UID:$(id -g) \
-            --cpus 4 \
-            -m 8g \
-            -v {CWD}:{CWD} \
-            --entrypoint samtools \
-            {DOCKER_VG} \
-            view -b -o "$TMP_BAM" -
+            > "$TMP_BAM"
 
         [[ -s "$TMP_BAM" ]] || {{ echo "ERROR: vg giraffe produced empty/missing $TMP_BAM"; exit 101; }}
 
