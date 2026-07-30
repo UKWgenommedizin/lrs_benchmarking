@@ -1,0 +1,42 @@
+category,caller,rule,primary_tool,primary_container,utility_tools,utility_container
+SV,cutSV,cuteSV_call,cuteSV,mamba (cutesv env via VarCAD),bgzip + tabix,native (no container)
+SV,cutSV,truvari_bench_refine,truvari bench,mamba (truvari env via VarCAD),,
+SV,pbsv,pbsv_discover,pbsv discover,mamba (pbsv env via VarCAD),samtools view + samtools index,native (no container)
+SV,pbsv,pbsv_call,pbsv call,mamba (pbsv env via VarCAD),,
+SV,pbsv,bgzip_index_vcf,,,bgzip + tabix,native (no container)
+SV,pbsv,truvari_bench_refine,truvari bench,mamba (truvari env via VarCAD),,
+SV,pbsv,bcftools_stats,,,bcftools stats,docker://storage-node:5000/own/genetic_data_analysis:3.0
+SV,Sniffles2,sniffles2_call,sniffles,mamba (sniffles2 env via VarCAD),,
+SV,Sniffles2,truvari_bench_refine,truvari bench,mamba (truvari env via VarCAD),,
+SV,Sniffles2,bcftools_stats,,,bcftools stats,docker://storage-node:5000/own/genetic_data_analysis:3.0
+SV,Sawfish,sawfish_discover,sawfish discover,mamba (sawfish env via VarCAD),,
+SV,Sawfish,sawfish_joint_call,sawfish joint-call,mamba (sawfish env via VarCAD),,
+SV,Sawfish,truvari_bench_refine,truvari bench,mamba (truvari env via VarCAD),,
+SV,Sawfish,bcftools_stats,,,bcftools stats,docker://storage-node:5000/own/genetic_data_analysis:3.0
+SNV,Clair3 (ILMN),run_clair3_ilmn,clair3 (run_clair3.sh),docker://hkubal/clair3:v1.1.2,,
+SNV,Clair3 (ILMN),copy_clair3_vcf_gz,,,bcftools view + tabix,docker://storage-node:5000/own/genetic_data_analysis:3.0
+SNV,Clair3 (ILMN),bcftools_stats,,,bcftools stats,docker://storage-node:5000/own/genetic_data_analysis:3.0
+SNV,Clair3 (ONT),run_clair3_ont,clair3 (run_clair3.sh),docker://hkubal/clair3:v1.1.2,,
+SNV,Clair3 (ONT),copy_clair3_vcf_gz,,,bcftools view + tabix,docker://storage-node:5000/own/genetic_data_analysis:3.0
+SNV,Clair3 (ONT),bcftools_stats,,,bcftools stats,docker://storage-node:5000/own/genetic_data_analysis:3.0
+SNV,Clair3 (PB/Revi),run_clair3_revio,clair3 (run_clair3.sh),docker://hkubal/clair3:v1.1.2,,
+SNV,Clair3 (PB/Revi),copy_clair3_vcf_gz,,,bcftools view + tabix,docker://storage-node:5000/own/genetic_data_analysis:3.0
+SNV,Clair3 (PB/Revi),bcftools_stats,,,bcftools stats,docker://storage-node:5000/own/genetic_data_analysis:3.0
+SNV,DeepVariant (ONT),deepvariant_gpu_make_examples,make_examples,docker://google/deepvariant:1.9.0,parallel (GNU parallel),docker://google/deepvariant:1.9.0
+SNV,DeepVariant (ONT),deepvariant_gpu_call_variants,call_variants,docker://google/deepvariant:1.9.0-gpu (NVIDIA GPU),,
+SNV,DeepVariant (ONT),deepvariant_gpu_postprocess_variants,postprocess_variants,docker://google/deepvariant:1.9.0,bcftools view,docker://google/deepvariant:1.9.0
+SNV,DeepVariant (ONT),deepvariant_cpu_only,run_deepvariant (all-in-one),docker://google/deepvariant:1.9.0,bcftools view,docker://google/deepvariant:1.9.0
+SNV,DeepVariant (ONT),deepvariant_visual_report,vcf_stats_report,docker://google/deepvariant:1.9.0,,
+SNV,DeepVariant (ONT),bcftools_stats,,,bcftools stats,docker://storage-node:5000/own/genetic_data_analysis:3.0
+SNV,DeepVariant (PB),deepvariant_gpu_make_examples,make_examples,docker://google/deepvariant:1.9.0,parallel (GNU parallel),docker://google/deepvariant:1.9.0
+SNV,DeepVariant (PB),deepvariant_gpu_call_variants,call_variants,docker://google/deepvariant:1.9.0-gpu (NVIDIA GPU),,
+SNV,DeepVariant (PB),deepvariant_gpu_postprocess_variants,postprocess_variants,docker://google/deepvariant:1.9.0,bcftools view,docker://google/deepvariant:1.9.0
+SNV,DeepVariant (PB),deepvariant_cpu_only,run_deepvariant (all-in-one),docker://google/deepvariant:1.9.0,bcftools view,docker://google/deepvariant:1.9.0
+SNV,DeepVariant (PB),deepvariant_visual_report,vcf_stats_report,docker://google/deepvariant:1.9.0,,
+SNV,DeepVariant (PB),bcftools_stats,,,bcftools stats,docker://storage-node:5000/own/genetic_data_analysis:3.0
+SNV,DeepVariant (WGS),deepvariant_gpu_make_examples,make_examples,docker://google/deepvariant:1.9.0,parallel (GNU parallel),docker://google/deepvariant:1.9.0
+SNV,DeepVariant (WGS),deepvariant_gpu_call_variants,call_variants,docker://google/deepvariant:1.9.0-gpu (NVIDIA GPU),,
+SNV,DeepVariant (WGS),deepvariant_gpu_postprocess_variants,postprocess_variants,docker://google/deepvariant:1.9.0,bcftools view,docker://google/deepvariant:1.9.0
+SNV,DeepVariant (WGS),deepvariant_cpu_only,run_deepvariant (all-in-one),docker://google/deepvariant:1.9.0,bcftools view,docker://google/deepvariant:1.9.0
+SNV,DeepVariant (WGS),deepvariant_visual_report,vcf_stats_report,docker://google/deepvariant:1.9.0,,
+SNV,DeepVariant (WGS),bcftools_stats,,,bcftools stats,docker://storage-node:5000/own/genetic_data_analysis:3.0
