@@ -116,16 +116,16 @@ Example: `HG002.ont.30x`
 
 **IV.4.** The `<mapper_tag>` identifies the mapper and target platform as `<tool>-<platform>`.
 
-Registered mapper tags (immutable once assigned):
+Registered mapper tags (immutable once assigned). Active mappers reside in the repository root; legacy mappers in `mapper_legacy/`:
 
-| Mapper | ONT tag | PacBio tag |
-|---|---|---|
-| minimap2 | `mm2-ont` | `mm2-pb` |
-| pbmm2 | `pbmm2-ont` | `pbmm2-pb` |
-| GraphAligner | `ga-ont` | `ga-pb` |
-| ParaHAT | `parahat-ont` | `parahat-pb` |
-| VACmap | `vacmap-ont` | `vacmap-pb` |
-| VG | `vg-ont` | `vg-pb` |
+| Mapper | ONT tag | PacBio tag | Status |
+|---|---|---|---|
+| minimap2 | `mm2-ont` | `mm2-pb` | Active |
+| pbmm2 | `pbmm2-ont` | `pbmm2-pb` | Active |
+| VACmap | `vacmap-ont` | `vacmap-pb` | Active |
+| VG | `vg-ont` | `vg-pb` | Active |
+| GraphAligner | `ga-ont` | `ga-pb` | Legacy |
+| ParaHAT | `parahat-ont` | `parahat-pb` | Legacy |
 
 **IV.5.** SNV/indel caller tags follow the pattern `<tool>-<platform>` (e.g., `clair3-ont`, `dv-ont-woPG`). The caller tag is appended to the mapper-tagged filename:
 ```
