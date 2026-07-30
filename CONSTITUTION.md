@@ -24,7 +24,7 @@ This constitution establishes the governing principles, architectural rules, nam
 
 **I.5.** Benchmarking workflow files follow the pattern `<process>.smk` (e.g., `run_happy.smk`).
 
-**I.6.** Non-mapping workflow files must include `header.smk` as their first executable line. Mapping workflow files (`<platform>.read_mapping.<tool>.smk`) must include `header_mapper.smk` as their first executable line. `header_mapper.smk` provides `CWD` only, with no VarCAD dependency.
+**I.6.** Mapping workflow files (`<platform>.read_mapping.<tool>.smk`) must include `header_mapper.smk` as their first executable line. `header_mapper.smk` provides `CWD` only, with no external dependency. All other workflow files are self-contained and define their own paths and Docker images inline.
 
 **I.7.** The constitution resides in `CONSTITUTION.md` at the repository root. It is immutable except by amendment per Article X.
 
