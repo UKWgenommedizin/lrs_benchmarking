@@ -246,3 +246,99 @@ Each stage is optional. Any workflow may be run independently if its inputs alre
 **X.3.** Human users may amend or override the constitution at any time by direct instruction. No pull request or formal process is required for human-initiated changes.
 
 **X.4.** The constitution is the immutable ground truth for all agent-driven work. All specifications, implementations, and reviews produced by the agent are measured against it.
+
+---
+
+# Nicolás Amendment — SV Caller and Docker Validation Rules
+
+## Purpose
+
+This amendment extends the existing project constitution for the current SV caller and variant-caller workflow validation task. The goal is to validate workflow structure, Docker/container references, and Snakemake dry-run behavior without executing full real-data variant calling unless explicitly approved by the supervisor.
+
+## Article XI — Scope of the Variant Caller Validation Task
+
+1. The validation task focuses on the variant-calling workflows already present in the repository.
+2. The caller groups to validate are Clair3, DeepVariant, Sniffles2, cuteSV, pbsv, and Sawfish.
+3. Clair3 and DeepVariant are SNV/indel callers.
+4. Sniffles2, cuteSV, pbsv, and Sawfish are structural variant callers.
+5. The technologies considered are ONT and PacBio HiFi/PacBio-style data, depending on the workflow.
+6. Producing final VCF files is outside the scope of this validation stage unless explicitly requested.
+
+## Article XII — Docker and Container Validation Rules
+
+1. The correct term for this task is Docker image or container validation, not Dockerfile testing, unless an actual Dockerfile is being built with docker build.
+2. Static Docker validation is mandatory. This means inspecting workflow files for Docker image references, container commands, mounted paths, image tags, and private registry dependencies.
+3. Runtime Docker validation is optional in local WSL if Docker is not available. Missing Docker inside WSL must be documented as an environment limitation, not treated as a workflow failure.
+4. Public Docker images may be checked locally when Docker is available.
+5. Private institutional images under storage-node:5000 must not be marked as failed only because they are inaccessible from the local laptop. They may require the institute workstation, network, or registry access.
+6. The Docker image check script must not execute full variant calling. It may only check Docker availability, list image references, optionally pull public images, and optionally run lightweight help or version checks.
+
+Approved Docker validation files:
+
+- SV aligners call/docs/docker_references_static_scan.txt
+- SV aligners call/docs/docker_status_note.md
+- SV aligners call/scripts/check_variant_caller_images.sh
+
+Public image examples detected in the project:
+
+- hkubal/clair3
+- google/deepvariant
+- google/deepvariant GPU image
+- nfcore/bcl2fastq
+- ensemblorg/ensembl-vep
+
+Private registry examples detected in the project:
+
+- storage-node:5000/own/genetic_data_analysis
+- storage-node:5000/own/varcad
+- storage-node:5000/illumina/hap.py
+
+## Article XIII — Dry-Run-Only Execution Policy
+
+1. For the current task, Snakemake dry-run validation is considered adequate unless the supervisor explicitly requests real execution.
+2. The default validation command must include -n -p.
+3. Commands without -n must not be executed on real data unless explicitly approved.
+4. Dry-run validation is acceptable because it verifies Snakefile syntax, rule connectivity, input and output resolution, Docker command construction, resource declarations, expected workflow DAG, and file naming consistency.
+5. Dry-run logs should be saved under SV aligners call/logs/.
+6. DAG or rulegraph outputs should be saved under SV aligners call/docs/ or a dedicated DAG folder if created later.
+
+## Article XIV — SV Caller-Specific Rules
+
+1. SV callers consume mapped CRAM or BAM files produced by the read-mapping workflows.
+2. SV callers must not remap reads internally unless that behavior is explicitly part of the caller.
+3. SV caller outputs must follow the existing project naming logic.
+4. The registered SV caller directories are sniffles2, cuteSV, pbsv, and sawfish.
+5. SV caller dry-runs must confirm that each caller can resolve the expected mapped inputs from the cram, bam, or equivalent alignment output directory.
+6. SV benchmarking with Truvari is downstream of SV calling and must not be mixed with caller execution rules unless the workflow explicitly defines that stage.
+7. Caller-specific assumptions must be documented. pbsv and Sawfish are primarily associated with PacBio HiFi/PacBio-style data. Sniffles2 and cuteSV are general long-read SV callers and may be evaluated with ONT and PacBio-derived alignments.
+
+## Article XV — Required Deliverables for This Validation Task
+
+Required files:
+
+- SV aligners call/CONSTITUTION_NICOLAS.md
+- SV aligners call/docs/docker_references_static_scan.txt
+- SV aligners call/docs/docker_status_note.md
+- SV aligners call/scripts/check_variant_caller_images.sh
+
+Recommended additional files:
+
+- SV aligners call/docs/variant_caller_inventory.tsv
+- SV aligners call/logs/caller_dryrun_logs
+- SV aligners call/docs/caller_DAG_or_rulegraph_outputs
+
+Large outputs, real VCFs, BAMs, CRAMs, indexes, and intermediate variant-calling results must not be committed.
+
+## Article XVI — Git Rules for This Task
+
+1. All work for this task must remain on feature/variant-caller-dryrun-validation.
+2. Files must be added intentionally.
+3. Do not use git add .
+4. Use explicit adds such as git add "SV aligners call".
+5. The feature branch may be pushed without merging into main.
+
+## Article XVII — Final Decision Rule
+
+1. If a workflow can be dry-run and its Docker/container references are documented, the validation objective for this stage is satisfied.
+2. Real-data execution is out of scope unless requested by the supervisor.
+3. Missing local Docker access, private registry restrictions, or unavailable full datasets must be reported transparently as environment limitations, not hidden or bypassed.
