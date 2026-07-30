@@ -342,3 +342,201 @@ Large outputs, real VCFs, BAMs, CRAMs, indexes, and intermediate variant-calling
 1. If a workflow can be dry-run and its Docker/container references are documented, the validation objective for this stage is satisfied.
 2. Real-data execution is out of scope unless requested by the supervisor.
 3. Missing local Docker access, private registry restrictions, or unavailable full datasets must be reported transparently as environment limitations, not hidden or bypassed.
+
+---
+
+# Article XVIII — Long-Read Aligner Workflow Validation Rules
+
+## Purpose
+
+This article extends the Nicolás constitution to include long-read aligner workflow validation. The supervisor requested additional Snakemake validation files for minimap2, pbmm2, VACmap, and vg Giraffe. These tools must be handled as alignment tools, not as variant callers.
+
+## XVIII.1 — Tool Classification
+
+The following tools are classified as long-read aligners or mappers:
+
+1. minimap2
+2. pbmm2
+3. VACmap
+4. vg Giraffe
+
+These tools are upstream of SNV/indel calling and structural variant calling. Their main purpose in this project is to produce mapped BAM or CRAM files that can later be used by variant callers.
+
+Correct classification:
+
+- minimap2: linear-reference long-read aligner
+- pbmm2: PacBio-oriented wrapper around minimap2
+- VACmap: long-read aligner designed for complex or nonlinear alignment scenarios
+- vg Giraffe: graph-based read mapper requiring graph indexes
+
+They must not be listed as variant callers.
+
+## XVIII.2 — Required Additional Snakemake Files
+
+Each aligner should have its own additional Snakemake validation file.
+
+Approved location:
+
+SV aligners call/workflow/aligners/
+
+Required files:
+
+- SV aligners call/workflow/aligners/minimap2.validation.smk
+- SV aligners call/workflow/aligners/pbmm2.validation.smk
+- SV aligners call/workflow/aligners/vacmap.validation.smk
+- SV aligners call/workflow/aligners/vg_giraffe.validation.smk
+
+These files are intended for validation, documentation, and dry-run testing. They are not intended to execute full real-data alignment unless explicitly approved.
+
+## XVIII.3 — Dry-Run Requirement
+
+The default validation mode for each aligner workflow is Snakemake dry-run.
+
+Approved command pattern:
+
+snakemake -s <aligner_validation_file.smk> --cores <N> -n -p
+
+Commands without -n must not be used on real data unless the supervisor explicitly approves real execution.
+
+Dry-run validation must confirm:
+
+1. Snakefile syntax is valid.
+2. Input paths are resolved.
+3. Output paths are predictable.
+4. Commands are constructed correctly.
+5. Technology-specific parameters are selected correctly.
+6. The workflow DAG can be generated.
+7. No large data processing is triggered.
+
+## XVIII.4 — Docker and Environment Rules for Aligners
+
+Aligner validation must distinguish between Docker-based execution and Conda/local execution.
+
+If an aligner workflow uses Docker:
+
+1. The Docker image reference must be documented.
+2. The docker run command must be inspected.
+3. Mounted paths must be checked.
+4. Private registry images must be marked as environment-dependent.
+5. Runtime docker pull or docker run checks are optional when Docker is unavailable in local WSL.
+
+If an aligner workflow uses Conda or a local executable:
+
+1. The environment name must be documented.
+2. The executable check must be documented.
+3. Version checks should be included when possible.
+4. Missing local installation must be documented as an environment limitation, not hidden.
+
+## XVIII.5 — Tool-Specific Validation Rules
+
+minimap2 validation must document:
+
+1. The reference FASTA input.
+2. The FASTQ input.
+3. The preset used for ONT or PacBio data.
+4. The expected sorted BAM output.
+5. The samtools index step.
+
+pbmm2 validation must document:
+
+1. The reference FASTA or pbmm2 index input.
+2. The FASTQ input.
+3. The preset used for PacBio HiFi or ONT-style testing.
+4. The expected sorted BAM output.
+5. The samtools index step.
+
+VACmap validation must document:
+
+1. The expected VACmap executable or environment.
+2. The reference FASTA input.
+3. The FASTQ input.
+4. The technology-specific mode or preset.
+5. The expected sorted BAM output.
+6. Any known dependency or environment limitation.
+
+vg Giraffe validation must document:
+
+1. The vg executable or Conda environment.
+2. The GBZ graph file.
+3. The minimizer index.
+4. The distance index.
+5. The optional zipcodes file.
+6. The FASTQ input.
+7. The technology-specific long-read preset.
+8. The expected sorted BAM output.
+
+vg Giraffe must not be considered ready for real full-reference execution unless real graph indexes exist for the intended reference.
+
+## XVIII.6 — Inventory Table Requirement
+
+The aligners must be added to the same workflow inventory table as the variant callers, but with workflow_stage set to alignment.
+
+Approved table:
+
+SV aligners call/docs/workflow_tool_inventory.tsv
+
+The table must include at least these columns:
+
+- tool
+- workflow_stage
+- variant_type_or_role
+- technology
+- scope_file_or_rule
+- container_or_runtime
+- status
+- notes
+
+Correct workflow_stage values:
+
+- alignment
+- SNV_indel_calling
+- SV_calling
+- benchmarking
+
+## XVIII.7 — Relationship Between Aligners and Variant Callers
+
+The aligner workflows produce mapped BAM or CRAM files.
+
+The variant caller workflows consume mapped BAM or CRAM files.
+
+Therefore, the validation order should be:
+
+1. Validate aligner workflow structure.
+2. Validate aligner dry-runs.
+3. Validate variant caller workflow structure.
+4. Validate variant caller dry-runs.
+5. Validate benchmarking workflow structure only after caller outputs are defined.
+
+Real alignments and real variant calls are not required for the current validation stage unless explicitly requested.
+
+## XVIII.8 — Required Deliverables for Aligner Validation
+
+Required files for the aligner-validation extension:
+
+- SV aligners call/workflow/aligners/minimap2.validation.smk
+- SV aligners call/workflow/aligners/pbmm2.validation.smk
+- SV aligners call/workflow/aligners/vacmap.validation.smk
+- SV aligners call/workflow/aligners/vg_giraffe.validation.smk
+- SV aligners call/docs/workflow_tool_inventory.tsv
+
+Recommended files:
+
+- SV aligners call/logs/minimap2_dryrun.log
+- SV aligners call/logs/pbmm2_dryrun.log
+- SV aligners call/logs/vacmap_dryrun.log
+- SV aligners call/logs/vg_giraffe_dryrun.log
+- SV aligners call/docs/minimap2_dag.svg
+- SV aligners call/docs/pbmm2_dag.svg
+- SV aligners call/docs/vacmap_dag.svg
+- SV aligners call/docs/vg_giraffe_dag.svg
+
+## XVIII.9 — Final Aligner Validation Decision Rule
+
+An aligner workflow is considered validated for this stage when:
+
+1. Its Snakemake validation file exists.
+2. Its tool classification is correct.
+3. Its inputs and outputs are documented.
+4. Its Docker or Conda/runtime requirement is documented.
+5. Its dry-run completes or its blocking environment limitation is clearly documented.
+6. No real full-data execution is performed without explicit approval.
