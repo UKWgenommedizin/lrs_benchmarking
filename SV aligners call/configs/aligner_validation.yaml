@@ -1,0 +1,13 @@
+reference: reference/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta
+
+ont_fastq: samples_try/HG002.ont.1k.fastq.gz
+pb_fastq: samples_try/HG002.pb.1k.fastq.gz
+
+output_dir: SV aligners call/results/alignments
+
+vacmap_bin: conda run -n vacmap_env vacmap
+
+vg_gbz: final_report_files/snakemake_aligners_benchmarking/data/graph/graph.gbz
+vg_min: final_report_files/snakemake_aligners_benchmarking/data/graph/graph.min
+vg_dist: final_report_files/snakemake_aligners_benchmarking/data/graph/graph.dist
+vg_zipcodes: final_report_files/snakemake_aligners_benchmarking/data/graph/graph.zipcodes

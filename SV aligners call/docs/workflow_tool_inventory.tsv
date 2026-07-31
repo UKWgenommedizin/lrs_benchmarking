@@ -1,0 +1,13 @@
+tool	workflow_stage	variant_type_or_role	technology	scope_file_or_rule	container_or_runtime	status	notes
+minimap2	alignment	upstream read alignment for variant calling	ONT/PacBio	ont.read_mapping.minimap2.smk; pb.read_mapping.minimap2.smk	Docker/VarCAD references detected in mapping rules	to_validate	Linear-reference long-read aligner used before variant calling
+pbmm2	alignment	upstream read alignment for variant calling	ONT/PacBio	ont.read_mapping.pbmm2.smk; pb.read_mapping.pbmm2.smk	Docker/VarCAD references detected in mapping rules	to_validate	PacBio-oriented wrapper around minimap2; used before variant calling
+VACmap	alignment	SV-aware/nonlinear long-read alignment	ONT/PacBio	SV aligners call/workflow/aligners/vacmap.validation.smk	Conda/local environment or future container	to_create	Additional aligner workflow requested by supervisor
+vg Giraffe	alignment	graph-based read alignment	ONT/PacBio	SV aligners call/workflow/aligners/vg_giraffe.validation.smk	Conda vg_env; graph indexes required	to_create	Requires GBZ graph, minimizer index, and distance index
+Clair3	SNV_indel_calling	small variant caller	ONT/PacBio/Illumina where available	ont.snv_calling.clair3.smk; pb.snv_calling.clair3.smk; ilmn.snv_calling.clair3.smk	hkubal/clair3 plus private genetic_data_analysis image	static_scan_done	Caller workflow already present in project
+DeepVariant	SNV_indel_calling	small variant caller	ONT/PacBio/WGS where available	ont.snv_calling.deepvariant.smk; pb.snv_calling.deepvariant.smk; wgs.snv_calling.deepvariant.smk	google/deepvariant plus private genetic_data_analysis image	static_scan_done	Caller workflow already present in project
+Sniffles2	SV_calling	structural variant caller	ONT/PacBio	sniffles2.hg38.smk	private genetic_data_analysis image	static_scan_done	SV caller workflow already present in project
+cuteSV	SV_calling	structural variant caller	ONT/PacBio	cuteSV.hg38.smk	container references detected	static_scan_done	SV caller workflow already present in project
+pbsv	SV_calling	structural variant caller	mainly PacBio HiFi	pbsv.hg38.smk	private genetic_data_analysis image	static_scan_done	SV caller workflow already present in project
+Sawfish	SV_calling	structural variant caller	mainly PacBio HiFi	sawfish.hg38.smk	private genetic_data_analysis image	static_scan_done	SV caller workflow already present in project
+hap.py	benchmarking	SNV/indel benchmarking	truth-set comparison	run_happy.smk	private storage-node hap.py image	static_scan_done	Downstream benchmarking workflow, not a caller
+Truvari	benchmarking	SV benchmarking	SV comparison	truvari_anno.smk	container references detected	static_scan_done	Downstream SV benchmarking workflow, not a caller
