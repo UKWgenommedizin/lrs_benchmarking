@@ -97,3 +97,36 @@ final_report_files/snakemake_aligners_benchmarking/results/stats/
 *.bam.bai
 *.sam
 *.tmp
+
+# Snakemake temporary environments and metadata
+**/.snakemake/
+
+# Large sequencing and alignment files
+**/*.bam
+**/*.bam.bai
+**/*.sam
+**/*.cram
+**/*.cram.crai
+**/*.fastq
+**/*.fastq.gz
+**/*.fq
+**/*.fq.gz
+
+# Large vg graph indexes
+**/*.gbz
+**/*.dist
+**/*.min
+**/*.zipcodes
+**/*.xg
+
+# Generated workflow results
+final_report_files/snakemake_aligners_benchmarking/results/bam/
+final_report_files/snakemake_aligners_benchmarking/results/logs/
+final_report_files/snakemake_aligners_benchmarking/results/stats/
+final_report_files/snakemake_aligners_benchmarking/results/checkpoints/
+
+final_report_files/snakemake_assemblers_benchmarking/results/
+final_report_files/snakemake_assemblers_benchmarking/data/
+
+# Temporary test files
+final_report_files/test_wsl.txt
