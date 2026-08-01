@@ -85,3 +85,15 @@ alignment_analysis/tables/*.pbmm2-ccs.samtools_stats.txt
 
 # Older non-indexed helper script
 alignment_analysis/scripts/run_pbmm2_ccs.sh
+
+# Large alignment outputs
+final_report_files/snakemake_aligners_benchmarking/results/bam/
+final_report_files/snakemake_aligners_benchmarking/.snakemake/
+final_report_files/snakemake_aligners_benchmarking/results/logs/
+final_report_files/snakemake_aligners_benchmarking/results/stats/
+
+# Temporary files
+*.bam
+*.bam.bai
+*.sam
+*.tmp

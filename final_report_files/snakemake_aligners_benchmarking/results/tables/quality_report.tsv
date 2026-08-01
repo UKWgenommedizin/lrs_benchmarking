@@ -1,0 +1,6 @@
+check	status	detail
+rows_exist	PASS	rows=24
+required_columns	PASS	all required columns present
+duplicate_conditions	PASS	duplicates=0
+missing_values	WARN	missing_values=54
+negative_numeric_values	PASS	negative_values=0

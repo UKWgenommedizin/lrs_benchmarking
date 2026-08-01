@@ -1,0 +1,55 @@
+read_technology	metric	aligner_a	aligner_b	n_pairs	t_statistic	p_value
+ont	error_percent	minimap2	pbmm2	3	8.552080307804854	0.013398592454968201
+ont	error_percent	minimap2	vacmap	3	2.0106605695532496	0.1820604000998549
+ont	error_percent	minimap2	vg_giraffe	3	16.846721645089826	0.0035049453606851425
+ont	error_percent	pbmm2	vacmap	3	1.368968331606512	0.30448031004972065
+ont	error_percent	pbmm2	vg_giraffe	3	18.1891015432939	0.003008942623364411
+ont	error_percent	vacmap	vg_giraffe	3	3.125749549544257	0.08891221910181965
+ont	mapped_reads_percent	minimap2	pbmm2	3		
+ont	mapped_reads_percent	minimap2	vacmap	3		
+ont	mapped_reads_percent	minimap2	vg_giraffe	3	33.7713004839468	0.0008756563458531167
+ont	mapped_reads_percent	pbmm2	vacmap	3		
+ont	mapped_reads_percent	pbmm2	vg_giraffe	3	33.7713004839468	0.0008756563458531167
+ont	mapped_reads_percent	vacmap	vg_giraffe	3	33.7713004839468	0.0008756563458531167
+ont	mapped_bases_percent	minimap2	pbmm2	3	7.845572638247898	0.015860676479095115
+ont	mapped_bases_percent	minimap2	vacmap	3	159.06841488272207	3.9519036563541093e-05
+ont	mapped_bases_percent	minimap2	vg_giraffe	3	12.410624190832344	0.006429959283917474
+ont	mapped_bases_percent	pbmm2	vacmap	3	166.55283060445586	3.6047278404920295e-05
+ont	mapped_bases_percent	pbmm2	vg_giraffe	3	12.412382239815477	0.006428155500190188
+ont	mapped_bases_percent	vacmap	vg_giraffe	3	-7.645345457044288	0.016681373594498033
+ont	bases_mapped	minimap2	pbmm2	3	1.164014045629732	0.3644985095290894
+ont	bases_mapped	minimap2	vacmap	3	8.397245599655955	0.01388691431278278
+ont	bases_mapped	minimap2	vg_giraffe	3	4.691691818248518	0.04255119416622201
+ont	bases_mapped	pbmm2	vacmap	3	8.42987012164102	0.013781842086484067
+ont	bases_mapped	pbmm2	vg_giraffe	3	4.709089855474621	0.042256970128483395
+ont	bases_mapped	vacmap	vg_giraffe	3	-30.798433750491032	0.0010525836496074923
+ont	bases_mapped_cigar	minimap2	pbmm2	3	5.020993671197817	0.037452011194308014
+ont	bases_mapped_cigar	minimap2	vacmap	3	7.753235273776933	0.016231509070872778
+ont	bases_mapped_cigar	minimap2	vg_giraffe	3	5.2173309997379205	0.03482902981597968
+ont	bases_mapped_cigar	pbmm2	vacmap	3	7.776569473732061	0.016136588913570244
+ont	bases_mapped_cigar	pbmm2	vg_giraffe	3	5.216464421367564	0.03484000485890586
+ont	bases_mapped_cigar	vacmap	vg_giraffe	3	-13.998264297873419	0.005064569872709529
+pb	error_percent	minimap2	pbmm2	3	4.891892070672939	0.039338211443088675
+pb	error_percent	minimap2	vacmap	3	10.163166843056612	0.009543117243866509
+pb	error_percent	minimap2	vg_giraffe	3	10.163166843056612	0.009543117243866509
+pb	error_percent	pbmm2	vacmap	3	11.412763732798872	0.007590174811032195
+pb	error_percent	pbmm2	vg_giraffe	3	11.412763732798872	0.007590174811032195
+pb	error_percent	vacmap	vg_giraffe	3		
+pb	mapped_reads_percent	minimap2	pbmm2	3		
+pb	mapped_reads_percent	minimap2	vg_giraffe	3	34.00871229859132	0.000863489035583997
+pb	mapped_reads_percent	pbmm2	vg_giraffe	3	34.00871229859132	0.000863489035583997
+pb	mapped_bases_percent	minimap2	pbmm2	3	5.814497367990576	0.028327652143354674
+pb	mapped_bases_percent	minimap2	vg_giraffe	3	57.002258809995794	0.0003076206148126322
+pb	mapped_bases_percent	pbmm2	vg_giraffe	3	58.10593323093742	0.00029605073623554157
+pb	bases_mapped	minimap2	pbmm2	3		
+pb	bases_mapped	minimap2	vacmap	3	53.101978437218	0.0003544440159306488
+pb	bases_mapped	minimap2	vg_giraffe	3	21.740144388245746	0.002109111286107421
+pb	bases_mapped	pbmm2	vacmap	3	53.101978437218	0.0003544440159306488
+pb	bases_mapped	pbmm2	vg_giraffe	3	21.740144388245746	0.002109111286107421
+pb	bases_mapped	vacmap	vg_giraffe	3	-45.85879278538072	0.00047516575704431005
+pb	bases_mapped_cigar	minimap2	pbmm2	3	5.293199209380655	0.033887575984019286
+pb	bases_mapped_cigar	minimap2	vacmap	3	53.47051111413285	0.0003495775652303829
+pb	bases_mapped_cigar	minimap2	vg_giraffe	3	32.32152824119907	0.0009558575896240953
+pb	bases_mapped_cigar	pbmm2	vacmap	3	55.24322062418438	0.0003275130612713834
+pb	bases_mapped_cigar	pbmm2	vg_giraffe	3	33.02758216298867	0.0009154818424269098
+pb	bases_mapped_cigar	vacmap	vg_giraffe	3	-21.26276582802212	0.0022045628949369776
