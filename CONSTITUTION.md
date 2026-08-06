@@ -24,7 +24,7 @@ This constitution establishes the governing principles, architectural rules, nam
 
 **I.5.** Benchmarking workflow files follow the pattern `<process>.smk` (e.g., `run_happy.smk`).
 
-**I.6.** Non-mapping workflow files must include `header.smk` as their first executable line. Mapping workflow files (`<platform>.read_mapping.<tool>.smk`) must include `header_mapper.smk` as their first executable line. `header_mapper.smk` provides `CWD` only, with no VarCAD dependency.
+**I.6.** Mapping workflow files (`<platform>.read_mapping.<tool>.smk`) must include `header_mapper.smk` as their first executable line. `header_mapper.smk` provides `CWD` only, with no external dependency. All other workflow files are self-contained and define their own paths and Docker images inline.
 
 **I.7.** The constitution resides in `CONSTITUTION.md` at the repository root. It is immutable except by amendment per Article X.
 
@@ -42,7 +42,7 @@ This constitution establishes the governing principles, architectural rules, nam
 
 **II.4.** Resource constraints (CPU, memory) are specified via Docker flags `--cpus` and `-m`.
 
-**II.5.** Each rule must set `--rm`, `--workdir /tmp`, and bind-mount `{CWD}:{CWD}` at minimum. Reference databases are mounted read-only.
+**II.5.** Each rule must set `--rm`, `--tmpfs /tmp:size=50g,exec`, and bind-mount `{CWD}:{CWD}` at minimum. Reference databases are mounted read-only.
 
 **II.6.** The user ID and group ID must be propagated via `-u $UID:$(id -g)` to ensure file ownership matches the host user.
 
@@ -116,16 +116,16 @@ Example: `HG002.ont.30x`
 
 **IV.4.** The `<mapper_tag>` identifies the mapper and target platform as `<tool>-<platform>`.
 
-Registered mapper tags (immutable once assigned):
+Registered mapper tags (immutable once assigned). Active mappers reside in the repository root; legacy mappers in `mapper_legacy/`:
 
-| Mapper | ONT tag | PacBio tag |
-|---|---|---|
-| minimap2 | `mm2-ont` | `mm2-pb` |
-| pbmm2 | `pbmm2-ont` | `pbmm2-pb` |
-| GraphAligner | `ga-ont` | `ga-pb` |
-| ParaHAT | `parahat-ont` | `parahat-pb` |
-| VACmap | `vacmap-ont` | `vacmap-pb` |
-| VG | `vg-ont` | `vg-pb` |
+| Mapper | ONT tag | PacBio tag | Status |
+|---|---|---|---|
+| minimap2 | `mm2-ont` | `mm2-pb` | Active |
+| pbmm2 | `pbmm2-ont` | `pbmm2-pb` | Active |
+| VACmap | `vacmap-ont` | `vacmap-pb` | Active |
+| VG | `vg-ont` | `vg-pb` | Active |
+| GraphAligner | `ga-ont` | `ga-pb` | Legacy |
+| ParaHAT | `parahat-ont` | `parahat-pb` | Legacy |
 
 **IV.5.** SNV/indel caller tags follow the pattern `<tool>-<platform>` (e.g., `clair3-ont`, `dv-ont-woPG`). The caller tag is appended to the mapper-tagged filename:
 ```
@@ -168,7 +168,7 @@ Each stage is optional. Any workflow may be run independently if its inputs alre
 
 ## Article VI — Quality and Validation
 
-**VI.1.** Every output-producing rule must include a post-execution validation check that causes the rule to fail (non-zero exit code) if the output is empty, truncated, or otherwise invalid.
+**VI.1.** Every output-producing rule must use `set -eo pipefail` at the top of its shell block to ensure Docker and pipeline failures are surfaced, and must include a post-execution validation check that causes the rule to fail (non-zero exit code) if the output is empty, truncated, or otherwise invalid.
 
 **VI.2.** Mandatory validation checks:
 - **CRAM**: `[[ $(du -b {output.cram} | cut -f 1) -le 64 ]] && exit 101`

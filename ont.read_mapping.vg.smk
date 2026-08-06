@@ -91,9 +91,9 @@ rule vg_map_sort:
         echo "[$(date -Is)] START vg_map_sort {wildcards.dataset}" >&2
         mkdir -p "{CWD}/cram/tmp"
 
-        TMP_SAM="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.sam"
+        TMP_BAM="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.bam"
 
-        # vg giraffe → SAM file
+        # vg giraffe → BAM directly (ONT r10 produces malformed SAM aux tags)
         docker run --rm \
             --tmpfs /tmp:size=50g,exec \
             -u $UID:$(id -g) \
@@ -111,14 +111,14 @@ rule vg_map_sort:
             -z {input.zipcodes} \
             -b r10 \
             -f {CWD}/{input.fastq} \
-            -o SAM \
+            -o BAM \
             -R "ID:{wildcards.dataset}\tSM:{wildcards.dataset}" \
             -N {wildcards.dataset} \
-            > "$TMP_SAM"
+            > "$TMP_BAM"
 
-        [[ -s "$TMP_SAM" ]] || {{ echo "ERROR: vg giraffe produced empty/missing $TMP_SAM"; exit 101; }}
+        [[ -s "$TMP_BAM" ]] || {{ echo "ERROR: vg giraffe produced empty/missing $TMP_BAM"; exit 101; }}
 
-        # samtools sort SAM → CRAM
+        # samtools sort BAM → CRAM
         docker run --rm \
             --workdir /tmp \
             -u $UID:$(id -g) \
@@ -133,9 +133,9 @@ rule vg_map_sort:
             -O CRAM \
             --reference {input.ref} \
             -o {CWD}/{output.cram} \
-            "$TMP_SAM"
+            "$TMP_BAM"
 
-        rm -f "$TMP_SAM"
+        rm -f "$TMP_BAM"
 
         docker run --rm \
             --workdir /tmp \
