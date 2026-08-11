@@ -1,4 +1,11 @@
+# Chromosome 21 assembler benchmark configuration
+
 sample_sheet: config/samples.assemblers.tsv
+
+# Base directory containing the normalized chr21 FASTQs.
+# On the server, change only this line or override it with:
+# --config input_root=/server/path/to/final_normalized
+input_root: inputs/final_normalized
 
 active_assemblers:
   - flye
