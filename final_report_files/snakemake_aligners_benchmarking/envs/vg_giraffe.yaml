@@ -1,0 +1,15 @@
+#####################################################################################
+# VG GIRAFFE LONG-READ ALIGNMENT ENVIRONMENT
+# This environment is separated from the minimap2, pbmm2, and VACmap environment
+# to prevent dependency changes from invalidating completed alignment results.
+#####################################################################################
+
+name: vg-giraffe-long-read
+
+channels:
+  - conda-forge
+  - bioconda
+
+dependencies:
+  - vg>=1.63.0
+  - samtools

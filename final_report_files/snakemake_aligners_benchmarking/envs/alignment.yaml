@@ -1,0 +1,17 @@
+name: alignment-benchmarking
+
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  - python=3.11
+  - minimap2
+  - pbmm2
+  - samtools
+  - pandas
+  - numpy
+  - scipy
+  - matplotlib-base
+  - pip

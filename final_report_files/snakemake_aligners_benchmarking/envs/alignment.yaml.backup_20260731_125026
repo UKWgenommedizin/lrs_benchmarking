@@ -1,0 +1,15 @@
+channels:
+  - bioconda
+  - conda-forge
+  - nodefaults
+
+dependencies:
+  - python=3.11
+  - minimap2
+  - pbmm2
+  - samtools
+  - pandas
+  - numpy
+  - scipy
+  - matplotlib
+  - pip
