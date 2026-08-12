@@ -48,88 +48,6 @@ tmp/
 # whitelist the truvari directory and its contents
 !/truvari/
 !/truvari/**
-*.fastq
-*.fastq.gz
-*.bam
-*.bai
-*.cram
-*.crai
-*.sam
-
-# Local sequencing input files
-samples_try/
-Samples_try/
-
-# Local shell history and logs
-alignment_analysis/logs/
-
-# Local path configuration
-alignment_analysis/resume_paths.sh
-reference/
-__pycache__/
-*.py[cod]
-/miniconda.sh
-/pbmm2
-alignment_analysis/alignments/
-alignment_analysis/tmp/
-path/to/file
-
-# Local backup files
-alignment_analysis/scripts/*.before_*.py
-alignment_analysis/scripts/*.before_*.sh
-alignment_analysis/tables/*.before_*.tsv
-
-# Large raw pbmm2 samtools reports
-alignment_analysis/tables/*.pbmm2-subread.samtools_stats.txt
-alignment_analysis/tables/*.pbmm2-ccs.samtools_stats.txt
-
-# Older non-indexed helper script
-alignment_analysis/scripts/run_pbmm2_ccs.sh
-
-# Large alignment outputs
-final_report_files/snakemake_aligners_benchmarking/results/bam/
-final_report_files/snakemake_aligners_benchmarking/.snakemake/
-final_report_files/snakemake_aligners_benchmarking/results/logs/
-final_report_files/snakemake_aligners_benchmarking/results/stats/
-
-# Temporary files
-*.bam
-*.bam.bai
-*.sam
-*.tmp
-
-# Snakemake temporary environments and metadata
-**/.snakemake/
-
-# Large sequencing and alignment files
-**/*.bam
-**/*.bam.bai
-**/*.sam
-**/*.cram
-**/*.cram.crai
-**/*.fastq
-**/*.fastq.gz
-**/*.fq
-**/*.fq.gz
-
-# Large vg graph indexes
-**/*.gbz
-**/*.dist
-**/*.min
-**/*.zipcodes
-**/*.xg
-
-# Generated workflow results
-final_report_files/snakemake_aligners_benchmarking/results/bam/
-final_report_files/snakemake_aligners_benchmarking/results/logs/
-final_report_files/snakemake_aligners_benchmarking/results/stats/
-final_report_files/snakemake_aligners_benchmarking/results/checkpoints/
-
-final_report_files/snakemake_assemblers_benchmarking/results/
-final_report_files/snakemake_assemblers_benchmarking/data/
-
-# Temporary test files
-final_report_files/test_wsl.txt
 
 # BEGIN CHR21 ASSEMBLER CONTAINER WORKFLOW
 
@@ -179,5 +97,3 @@ final_report_files/snakemake_assemblers_benchmarking/**/__pycache__/
 final_report_files/snakemake_assemblers_benchmarking/**/*.pyc
 
 # END CHR21 ASSEMBLER CONTAINER WORKFLOW
-final_report_files/snakemake_assemblers_benchmarking/benchmark_chr21_real/user_config/paths.local.yaml
-final_report_files/snakemake_assemblers_benchmarking/benchmark_chr21_real/user_settings/input_data_path.local.yaml
