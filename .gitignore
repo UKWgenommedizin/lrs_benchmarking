@@ -179,3 +179,4 @@ final_report_files/snakemake_assemblers_benchmarking/**/__pycache__/
 final_report_files/snakemake_assemblers_benchmarking/**/*.pyc
 
 # END CHR21 ASSEMBLER CONTAINER WORKFLOW
+final_report_files/snakemake_assemblers_benchmarking/benchmark_chr21_real/config/paths.local.yaml

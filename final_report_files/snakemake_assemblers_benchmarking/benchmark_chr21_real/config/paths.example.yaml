@@ -1,0 +1,16 @@
+# ============================================================
+# CHROMOSOME 21 INPUT DATA LOCATION
+#
+# Copy this file to paths.local.yaml and change ONLY input_root.
+# Do NOT modify Snakefile.assemblers.
+#
+# The directory must contain:
+#
+# HG002/
+# HG003/
+# HG004/
+#
+# with the expected PacBio HiFi and ONT FASTQ files.
+# ============================================================
+
+input_root: "/path/to/final_normalized"
