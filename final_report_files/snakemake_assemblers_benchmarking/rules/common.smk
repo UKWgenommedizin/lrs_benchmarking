@@ -11,6 +11,8 @@
 
 from pathlib import Path
 import csv
+import hashlib
+import re
 
 
 # -----------------------------------------------------------------------------
@@ -23,6 +25,95 @@ SAMPLE_SHEET = config.get("sample_sheet", "samples.tsv")
 ACTIVE_ASSEMBLERS = config.get("active_assemblers", ["flye"])
 GENOME_SIZE = config.get("genome_size", 46709983)
 DEFAULT_THREADS = int(config.get("threads", 4))
+
+CHROMOSOME = config.get("chromosome", "chr21")
+CHROMOSOME_LENGTH = int(
+    config.get("chromosome_length", GENOME_SIZE)
+)
+MIN_MAPQ = int(
+    config.get("min_mapq", 20)
+)
+TARGET_COVERAGE = float(
+    config.get("target_coverage", 30)
+)
+TARGET_BASES = int(
+    config.get(
+        "target_bases",
+        round(CHROMOSOME_LENGTH * TARGET_COVERAGE)
+    )
+)
+
+EXPECTED_TARGET_BASES = round(
+    CHROMOSOME_LENGTH * TARGET_COVERAGE
+)
+
+if TARGET_BASES != EXPECTED_TARGET_BASES:
+    raise ValueError(
+        "target_bases is inconsistent with chromosome length "
+        "and target coverage: "
+        f"configured={TARGET_BASES}, "
+        f"expected={EXPECTED_TARGET_BASES}"
+    )
+
+PROGRESS_DIR = config.get(
+    "progress_dir",
+    "results/progress"
+)
+
+LOG_DIR = config.get(
+    "log_dir",
+    "results/logs"
+)
+
+RESOURCE_CONFIG = (
+    config.get("resources", {})
+    or {}
+)
+
+MAPPING_THREADS = int(
+    RESOURCE_CONFIG.get(
+        "mapping_threads",
+        DEFAULT_THREADS
+    )
+)
+
+MAPPING_MEM_MB = int(
+    RESOURCE_CONFIG.get(
+        "mapping_mem_mb",
+        8000
+    )
+)
+
+# Keep the total CPU usage of the mapping pipeline near the Snakemake
+# threads allocation. minimap2 and both samtools sort processes can overlap.
+MAP_THREADS = max(
+    1,
+    MAPPING_THREADS - 4
+)
+
+SORT_THREADS = max(
+    1,
+    min(2, MAPPING_THREADS // 4)
+)
+
+RAW_REFERENCE = config.get("reference")
+
+REFERENCE = None
+
+if RAW_REFERENCE:
+    REFERENCE = Path(
+        RAW_REFERENCE
+    ).expanduser()
+
+    if not REFERENCE.is_absolute():
+        REFERENCE = (
+            PROJECT_DIR
+            / REFERENCE
+        )
+
+    REFERENCE = REFERENCE.resolve(
+        strict=False
+    )
 
 INPUT_MODE = config.get("input_mode")
 
@@ -269,6 +360,65 @@ def _check_sample_technology(
             f"sample={sample}, "
             f"technology={technology}"
         )
+
+
+
+def seed_for_values(
+    sample,
+    technology
+):
+    """
+    Return a deterministic normalization seed.
+
+    For GIAB HG samples this reproduces the validated historical scheme:
+
+        HG002 pb  -> 21002
+        HG002 ont -> 22002
+        HG003 pb  -> 21003
+        HG003 ont -> 22003
+
+    Other sample names receive a stable SHA256-derived seed.
+    """
+
+    _check_sample_technology(
+        sample,
+        technology
+    )
+
+    match = re.fullmatch(
+        r"HG(\d+)",
+        sample
+    )
+
+    if match:
+        sample_number = int(
+            match.group(1)
+        )
+
+        technology_base = {
+            "pb": 21000,
+            "ont": 22000,
+        }[technology]
+
+        return (
+            technology_base
+            + sample_number
+        )
+
+    digest = hashlib.sha256(
+        f"{sample}\0{technology}".encode(
+            "utf-8"
+        )
+    ).digest()
+
+    return (
+        100000
+        + int.from_bytes(
+            digest[:4],
+            "big"
+        )
+        % 900000000
+    )
 
 
 def source_fastq_for_values(

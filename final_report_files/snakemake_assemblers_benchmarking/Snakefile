@@ -35,6 +35,7 @@ rule all:
 # Each tool is stored in a separate file to simplify testing, maintenance,
 # environment management, and migration to another computing system
 include: "rules/validation.smk"
+include: "rules/chr21.smk"
 include: "rules/flye.smk"
 include: "rules/goldrush.smk"
 include: "rules/ntlink.smk"

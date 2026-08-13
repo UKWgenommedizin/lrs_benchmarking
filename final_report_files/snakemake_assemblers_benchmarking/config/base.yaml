@@ -18,6 +18,9 @@ sample_sheet: "samples.tsv"
 chromosome: "chr21"
 genome_size: 46709983
 min_mapq: 20
+target_coverage: 30
+target_bases: 1401299490
+
 
 # ---------------------------------------------------------------------------
 # Assemblers
@@ -67,3 +70,11 @@ preextracted_pattern: "{sample}.{technology}.fastq.gz"
 
 # Default value retained for compatibility with existing rules.
 threads: 4
+
+
+# ---------------------------------------------------------------------------
+# Progress and logging
+# ---------------------------------------------------------------------------
+
+progress_dir: "results/progress"
+log_dir: "results/logs"
