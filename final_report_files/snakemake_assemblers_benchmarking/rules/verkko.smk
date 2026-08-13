@@ -10,14 +10,8 @@ rule verkko_assembly:
         ont=ont_fastq_for_sample
 
     output:
-        assembly=(
-            "results/smoke_test/verkko/"
-            "{sample}/assembly.fasta"
-        ),
-        done=(
-            f"{PROGRESS_DIR}/verkko/"
-            "{sample}.done"
-        )
+        assembly="results/verkko/{sample}.fasta",
+        done=PROGRESS_DIR + "/verkko/{sample}.done"
 
     threads:
         VERKKO_THREADS
@@ -29,10 +23,7 @@ rule verkko_assembly:
         ENV_VERKKO
 
     params:
-        workdir=(
-            "results/smoke_test/verkko/"
-            "{sample}/work"
-        ),
+        workdir="results/work/verkko/{sample}",
         memory_gb=VERKKO_LOCAL_MEMORY_GB,
         running=lambda wc: (
             f"{PROGRESS_DIR}/verkko/"
@@ -44,10 +35,7 @@ rule verkko_assembly:
         )
 
     log:
-        (
-            f"{LOG_DIR}/verkko/"
-            "{sample}.log"
-        )
+        LOG_DIR + "/verkko/{sample}.log"
 
     shell:
         r"""

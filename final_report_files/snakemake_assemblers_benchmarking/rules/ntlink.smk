@@ -5,21 +5,12 @@
 rule ntlink_scaffold:
     input:
         validation=VALIDATION_OK,
-        draft=(
-            "results/smoke_test/goldrush/"
-            "{sample}.{technology}/assembly.fasta"
-        ),
+        draft="results/goldrush/{sample}.{technology}.fasta",
         reads=lambda wildcards: fastq_for(wildcards)
 
     output:
-        assembly=(
-            "results/smoke_test/ntlink/"
-            "{sample}.{technology}/assembly.fasta"
-        ),
-        done=(
-            f"{PROGRESS_DIR}/ntlink/"
-            "{sample}.{technology}.done"
-        )
+        assembly="results/ntlink/{sample}.{technology}.fasta",
+        done=PROGRESS_DIR + "/ntlink/{sample}.{technology}.done"
 
     threads:
         NTLINK_THREADS
@@ -31,10 +22,7 @@ rule ntlink_scaffold:
         ENV_NTLINK
 
     params:
-        workdir=(
-            "results/smoke_test/ntlink/"
-            "{sample}.{technology}/work"
-        ),
+        workdir="results/work/ntlink/{sample}.{technology}",
         running=lambda wc: (
             f"{PROGRESS_DIR}/ntlink/"
             f"{wc.sample}.{wc.technology}.running"
@@ -45,10 +33,7 @@ rule ntlink_scaffold:
         )
 
     log:
-        (
-            f"{LOG_DIR}/ntlink/"
-            "{sample}.{technology}.log"
-        )
+        LOG_DIR + "/ntlink/{sample}.{technology}.log"
 
     shell:
         r"""

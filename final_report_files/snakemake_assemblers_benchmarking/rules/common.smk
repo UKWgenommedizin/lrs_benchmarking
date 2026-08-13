@@ -591,11 +591,7 @@ EXPECTED_FINAL_OUTPUTS = []
 if "flye" in ACTIVE_ASSEMBLERS:
     EXPECTED_FINAL_OUTPUTS.extend(
         [
-            (
-                f"results/assemblies/"
-                f"{sample}.{technology}.flye/"
-                f"assembly.fasta"
-            )
+            f"results/flye/{sample}.{technology}.fasta"
             for sample, technology
             in SAMPLE_TECH_PAIRS
         ]
@@ -606,10 +602,7 @@ if "flye" in ACTIVE_ASSEMBLERS:
 if "goldrush" in ACTIVE_ASSEMBLERS:
     EXPECTED_FINAL_OUTPUTS.extend(
         [
-            (
-                f"results/smoke_test/goldrush/"
-                f"{sample}.{technology}/assembly.fasta"
-            )
+            f"results/goldrush/{sample}.{technology}.fasta"
             for sample, technology
             in SAMPLE_TECH_PAIRS
         ]
@@ -620,10 +613,7 @@ if "goldrush" in ACTIVE_ASSEMBLERS:
 if "ntlink" in ACTIVE_ASSEMBLERS:
     EXPECTED_FINAL_OUTPUTS.extend(
         [
-            (
-                f"results/smoke_test/ntlink/"
-                f"{sample}.{technology}/assembly.fasta"
-            )
+            f"results/ntlink/{sample}.{technology}.fasta"
             for sample, technology
             in SAMPLE_TECH_PAIRS
         ]
@@ -634,10 +624,7 @@ if "ntlink" in ACTIVE_ASSEMBLERS:
 if "verkko" in ACTIVE_ASSEMBLERS:
     EXPECTED_FINAL_OUTPUTS.extend(
         [
-            (
-                f"results/smoke_test/verkko/"
-                f"{sample}/assembly.fasta"
-            )
+            f"results/verkko/{sample}.fasta"
             for sample
             in SAMPLES
         ]

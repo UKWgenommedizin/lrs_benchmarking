@@ -9,24 +9,14 @@ rule flye_assembly:
         fastq=fastq_for
 
     output:
-        assembly=(
-            "results/assemblies/"
-            "{sample}.{technology}.flye/"
-            "assembly.fasta"
-        ),
-        done=(
-            f"{PROGRESS_DIR}/flye/"
-            "{sample}.{technology}.done"
-        )
+        assembly="results/flye/{sample}.{technology}.fasta",
+        done=PROGRESS_DIR + "/flye/{sample}.{technology}.done"
 
     conda:
         ENV_FLYE
 
     params:
-        outdir=(
-            "results/assemblies/"
-            "{sample}.{technology}.flye"
-        ),
+        outdir="results/work/flye/{sample}.{technology}",
         read_option=flye_read_option,
         genome_size=GENOME_SIZE,
         running=lambda wc: (
@@ -45,10 +35,7 @@ rule flye_assembly:
         mem_mb=FLYE_MEM_MB
 
     log:
-        (
-            f"{LOG_DIR}/flye/"
-            "{sample}.{technology}.log"
-        )
+        LOG_DIR + "/flye/{sample}.{technology}.log"
 
     shell:
         r"""
@@ -56,6 +43,7 @@ rule flye_assembly:
 
         mkdir -p \
             "{params.outdir}" \
+            "$(dirname "{output.assembly}")" \
             "$(dirname "{output.done}")" \
             "$(dirname "{log}")"
 
@@ -89,6 +77,14 @@ rule flye_assembly:
             --genome-size "{params.genome_size}" \
             --threads {threads} \
             --out-dir "{params.outdir}"
+
+        if [[ ! -s "{params.outdir}/assembly.fasta" ]]; then
+            echo "ERROR: Flye did not produce assembly.fasta"
+            exit 1
+        fi
+
+        cp "{params.outdir}/assembly.fasta" \
+           "{output.assembly}"
 
         test -s "{output.assembly}"
 

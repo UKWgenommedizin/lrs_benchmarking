@@ -8,20 +8,11 @@ rule goldrush_assembly:
         reads=lambda wildcards: fastq_for(wildcards)
 
     output:
-        assembly=(
-            "results/smoke_test/goldrush/"
-            "{sample}.{technology}/assembly.fasta"
-        ),
-        done=(
-            f"{PROGRESS_DIR}/goldrush/"
-            "{sample}.{technology}.done"
-        )
+        assembly="results/goldrush/{sample}.{technology}.fasta",
+        done=PROGRESS_DIR + "/goldrush/{sample}.{technology}.done"
 
     params:
-        workdir=lambda wildcards: (
-            f"results/smoke_test/goldrush/"
-            f"{wildcards.sample}.{wildcards.technology}/work"
-        ),
+        workdir="results/work/goldrush/{sample}.{technology}",
         prefix=lambda wildcards: (
             f"{wildcards.sample}_{wildcards.technology}_goldrush"
         ),
@@ -50,10 +41,7 @@ rule goldrush_assembly:
         ENV_GOLDRUSH
 
     log:
-        (
-            f"{LOG_DIR}/goldrush/"
-            "{sample}.{technology}.log"
-        )
+        LOG_DIR + "/goldrush/{sample}.{technology}.log"
 
     shell:
         r"""
