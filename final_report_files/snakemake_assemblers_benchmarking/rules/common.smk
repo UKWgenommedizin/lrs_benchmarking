@@ -651,3 +651,74 @@ if "verkko" in ACTIVE_ASSEMBLERS:
 wildcard_constraints:
     sample="|".join(SAMPLES),
     technology="|".join(TECHNOLOGIES)
+
+
+#####################################################################################
+# ASSEMBLER RESOURCE SETTINGS
+#
+# Values come from config/local.yaml or config/server.yaml.
+# Snakemake treats mem_mb as total memory requested by one job.
+#####################################################################################
+
+FLYE_THREADS = int(
+    RESOURCE_CONFIG.get(
+        "flye_threads",
+        DEFAULT_THREADS
+    )
+)
+
+GOLDRUSH_THREADS = int(
+    RESOURCE_CONFIG.get(
+        "goldrush_threads",
+        DEFAULT_THREADS
+    )
+)
+
+NTLINK_THREADS = int(
+    RESOURCE_CONFIG.get(
+        "ntlink_threads",
+        DEFAULT_THREADS
+    )
+)
+
+VERKKO_THREADS = int(
+    RESOURCE_CONFIG.get(
+        "verkko_threads",
+        DEFAULT_THREADS
+    )
+)
+
+FLYE_MEM_MB = int(
+    RESOURCE_CONFIG.get(
+        "flye_mem_mb",
+        12000
+    )
+)
+
+GOLDRUSH_MEM_MB = int(
+    RESOURCE_CONFIG.get(
+        "goldrush_mem_mb",
+        12000
+    )
+)
+
+NTLINK_MEM_MB = int(
+    RESOURCE_CONFIG.get(
+        "ntlink_mem_mb",
+        8000
+    )
+)
+
+VERKKO_MEM_MB = int(
+    RESOURCE_CONFIG.get(
+        "verkko_mem_mb",
+        12000
+    )
+)
+
+VERKKO_LOCAL_MEMORY_GB = int(
+    RESOURCE_CONFIG.get(
+        "verkko_local_memory_gb",
+        max(1, VERKKO_MEM_MB // 1000)
+    )
+)

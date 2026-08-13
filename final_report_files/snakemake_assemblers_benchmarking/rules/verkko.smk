@@ -1,23 +1,114 @@
 #####################################################################################
 # VERKKO HYBRID ASSEMBLY RULES
-# Verkko combines the ONT and PacBio HiFi datasets belonging to the same sample
-# to perform hybrid diploid genome assembly.
+# Verkko combines ONT and PacBio HiFi reads from the same sample.
 #####################################################################################
 
+rule verkko_assembly:
+    input:
+        validation=VALIDATION_OK,
+        hifi=pb_fastq_for_sample,
+        ont=ont_fastq_for_sample
 
-# -----------------------------------------------------------------------------
-# Future Rule 5: Verkko hybrid assembly
-# -----------------------------------------------------------------------------
+    output:
+        assembly=(
+            "results/smoke_test/verkko/"
+            "{sample}/assembly.fasta"
+        ),
+        done=(
+            f"{PROGRESS_DIR}/verkko/"
+            "{sample}.done"
+        )
 
-# Planned inputs:
-#   - Input validation marker
-#   - PacBio HiFi FASTQ belonging to one sample
-#   - ONT FASTQ belonging to the same sample
-#
-# Planned outputs:
-#   - Final Verkko assembly graph
-#   - Primary or haplotype assembly FASTA files
-#   - Assembly logs and intermediate workflow files
-#
-# This rule is intentionally inactive until the installation, supported ONT
-# input type, output structure, and required computing resources are validated.
+    threads:
+        VERKKO_THREADS
+
+    resources:
+        mem_mb=VERKKO_MEM_MB
+
+    conda:
+        ENV_VERKKO
+
+    params:
+        workdir=(
+            "results/smoke_test/verkko/"
+            "{sample}/work"
+        ),
+        memory_gb=VERKKO_LOCAL_MEMORY_GB,
+        running=lambda wc: (
+            f"{PROGRESS_DIR}/verkko/"
+            f"{wc.sample}.running"
+        ),
+        failed=lambda wc: (
+            f"{PROGRESS_DIR}/verkko/"
+            f"{wc.sample}.failed"
+        )
+
+    log:
+        (
+            f"{LOG_DIR}/verkko/"
+            "{sample}.log"
+        )
+
+    shell:
+        r"""
+        set -euo pipefail
+
+        mkdir -p \
+            "{params.workdir}" \
+            "$(dirname "{output.assembly}")" \
+            "$(dirname "{output.done}")" \
+            "$(dirname "{log}")"
+
+        rm -f \
+            "{output.done}" \
+            "{params.running}" \
+            "{params.failed}"
+
+        printf \
+            "STATUS=RUNNING\nsample=%s\nstarted=%s\n" \
+            "{wildcards.sample}" \
+            "$(date -Is)" \
+            > "{params.running}"
+
+        trap 'rc=$?;
+              rm -f "{params.running}";
+              if [[ $rc -ne 0 ]]; then
+                  printf "STATUS=FAILED\nsample=%s\nfailed=%s\n" \
+                      "{wildcards.sample}" \
+                      "$(date -Is)" \
+                      > "{params.failed}";
+              fi;
+              exit $rc' EXIT
+
+        exec > "{log}" 2>&1
+
+        verkko \
+            -d "{params.workdir}" \
+            --hifi "{input.hifi}" \
+            --nano "{input.ont}" \
+            --local \
+            --local-cpus {threads} \
+            --local-memory {params.memory_gb}
+
+        if [[ ! -s "{params.workdir}/assembly.fasta" ]]; then
+            echo "ERROR: Verkko did not produce assembly.fasta"
+            exit 1
+        fi
+
+        cp "{params.workdir}/assembly.fasta" \
+           "{output.assembly}"
+
+        test -s "{output.assembly}"
+
+        printf \
+            "STATUS=PASS\nsample=%s\ncompleted=%s\n" \
+            "{wildcards.sample}" \
+            "$(date -Is)" \
+            > "{output.done}"
+
+        rm -f \
+            "{params.running}" \
+            "{params.failed}"
+
+        trap - EXIT
+        """

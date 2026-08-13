@@ -25,3 +25,4 @@ resources:
   goldrush_mem_mb: 12000
   ntlink_mem_mb: 8000
   verkko_mem_mb: 12000
+  verkko_local_memory_gb: 9
