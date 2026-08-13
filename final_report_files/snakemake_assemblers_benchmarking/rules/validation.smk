@@ -1,11 +1,8 @@
 #####################################################################################
-# INPUT AND ENVIRONMENT VALIDATION
+# INPUT AND RUNTIME VALIDATION
 #
-# Validates:
-#   - portable sample metadata
-#   - automatically resolved source FASTQs
-#   - server reference when required
-#   - required Conda environment definitions
+# Checks metadata, automatically resolved inputs, the server reference when needed,
+# and Docker availability before any assembler is allowed to start.
 #####################################################################################
 
 
@@ -14,175 +11,75 @@ rule validate_inputs:
         VALIDATION_OK
 
     run:
-        Path(output[0]).parent.mkdir(
-            parents=True,
-            exist_ok=True
-        )
-
+        Path(output[0]).parent.mkdir(parents=True, exist_ok=True)
         errors = []
 
-        # ---------------------------------------------------------------------
         # Sample sheet
-        # ---------------------------------------------------------------------
-
-        sample_sheet_path = Path(
-            SAMPLE_SHEET
-        )
-
+        sample_sheet_path = Path(SAMPLE_SHEET)
         if not sample_sheet_path.is_absolute():
-            sample_sheet_path = (
-                PROJECT_DIR
-                / sample_sheet_path
-            )
+            sample_sheet_path = PROJECT_DIR / sample_sheet_path
 
         if not sample_sheet_path.exists():
-            errors.append(
-                f"Missing sample sheet: "
-                f"{sample_sheet_path}"
-            )
+            errors.append(f"Missing sample sheet: {sample_sheet_path}")
 
-
-        # ---------------------------------------------------------------------
         # Input root
-        # ---------------------------------------------------------------------
-
         if not INPUT_ROOT.exists():
-            errors.append(
-                f"Missing input_root directory: "
-                f"{INPUT_ROOT}"
-            )
+            errors.append(f"Missing input_root directory: {INPUT_ROOT}")
 
-
-        # ---------------------------------------------------------------------
-        # Automatically resolved SOURCE FASTQs
-        # ---------------------------------------------------------------------
-
+        # Automatically resolved source FASTQs
         for row in SAMPLE_ROWS:
             sample = row["sample"]
             technology = row["technology"]
-
-            fastq = Path(
-                source_fastq_for_values(
-                    sample,
-                    technology
-                )
-            )
+            fastq = Path(source_fastq_for_values(sample, technology))
 
             if not fastq.exists():
-                errors.append(
-                    "Missing source FASTQ for "
-                    f"{sample} {technology}: "
-                    f"{fastq}"
-                )
-
+                errors.append(f"Missing source FASTQ for {sample} {technology}: {fastq}")
             elif not fastq.is_file():
-                errors.append(
-                    "Input is not a regular FASTQ file for "
-                    f"{sample} {technology}: "
-                    f"{fastq}"
-                )
+                errors.append(f"Input is not a regular FASTQ file for {sample} {technology}: {fastq}")
 
-
-        # ---------------------------------------------------------------------
-        # Reference genome required only for WGS/server mode
-        # ---------------------------------------------------------------------
-
+        # Reference is required only for server/WGS mode.
         if INPUT_MODE == "whole_genome":
-            raw_reference = config.get(
-                "reference"
-            )
+            if not REFERENCE:
+                errors.append("Server/whole_genome mode requires 'reference' in config/server.yaml")
+            elif not REFERENCE.exists():
+                errors.append(f"Missing reference FASTA: {REFERENCE}")
 
-            if not raw_reference:
-                errors.append(
-                    "Server/whole_genome mode requires "
-                    "'reference' in config/server.yaml"
-                )
+        # Docker is required whenever an assembler is active.
+        if ACTIVE_ASSEMBLERS:
+            docker = shutil.which("docker")
 
+            if not docker:
+                errors.append("Docker executable was not found in PATH.")
             else:
-                reference_path = Path(
-                    raw_reference
-                ).expanduser()
-
-                if not reference_path.is_absolute():
-                    reference_path = (
-                        PROJECT_DIR
-                        / reference_path
-                    )
-
-                if not reference_path.exists():
-                    errors.append(
-                        "Missing reference FASTA: "
-                        f"{reference_path}"
-                    )
-
-
-        # ---------------------------------------------------------------------
-        # Required assembler environments
-        # ---------------------------------------------------------------------
-
-        required_environments = []
-
-        if "flye" in ACTIVE_ASSEMBLERS:
-            required_environments.append(
-                ENV_FLYE
-            )
-
-        if "goldrush" in ACTIVE_ASSEMBLERS:
-            required_environments.append(
-                ENV_GOLDRUSH
-            )
-
-        if "ntlink" in ACTIVE_ASSEMBLERS:
-            required_environments.append(
-                ENV_NTLINK
-            )
-
-        if "verkko" in ACTIVE_ASSEMBLERS:
-            required_environments.append(
-                ENV_VERKKO
-            )
-
-        for environment_file in required_environments:
-            if not Path(
-                environment_file
-            ).exists():
-                errors.append(
-                    "Missing Conda environment file: "
-                    f"{environment_file}"
+                docker_info = subprocess.run(
+                    [docker, "info"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.PIPE,
+                    text=True
                 )
 
-
-        # ---------------------------------------------------------------------
-        # Report all errors together
-        # ---------------------------------------------------------------------
+                if docker_info.returncode != 0:
+                    detail = docker_info.stderr.strip().splitlines()
+                    detail = detail[-1] if detail else "Docker daemon is not reachable."
+                    errors.append(f"Docker daemon is not reachable: {detail}")
 
         if errors:
-            message = "\n".join(
-                f"- {error}"
-                for error in errors
-            )
+            message = "\n".join(f"- {error}" for error in errors)
 
             raise RuntimeError(
                 "\n"
-                "ASSEMBLER WORKFLOW VALIDATION FAILED\n"
-                "\n"
+                "ASSEMBLER WORKFLOW VALIDATION FAILED\n\n"
                 f"Input mode: {INPUT_MODE}\n"
-                f"Input root: {INPUT_ROOT}\n"
-                "\n"
-                "Fix these problems before running "
-                "the workflow:\n\n"
+                f"Input root: {INPUT_ROOT}\n\n"
+                "Fix these problems before running the workflow:\n\n"
                 f"{message}\n"
             )
 
-
-        # ---------------------------------------------------------------------
-        # Validation marker
-        # ---------------------------------------------------------------------
-
         Path(output[0]).write_text(
-            "Assembler input validation passed.\n"
+            "Assembler workflow validation passed.\n"
             f"input_mode={INPUT_MODE}\n"
             f"input_root={INPUT_ROOT}\n"
             f"samples={len(SAMPLES)}\n"
             f"datasets={len(SAMPLE_TECH_PAIRS)}\n"
+            f"docker_images={','.join(DOCKER_IMAGES[key] for key in sorted(DOCKER_IMAGES))}\n"
         )

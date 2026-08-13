@@ -13,6 +13,9 @@ from pathlib import Path
 import csv
 import hashlib
 import re
+import shlex
+import shutil
+import subprocess
 
 
 # -----------------------------------------------------------------------------
@@ -173,14 +176,68 @@ VALIDATION_OK = (
 
 
 # -----------------------------------------------------------------------------
-# Conda environments
+# Assembler Docker containers
 # -----------------------------------------------------------------------------
 
-# Absolute paths prevent included rule files from looking for rules/envs/.
-ENV_FLYE = str(PROJECT_DIR / "envs" / "flye.yaml")
-ENV_GOLDRUSH = str(PROJECT_DIR / "envs" / "goldrush.yaml")
-ENV_NTLINK = str(PROJECT_DIR / "envs" / "ntlink.yaml")
-ENV_VERKKO = str(PROJECT_DIR / "envs" / "verkko.yaml")
+CONTAINERS = config.get("containers", {}) or {}
+ASSEMBLER_CONTAINER_KEYS = {
+    "flye": "flye2",
+    "goldrush": "goldrush",
+    "ntlink": "ntlink",
+    "verkko": "verkko2",
+}
+
+missing_container_keys = [
+    key for assembler, key in ASSEMBLER_CONTAINER_KEYS.items()
+    if assembler in ACTIVE_ASSEMBLERS and key not in CONTAINERS
+]
+
+if missing_container_keys:
+    raise ValueError(
+        "Missing container definitions in config/base.yaml: "
+        + ", ".join(sorted(missing_container_keys))
+    )
+
+DOCKER_IMAGES = {}
+
+for key, image in CONTAINERS.items():
+    image = str(image).strip()
+
+    if image.startswith("docker://"):
+        image = image[len("docker://"):]
+
+    if not image:
+        raise ValueError(f"Empty Docker image definition: {key}")
+
+    DOCKER_IMAGES[key] = image
+
+
+def is_within(path, parent):
+    """Return True when path is inside parent after path normalization."""
+    path = Path(path).resolve(strict=False)
+    parent = Path(parent).resolve(strict=False)
+
+    try:
+        path.relative_to(parent)
+        return True
+    except ValueError:
+        return False
+
+
+def docker_mount_args():
+    """Mount the project writable and external input data read-only."""
+    mounts = ["-v " + shlex.quote(f"{PROJECT_DIR}:{PROJECT_DIR}")]
+
+    if not is_within(INPUT_ROOT, PROJECT_DIR):
+        mounts.append("-v " + shlex.quote(f"{INPUT_ROOT}:{INPUT_ROOT}:ro"))
+
+    return " ".join(mounts)
+
+
+PROJECT_DIR_STR = str(PROJECT_DIR)
+DOCKER_MOUNTS = docker_mount_args()
+
+# Assessment remains Conda-based for now; assembler execution does not.
 ENV_ASSESSMENT = str(PROJECT_DIR / "envs" / "assessment.yaml")
 
 
@@ -688,6 +745,8 @@ GOLDRUSH_MEM_MB = int(
         12000
     )
 )
+
+GOLDRUSH_SHM_SIZE = str(RESOURCE_CONFIG.get("goldrush_shm_size", "2g"))
 
 NTLINK_MEM_MB = int(
     RESOURCE_CONFIG.get(
