@@ -65,7 +65,7 @@ with the expected PacBio HiFi and ONT chromosome 21 FASTQ files.
 
 ## 3. Dry-run
 
-From `final_report_files/snakemake_assemblers_benchmarking/` run:
+From the `assemblers/` directory run:
 
     snakemake \
       --snakefile benchmark_chr21_real/Snakefile.assemblers \

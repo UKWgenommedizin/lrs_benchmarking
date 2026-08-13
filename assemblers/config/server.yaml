@@ -47,5 +47,5 @@ resources:
   goldrush_mem_mb: 64000
   goldrush_shm_size: "8g"
   ntlink_mem_mb: 32000
-  verkko_mem_mb: 64000
+  verkko_mem_mb: 72000
   verkko_local_memory_gb: 64

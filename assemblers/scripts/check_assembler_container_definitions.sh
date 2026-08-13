@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-PROJECT="$HOME/lrs_benchmarking/final_report_files/snakemake_assemblers_benchmarking"
+PROJECT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CONTAINERS="$PROJECT/containers"
 CONFIG="$PROJECT/benchmark_chr21_real/config/containers.yaml"
 
