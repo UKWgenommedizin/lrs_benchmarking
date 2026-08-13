@@ -1,7 +1,0 @@
-sample	technology	fastq
-HG002	ont	data/reads/HG002.ont.1k.fastq.gz
-HG002	pb	data/reads/HG002.pb.1k.fastq.gz
-HG003	ont	data/reads/HG003.ont.1k.fastq.gz
-HG003	pb	data/reads/HG003.pb.1k.fastq.gz
-HG004	ont	data/reads/HG004.ont.1k.fastq.gz
-HG004	pb	data/reads/HG004.pb.1k.fastq.gz

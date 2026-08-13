@@ -1,0 +1,51 @@
+# =============================================================================
+# SERVER CONFIGURATION
+# =============================================================================
+#
+# Normally the user/supervisor only needs to modify:
+#
+#   input_root
+#   reference
+#
+# samples.tsv must NEVER contain server-specific directories.
+# =============================================================================
+
+input_mode: "whole_genome"
+
+# ---------------------------------------------------------------------------
+# CHANGE THESE FOR THE SERVER
+# ---------------------------------------------------------------------------
+
+input_root: "/CHANGE/THIS/TO/SERVER/WGS_30X"
+
+reference: "/CHANGE/THIS/TO/SERVER/GRCh38.fa"
+
+# ---------------------------------------------------------------------------
+# Server resources
+# ---------------------------------------------------------------------------
+#
+# The server may provide approximately:
+#
+#   128 CPU threads
+#   256 GB RAM
+#
+# Those are TOTAL server resources and should not be assigned independently
+# to every rule.
+# ---------------------------------------------------------------------------
+
+threads: 32
+
+resources:
+  mapping_threads: 32
+  flye_threads: 32
+  goldrush_threads: 32
+  ntlink_threads: 16
+  verkko_threads: 32
+
+  mapping_mem_mb: 64000
+  flye_mem_mb: 64000
+  goldrush_mem_mb: 64000
+  goldrush_shm_size: "8g"
+  ntlink_mem_mb: 32000
+  verkko_mem_mb: 72000
+  verkko_local_memory_gb: 64
