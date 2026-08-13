@@ -1,0 +1,27 @@
+# =============================================================================
+# LOCAL TEST CONFIGURATION
+# =============================================================================
+#
+# Uses Nicolas's previously extracted real Chr21 30x reads.
+#
+# No chromosome extraction is performed in this mode.
+# =============================================================================
+
+input_mode: "preextracted"
+
+input_root: "data/chr21_test"
+
+threads: 4
+
+resources:
+  mapping_threads: 4
+  flye_threads: 4
+  goldrush_threads: 4
+  ntlink_threads: 4
+  verkko_threads: 4
+
+  mapping_mem_mb: 8000
+  flye_mem_mb: 12000
+  goldrush_mem_mb: 12000
+  ntlink_mem_mb: 8000
+  verkko_mem_mb: 12000

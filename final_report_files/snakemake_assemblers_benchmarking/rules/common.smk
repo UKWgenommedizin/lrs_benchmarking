@@ -1,10 +1,14 @@
 #####################################################################################
 # SHARED ASSEMBLER WORKFLOW CONFIGURATION
-# This module reads the sample table, validates configuration values, defines
-# helper functions, and generates the expected outputs used by the workflow.
+#
+# Responsibilities:
+#   - Read sample metadata from samples.tsv.
+#   - Keep machine-specific paths OUT of samples.tsv.
+#   - Resolve source FASTQs from input_root automatically.
+#   - Support local pre-extracted Chr21 testing and server WGS mode.
+#   - Define shared assembler parameters and expected workflow outputs.
 #####################################################################################
 
-# Import packages used to verify paths and read tab-separated sample information
 from pathlib import Path
 import csv
 
@@ -13,23 +17,86 @@ import csv
 # General workflow configuration
 # -----------------------------------------------------------------------------
 
-# Define the sample table and general assembler settings
+PROJECT_DIR = Path(workflow.basedir).resolve()
+
 SAMPLE_SHEET = config.get("sample_sheet", "samples.tsv")
 ACTIVE_ASSEMBLERS = config.get("active_assemblers", ["flye"])
-GENOME_SIZE = config.get("genome_size", "3.1g")
+GENOME_SIZE = config.get("genome_size", 46709983)
 DEFAULT_THREADS = int(config.get("threads", 4))
 
-# Marker file created after all required inputs have been validated
-VALIDATION_OK = "results/logs/validate_inputs.ok"
+INPUT_MODE = config.get("input_mode")
 
-# Conda environments used by the individual assembler and assessment modules
-ENV_FLYE = "envs/flye.yaml"
-ENV_GOLDRUSH = "envs/goldrush.yaml"
-ENV_NTLINK = "envs/ntlink.yaml"
-ENV_VERKKO = "envs/verkko.yaml"
-ENV_ASSESSMENT = "envs/assessment.yaml"
+if INPUT_MODE not in {"preextracted", "whole_genome"}:
+    raise ValueError(
+        "Missing or invalid input_mode. "
+        "Run the workflow with either config/local.yaml "
+        "or config/server.yaml. Expected input_mode to be "
+        "'preextracted' or 'whole_genome'."
+    )
 
-# Define all assembler and scaffolding names accepted by this workflow
+
+# -----------------------------------------------------------------------------
+# Input root
+# -----------------------------------------------------------------------------
+
+RAW_INPUT_ROOT = config.get("input_root")
+
+if not RAW_INPUT_ROOT:
+    raise ValueError(
+        "Missing input_root. "
+        "Set input_root in config/local.yaml or config/server.yaml."
+    )
+
+INPUT_ROOT = Path(RAW_INPUT_ROOT).expanduser()
+
+if not INPUT_ROOT.is_absolute():
+    INPUT_ROOT = PROJECT_DIR / INPUT_ROOT
+
+INPUT_ROOT = INPUT_ROOT.resolve(strict=False)
+
+
+# -----------------------------------------------------------------------------
+# Input/output naming
+# -----------------------------------------------------------------------------
+
+WHOLE_GENOME_PATTERN = config.get(
+    "whole_genome_pattern",
+    "{sample}.{technology}.30x.fastq.gz"
+)
+
+PREEXTRACTED_PATTERN = config.get(
+    "preextracted_pattern",
+    "{sample}.{technology}.fastq.gz"
+)
+
+CHR21_OUTPUT_DIR = config.get(
+    "chr21_output_dir",
+    "results/chr21"
+)
+
+# Separate validation markers prevent a successful local validation from being
+# accidentally reused during a server run, or vice versa.
+VALIDATION_OK = (
+    f"results/logs/validate_inputs.{INPUT_MODE}.ok"
+)
+
+
+# -----------------------------------------------------------------------------
+# Conda environments
+# -----------------------------------------------------------------------------
+
+# Absolute paths prevent included rule files from looking for rules/envs/.
+ENV_FLYE = str(PROJECT_DIR / "envs" / "flye.yaml")
+ENV_GOLDRUSH = str(PROJECT_DIR / "envs" / "goldrush.yaml")
+ENV_NTLINK = str(PROJECT_DIR / "envs" / "ntlink.yaml")
+ENV_VERKKO = str(PROJECT_DIR / "envs" / "verkko.yaml")
+ENV_ASSESSMENT = str(PROJECT_DIR / "envs" / "assessment.yaml")
+
+
+# -----------------------------------------------------------------------------
+# Supported assemblers
+# -----------------------------------------------------------------------------
+
 SUPPORTED_ASSEMBLERS = {
     "flye",
     "goldrush",
@@ -37,24 +104,41 @@ SUPPORTED_ASSEMBLERS = {
     "verkko",
 }
 
-# Stop immediately if config.yaml contains an unknown tool name
-UNKNOWN_ASSEMBLERS = set(ACTIVE_ASSEMBLERS) - SUPPORTED_ASSEMBLERS
+UNKNOWN_ASSEMBLERS = (
+    set(ACTIVE_ASSEMBLERS)
+    - SUPPORTED_ASSEMBLERS
+)
 
 if UNKNOWN_ASSEMBLERS:
     raise ValueError(
-        f"Unsupported assembler names in config.yaml: "
+        "Unsupported assembler names in configuration: "
         f"{sorted(UNKNOWN_ASSEMBLERS)}"
     )
 
 
 # -----------------------------------------------------------------------------
-# Read the sample table
+# Read portable sample table
 # -----------------------------------------------------------------------------
 
-# Read samples.tsv, verify its required columns, reject missing values, and
-# return the sample name, sequencing technology, and FASTQ path for each row
 def read_sample_sheet(path):
+    """
+    Read sample metadata.
+
+    samples.tsv deliberately contains NO file paths.
+
+    Required columns:
+        sample
+        technology
+
+    Example:
+        HG002   ont
+        HG002   pb
+    """
+
     path = Path(path)
+
+    if not path.is_absolute():
+        path = PROJECT_DIR / path
 
     if not path.exists():
         raise FileNotFoundError(
@@ -62,6 +146,7 @@ def read_sample_sheet(path):
         )
 
     rows = []
+    seen_pairs = set()
 
     with path.open(newline="") as handle:
         reader = csv.DictReader(
@@ -72,7 +157,6 @@ def read_sample_sheet(path):
         required_columns = {
             "sample",
             "technology",
-            "fastq",
         }
 
         observed_columns = set(
@@ -80,35 +164,48 @@ def read_sample_sheet(path):
         )
 
         missing_columns = (
-            required_columns - observed_columns
+            required_columns
+            - observed_columns
         )
 
         if missing_columns:
             raise ValueError(
-                f"Sample sheet is missing columns: "
+                "Sample sheet is missing columns: "
                 f"{sorted(missing_columns)}"
             )
 
         for row in reader:
             sample = row["sample"].strip()
             technology = row["technology"].strip()
-            fastq = row["fastq"].strip()
 
-            if not sample or not technology or not fastq:
+            if not sample or not technology:
                 raise ValueError(
                     f"Invalid empty value in sample sheet row: {row}"
                 )
 
             if technology not in {"ont", "pb"}:
                 raise ValueError(
-                    f"Unsupported sequencing technology: {technology}"
+                    "Unsupported sequencing technology: "
+                    f"{technology}"
                 )
+
+            pair = (
+                sample,
+                technology,
+            )
+
+            if pair in seen_pairs:
+                raise ValueError(
+                    "Duplicate sample/technology combination: "
+                    f"{sample} {technology}"
+                )
+
+            seen_pairs.add(pair)
 
             rows.append(
                 {
                     "sample": sample,
                     "technology": technology,
-                    "fastq": fastq,
                 }
             )
 
@@ -120,8 +217,9 @@ def read_sample_sheet(path):
     return rows
 
 
-# Transform samples.tsv into structures used to generate Snakemake jobs
-SAMPLE_ROWS = read_sample_sheet(SAMPLE_SHEET)
+SAMPLE_ROWS = read_sample_sheet(
+    SAMPLE_SHEET
+)
 
 SAMPLES = list(
     dict.fromkeys(
@@ -147,73 +245,178 @@ SAMPLE_TECH_PAIRS = list(
     )
 )
 
-FASTQ_BY_SAMPLE_TECH = {
-    (
-        row["sample"],
-        row["technology"],
-    ): row["fastq"]
-    for row in SAMPLE_ROWS
-}
+SAMPLE_TECH_SET = set(
+    SAMPLE_TECH_PAIRS
+)
 
 
 # -----------------------------------------------------------------------------
-# Shared input helper functions
+# Source input path construction
 # -----------------------------------------------------------------------------
 
-# Return the FASTQ associated with one sample and sequencing technology
-def fastq_for(wildcards):
+def _check_sample_technology(
+    sample,
+    technology
+):
     key = (
+        sample,
+        technology,
+    )
+
+    if key not in SAMPLE_TECH_SET:
+        raise ValueError(
+            "No dataset defined for "
+            f"sample={sample}, "
+            f"technology={technology}"
+        )
+
+
+def source_fastq_for_values(
+    sample,
+    technology
+):
+    """
+    Return the ORIGINAL source FASTQ.
+
+    Local mode:
+        input_root/HG002.ont.fastq.gz
+
+    Server mode:
+        input_root/HG002.ont.30x.fastq.gz
+
+    The filename is derived automatically.
+    It is never stored in samples.tsv.
+    """
+
+    _check_sample_technology(
+        sample,
+        technology
+    )
+
+    if INPUT_MODE == "preextracted":
+        pattern = PREEXTRACTED_PATTERN
+
+    elif INPUT_MODE == "whole_genome":
+        pattern = WHOLE_GENOME_PATTERN
+
+    else:
+        raise ValueError(
+            f"Unsupported input_mode: {INPUT_MODE}"
+        )
+
+    filename = pattern.format(
+        sample=sample,
+        technology=technology,
+    )
+
+    return str(
+        INPUT_ROOT / filename
+    )
+
+
+def source_fastq_for(wildcards):
+    """
+    Return the source FASTQ for a Snakemake wildcard object.
+
+    This helper will be used by the future Chr21 extraction rule.
+    """
+
+    return source_fastq_for_values(
         wildcards.sample,
         wildcards.technology,
     )
 
-    if key not in FASTQ_BY_SAMPLE_TECH:
-        raise ValueError(
-            f"No FASTQ defined for "
-            f"sample={wildcards.sample}, "
-            f"technology={wildcards.technology}"
+
+# -----------------------------------------------------------------------------
+# Canonical chromosome-21 paths
+# -----------------------------------------------------------------------------
+
+def generated_chr21_fastq_for_values(
+    sample,
+    technology
+):
+    """
+    Canonical Chr21 FASTQ generated by server preprocessing.
+    """
+
+    _check_sample_technology(
+        sample,
+        technology
+    )
+
+    return (
+        f"{CHR21_OUTPUT_DIR}/"
+        f"{sample}.{technology}.fastq.gz"
+    )
+
+
+# -----------------------------------------------------------------------------
+# Shared assembler input helpers
+# -----------------------------------------------------------------------------
+
+def assembler_fastq_for_values(
+    sample,
+    technology
+):
+    """
+    Return the FASTQ that assemblers should consume.
+
+    LOCAL:
+        directly use Nicolas's pre-extracted real Chr21 30x reads.
+
+    SERVER:
+        use the canonical Chr21 FASTQ generated automatically from WGS.
+    """
+
+    _check_sample_technology(
+        sample,
+        technology
+    )
+
+    if INPUT_MODE == "preextracted":
+        return source_fastq_for_values(
+            sample,
+            technology
         )
 
-    return FASTQ_BY_SAMPLE_TECH[key]
+    if INPUT_MODE == "whole_genome":
+        return generated_chr21_fastq_for_values(
+            sample,
+            technology
+        )
+
+    raise ValueError(
+        f"Unsupported input_mode: {INPUT_MODE}"
+    )
 
 
-# Return the ONT FASTQ associated with one sample
+# Preserve the existing helper API used by Flye, GoldRush and ntLink.
+def fastq_for(wildcards):
+    return assembler_fastq_for_values(
+        wildcards.sample,
+        wildcards.technology,
+    )
+
+
+# Preserve the existing helper API used by Verkko.
 def ont_fastq_for_sample(wildcards):
-    key = (
+    return assembler_fastq_for_values(
         wildcards.sample,
         "ont",
     )
 
-    if key not in FASTQ_BY_SAMPLE_TECH:
-        raise ValueError(
-            f"No ONT FASTQ defined for "
-            f"sample={wildcards.sample}"
-        )
 
-    return FASTQ_BY_SAMPLE_TECH[key]
-
-
-# Return the PacBio HiFi FASTQ associated with one sample
 def pb_fastq_for_sample(wildcards):
-    key = (
+    return assembler_fastq_for_values(
         wildcards.sample,
         "pb",
     )
 
-    if key not in FASTQ_BY_SAMPLE_TECH:
-        raise ValueError(
-            f"No PacBio HiFi FASTQ defined for "
-            f"sample={wildcards.sample}"
-        )
-
-    return FASTQ_BY_SAMPLE_TECH[key]
-
 
 # -----------------------------------------------------------------------------
-# Technology-specific parameter functions
+# Technology-specific assembler parameters
 # -----------------------------------------------------------------------------
 
-# Select the correct Flye input option for ONT or PacBio HiFi reads
 def flye_read_option(wildcards):
     if wildcards.technology == "ont":
         return "--nano-raw"
@@ -222,7 +425,7 @@ def flye_read_option(wildcards):
         return "--pacbio-hifi"
 
     raise ValueError(
-        f"Unsupported sequencing technology: "
+        "Unsupported sequencing technology: "
         f"{wildcards.technology}"
     )
 
@@ -231,10 +434,10 @@ def flye_read_option(wildcards):
 # Expected workflow outputs
 # -----------------------------------------------------------------------------
 
-# Build the final output collection according to the tools enabled in config.yaml
 EXPECTED_FINAL_OUTPUTS = []
 
-# Flye generates one independent assembly for each sample and technology
+
+# Flye
 if "flye" in ACTIVE_ASSEMBLERS:
     EXPECTED_FINAL_OUTPUTS.extend(
         [
@@ -248,19 +451,53 @@ if "flye" in ACTIVE_ASSEMBLERS:
         ]
     )
 
-# GoldRush outputs will be added after its command and installation are validated
 
-# ntLink outputs will be added after selecting which draft assemblies it will
-# scaffold using the corresponding long-read datasets
+# GoldRush
+if "goldrush" in ACTIVE_ASSEMBLERS:
+    EXPECTED_FINAL_OUTPUTS.extend(
+        [
+            (
+                f"results/smoke_test/goldrush/"
+                f"{sample}.{technology}/assembly.fasta"
+            )
+            for sample, technology
+            in SAMPLE_TECH_PAIRS
+        ]
+    )
 
-# Verkko outputs will be added after validating its hybrid ONT and PacBio inputs
+
+# ntLink
+if "ntlink" in ACTIVE_ASSEMBLERS:
+    EXPECTED_FINAL_OUTPUTS.extend(
+        [
+            (
+                f"results/smoke_test/ntlink/"
+                f"{sample}.{technology}/assembly.fasta"
+            )
+            for sample, technology
+            in SAMPLE_TECH_PAIRS
+        ]
+    )
+
+
+# Verkko
+if "verkko" in ACTIVE_ASSEMBLERS:
+    EXPECTED_FINAL_OUTPUTS.extend(
+        [
+            (
+                f"results/smoke_test/verkko/"
+                f"{sample}/assembly.fasta"
+            )
+            for sample
+            in SAMPLES
+        ]
+    )
 
 
 # -----------------------------------------------------------------------------
 # Wildcard constraints
 # -----------------------------------------------------------------------------
 
-# Restrict wildcards to the samples and technologies listed in samples.tsv
 wildcard_constraints:
     sample="|".join(SAMPLES),
     technology="|".join(TECHNOLOGIES)

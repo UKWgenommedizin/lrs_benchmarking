@@ -6,7 +6,7 @@
 
 # Load the main configuration file containing the sample table, active tools,
 # genome size, thread settings, and other workflow parameters
-configfile: "config.yaml"
+configfile: "config/base.yaml"
 
 
 # -----------------------------------------------------------------------------
