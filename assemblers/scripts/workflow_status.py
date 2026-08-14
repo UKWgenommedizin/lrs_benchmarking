@@ -89,21 +89,8 @@ def read_samples() -> list[tuple[str, str]]:
 
 
 def detect_mode() -> str:
-    logs = ROOT / "results" / "logs"
-
-    if (
-        logs
-        / "validate_inputs.whole_genome.ok"
-    ).exists():
-        return "whole_genome"
-
-    if (
-        logs
-        / "validate_inputs.preextracted.ok"
-    ).exists():
-        return "preextracted"
-
-    return "unknown"
+    """Return the supported assembler input mode."""
+    return "chr21_fastq"
 
 
 def main() -> None:
@@ -125,7 +112,7 @@ def main() -> None:
     table = []
 
     for sample, tech in samples:
-        if mode == "preextracted":
+        if mode == "chr21_fastq":
             mapping = "N/A"
             filtering = "N/A"
             normalization = "PRESET"

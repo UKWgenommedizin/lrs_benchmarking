@@ -7,13 +7,18 @@
 # See:
 #   config/local.yaml
 #   config/server.yaml
+#
+# The assembler workflow starts directly from final normalized
+# chromosome-21 FASTQ files.
 # =============================================================================
 
 sample_sheet: "samples.tsv"
 
-# ---------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 # Biological target
-# ---------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
 
 chromosome: "chr21"
 genome_size: 46709983
@@ -22,9 +27,9 @@ target_coverage: 30
 target_bases: 1401299490
 
 
-# ---------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Assemblers
-# ---------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 active_assemblers:
   - flye
@@ -32,55 +37,96 @@ active_assemblers:
   - ntlink
   - verkko
 
-# ---------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 # Output locations
-# ---------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+#
+# input_root in config/local.yaml or config/server.yaml.
+# -----------------------------------------------------------------------------
 
 output_root: "results"
-chr21_output_dir: "results/chr21"
 
-# ---------------------------------------------------------------------------
-# Input naming conventions
-# ---------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# Input dataset contract
+# -----------------------------------------------------------------------------
 #
-# samples.tsv contains ONLY:
+# samples.tsv contains sample metadata only:
 #
 # sample    technology
 #
-# It does NOT contain FASTQ paths.
-#
-# The workflow automatically combines:
-#
-# input_root + sample + technology + pattern
-#
 # Example:
 #
-# /data/wgs_30x + HG002 + ont
+# HG002     ont
+# HG002     pb
+# HG003     ont
+# HG003     pb
 #
-# becomes:
+# samples.tsv deliberately contains NO machine-specific file paths.
 #
-# /data/wgs_30x/HG002.ont.30x.fastq.gz
+# The location of the dataset is provided through:
 #
-# ---------------------------------------------------------------------------
+#   config/local.yaml  -> local input_root
+#   config/server.yaml -> server input_root
+#
+# Under input_root, the workflow expects one directory per sample:
+#
+# input_root/
+# ├── HG002/
+# ├── HG003/
+# └── HG004/
+#
+# Expected FASTQ naming convention:
+#
+# HG002/HG002.ont.chr21.primary.mapq20.30x.fastq.gz
+# HG002/HG002.hifi.chr21.primary.mapq20.30x.fastq.gz
+#
+# Technology naming used by the workflow:
+#
+#   ont -> ont
+#   pb  -> hifi
+#
+# The exact FASTQ path is constructed automatically in rules/common.smk
+# from:
+#
+#   input_root + sample + technology
+#
+# No whole-genome input or chromosome-extraction step is required by the
+# assembler workflow.
+# -----------------------------------------------------------------------------
 
-whole_genome_pattern: "{sample}.{technology}.30x.fastq.gz"
 
-# Used by local testing with Nicolas's previously extracted Chr21 data.
-preextracted_pattern: "{sample}.{technology}.fastq.gz"
+# -----------------------------------------------------------------------------
+# Default runtime settings
+# -----------------------------------------------------------------------------
+#
+# Machine-specific resource values can override this default in:
+#
+#   config/local.yaml
+#   config/server.yaml
+# -----------------------------------------------------------------------------
 
-# Default value retained for compatibility with existing rules.
 threads: 4
 
 
-# ---------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Progress and logging
-# ---------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+#
+# Rules write execution state markers under results/progress and detailed
+# application logs under results/logs.
+# -----------------------------------------------------------------------------
 
 progress_dir: "results/progress"
 log_dir: "results/logs"
 
-# Version-pinned assembler containers.
-# These are workflow infrastructure and normally do not need to be changed.
+
+# -----------------------------------------------------------------------------
+# Assembler containers
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
 containers:
   flye2: "nicolasardila1/lrs-flye2:2.9.6"
   goldrush: "nicolasardila1/lrs-goldrush:1.2.2"

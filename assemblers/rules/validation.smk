@@ -1,7 +1,7 @@
 #####################################################################################
 # INPUT AND RUNTIME VALIDATION
 #
-# Checks metadata, automatically resolved inputs, the server reference when needed,
+# Checks metadata, automatically resolved Chr21 FASTQ inputs,
 # and Docker availability before any assembler is allowed to start.
 #####################################################################################
 
@@ -36,13 +36,6 @@ rule validate_inputs:
                 errors.append(f"Missing source FASTQ for {sample} {technology}: {fastq}")
             elif not fastq.is_file():
                 errors.append(f"Input is not a regular FASTQ file for {sample} {technology}: {fastq}")
-
-        # Reference is required only for server/WGS mode.
-        if INPUT_MODE == "whole_genome":
-            if not REFERENCE:
-                errors.append("Server/whole_genome mode requires 'reference' in config/server.yaml")
-            elif not REFERENCE.exists():
-                errors.append(f"Missing reference FASTA: {REFERENCE}")
 
         # Docker is required whenever an assembler is active.
         if ACTIVE_ASSEMBLERS:
