@@ -37,13 +37,6 @@ rule validate_inputs:
             elif not fastq.is_file():
                 errors.append(f"Input is not a regular FASTQ file for {sample} {technology}: {fastq}")
 
-        # Reference is required only for server/WGS mode.
-        if INPUT_MODE == "whole_genome":
-            if not REFERENCE:
-                errors.append("Server/whole_genome mode requires 'reference' in config/server.yaml")
-            elif not REFERENCE.exists():
-                errors.append(f"Missing reference FASTA: {REFERENCE}")
-
         # Docker is required whenever an assembler is active.
         if ACTIVE_ASSEMBLERS:
             docker = shutil.which("docker")

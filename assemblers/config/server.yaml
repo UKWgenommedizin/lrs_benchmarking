@@ -10,15 +10,13 @@
 # samples.tsv must NEVER contain server-specific directories.
 # =============================================================================
 
-input_mode: "whole_genome"
+input_mode: "chr21_fastq"
 
 # ---------------------------------------------------------------------------
 # CHANGE THESE FOR THE SERVER
 # ---------------------------------------------------------------------------
 
-input_root: "/CHANGE/THIS/TO/SERVER/WGS_30X"
-
-reference: "/CHANGE/THIS/TO/SERVER/GRCh38.fa"
+input_root: "/home/yu_j/smbshare/lrs_benchmarking/fastq/final"
 
 # ---------------------------------------------------------------------------
 # Server resources

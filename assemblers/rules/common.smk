@@ -120,12 +120,10 @@ if RAW_REFERENCE:
 
 INPUT_MODE = config.get("input_mode")
 
-if INPUT_MODE not in {"preextracted", "whole_genome"}:
+if INPUT_MODE != "chr21_fastq":
     raise ValueError(
         "Missing or invalid input_mode. "
-        "Run the workflow with either config/local.yaml "
-        "or config/server.yaml. Expected input_mode to be "
-        "'preextracted' or 'whole_genome'."
+        "Expected input_mode to be 'chr21_fastq'."
     )
 
 
@@ -483,16 +481,20 @@ def source_fastq_for_values(
     technology
 ):
     """
-    Return the ORIGINAL source FASTQ.
+    Return the final normalized chromosome-21 FASTQ.
 
-    Local mode:
-        input_root/HG002.ont.fastq.gz
+    The assembler workflow starts directly from already extracted
+    and normalized chromosome-21 reads.
 
-    Server mode:
-        input_root/HG002.ont.30x.fastq.gz
+    Examples:
+        HG002 + ont
+        -> HG002/HG002.ont.chr21.primary.mapq20.30x.fastq.gz
 
-    The filename is derived automatically.
-    It is never stored in samples.tsv.
+        HG002 + pb
+        -> HG002/HG002.hifi.chr21.primary.mapq20.30x.fastq.gz
+
+    File paths are derived automatically from input_root,
+    sample, and technology. They are not stored in samples.tsv.
     """
 
     _check_sample_technology(
@@ -500,24 +502,27 @@ def source_fastq_for_values(
         technology
     )
 
-    if INPUT_MODE == "preextracted":
-        pattern = PREEXTRACTED_PATTERN
-
-    elif INPUT_MODE == "whole_genome":
-        pattern = WHOLE_GENOME_PATTERN
-
-    else:
+    if INPUT_MODE != "chr21_fastq":
         raise ValueError(
-            f"Unsupported input_mode: {INPUT_MODE}"
+            f"Unsupported input_mode: {INPUT_MODE}. "
+            "Expected 'chr21_fastq'."
         )
 
-    filename = pattern.format(
-        sample=sample,
-        technology=technology,
+    filename_technology = {
+        "ont": "ont",
+        "pb": "hifi",
+    }[technology]
+
+    filename = (
+        f"{sample}."
+        f"{filename_technology}."
+        "chr21.primary.mapq20.30x.fastq.gz"
     )
 
     return str(
-        INPUT_ROOT / filename
+        INPUT_ROOT
+        / sample
+        / filename
     )
 
 
@@ -566,35 +571,14 @@ def assembler_fastq_for_values(
     technology
 ):
     """
-    Return the FASTQ that assemblers should consume.
+    Return the final normalized Chr21 FASTQ consumed by assemblers.
 
-    LOCAL:
-        directly use Nicolas's pre-extracted real Chr21 30x reads.
-
-    SERVER:
-        use the canonical Chr21 FASTQ generated automatically from WGS.
+    Chr21 FASTQ is the production workflow entry point.
     """
 
-    _check_sample_technology(
-        sample,
-        technology
-    )
+    _check_sample_technology(sample,technology)
 
-    if INPUT_MODE == "preextracted":
-        return source_fastq_for_values(
-            sample,
-            technology
-        )
-
-    if INPUT_MODE == "whole_genome":
-        return generated_chr21_fastq_for_values(
-            sample,
-            technology
-        )
-
-    raise ValueError(
-        f"Unsupported input_mode: {INPUT_MODE}"
-    )
+    return source_fastq_for_values(sample,technology)
 
 
 # Preserve the existing helper API used by Flye, GoldRush and ntLink.
