@@ -2,7 +2,7 @@
 # LOCAL TEST CONFIGURATION
 # =============================================================================
 #
-# Uses Nicolas's previously extracted real Chr21 30x reads.
+# Uses the final normalized Chr21 30x FASTQ dataset.
 #
 # No chromosome extraction is performed in this mode.
 # =============================================================================

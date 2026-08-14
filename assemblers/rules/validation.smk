@@ -1,7 +1,7 @@
 #####################################################################################
 # INPUT AND RUNTIME VALIDATION
 #
-# Checks metadata, automatically resolved inputs, the server reference when needed,
+# Checks metadata, automatically resolved Chr21 FASTQ inputs,
 # and Docker availability before any assembler is allowed to start.
 #####################################################################################
 
