@@ -8,7 +8,7 @@ include: "../../header_assembler.smk"
 
 #################
 # GoldRush version
-GOLDRUSH_VERSION = "1.2.2"
+GOLDRUSH_VERSION = "1.2.2-ntlinkfix"
 DOCKER_GOLDRUSH = "nicolasardila1/lrs-goldrush:" + GOLDRUSH_VERSION
 
 print("GoldRush version: " + GOLDRUSH_VERSION)
