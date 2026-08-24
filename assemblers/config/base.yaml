@@ -8,8 +8,8 @@
 #   config/local.yaml
 #   config/server.yaml
 #
-# The assembler workflow starts directly from final normalized
-# chromosome-21 FASTQ files.
+# The assembler workflow accepts either final normalized chromosome-21 FASTQs
+# or whole-genome FASTQs that are prepared to chromosome 21 first.
 # =============================================================================
 
 sample_sheet: "samples.tsv"
@@ -92,8 +92,8 @@ output_root: "results"
 #
 #   input_root + sample + technology
 #
-# No whole-genome input or chromosome-extraction step is required by the
-# assembler workflow.
+# Whole-genome input is mapped and normalized by rules/chr21.smk before
+# assembler execution when input_mode is whole_genome.
 # -----------------------------------------------------------------------------
 
 
@@ -129,6 +129,6 @@ log_dir: "results/logs"
 
 containers:
   flye2: "nicolasardila1/lrs-flye2:2.9.6"
-  goldrush: "nicolasardila1/lrs-goldrush:1.2.2-gzipfix1"
+  goldrush: "nicolasardila1/lrs-goldrush:1.2.2-ntlinkfix"
   ntlink: "nicolasardila1/lrs-ntlink:1.3.11"
   verkko2: "nicolasardila1/lrs-verkko2:2.3.2"

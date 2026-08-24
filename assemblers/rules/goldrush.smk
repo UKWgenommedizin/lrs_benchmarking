@@ -63,6 +63,9 @@ rule goldrush_assembly:
             mv "$READS_FASTQ.tmp" "$READS_FASTQ"
         fi
 
+        # Force ntLink to regenerate mappings after an interrupted run.
+        rm -f "{params.workdir}"/goldrush_intermediate_files/*.verbose_mapping.tsv
+
         docker run --rm \
             --cpus {threads} \
             --memory {resources.mem_mb}m \

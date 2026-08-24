@@ -16,7 +16,7 @@
 #          ↓
 #   docker build
 #          ↓
-#   lrs-goldrush:1.2.2
+#   lrs-goldrush:1.2.2-ntlinkfix
 #          ↓
 #   check executable
 #          ↓
@@ -38,12 +38,7 @@ import sys
 # STEP 2 — DEFINE PROJECT DIRECTORIES
 # =============================================================================
 
-PROJECT = (
-    Path.home()
-    / "lrs_benchmarking"
-    / "final_report_files"
-    / "snakemake_assemblers_benchmarking"
-)
+PROJECT = Path(__file__).resolve().parents[2]
 
 
 # Directory containing:
@@ -69,10 +64,7 @@ goldrush_context = CONTAINERS / "goldrush"
 
 LOGDIR = PROJECT / "container_build_logs"
 
-LOGDIR.mkdir(
-    parents=True,
-    exist_ok=True,
-)
+LOGDIR.mkdir(parents=True, exist_ok=True,)
 
 
 # =============================================================================
@@ -84,8 +76,7 @@ print("Checking Docker...")
 docker_check = subprocess.run(
     ["docker", "info"],
     stdout=subprocess.DEVNULL,
-    stderr=subprocess.DEVNULL,
-)
+    stderr=subprocess.DEVNULL,)
 
 
 if docker_check.returncode != 0:
@@ -113,7 +104,7 @@ print("=" * 60)
 
 # Docker image that will be created locally.
 
-goldrush_image = "lrs-goldrush:1.2.2"
+goldrush_image = "lrs-goldrush:1.2.2-ntlinkfix"
 
 
 # File where Docker build output will be saved.
@@ -132,8 +123,7 @@ command = [
     "--pull",
     "--tag",
     goldrush_image,
-    str(goldrush_context),
-]
+    str(goldrush_context),]
 
 
 print("Command:")
@@ -159,8 +149,7 @@ with goldrush_log.open("w") as log_file:
         command,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        text=True,
-    )
+        text=True,)
 
 
     # =========================================================================
@@ -169,14 +158,9 @@ with goldrush_log.open("w") as log_file:
 
     for line in process.stdout:
 
-        print(
-            line,
-            end="",
-        )
+        print(line, end="",)
 
-        log_file.write(
-            line
-        )
+        log_file.write(line)
 
 
     # =========================================================================
@@ -192,18 +176,12 @@ with goldrush_log.open("w") as log_file:
 
 if return_code != 0:
 
-    print(
-        "ERROR: GoldRush Docker image build failed."
-    )
+    print("ERROR: GoldRush Docker image build failed.")
 
-    sys.exit(
-        return_code
-    )
+    sys.exit(return_code)
 
 
-print(
-    "SUCCESS: GoldRush Docker image created."
-)
+print("SUCCESS: GoldRush Docker image created.")
 
 # =============================================================================
 # STEP 12 — CHECK GOLDRUSH EXECUTABLE INSIDE THE CONTAINER
@@ -217,15 +195,13 @@ runtime_command = [
     goldrush_image,
     "bash",
     "-lc",
-    "command -v goldrush",
-]
+    "command -v goldrush",]
 
 #Check the subprocess is true
 runtime_check = subprocess.run(
     runtime_command,
     capture_output=True,
-    text=True,
-)
+    text=True,)
 
 #Verify its running
 if runtime_check.returncode != 0:
@@ -234,13 +210,9 @@ if runtime_check.returncode != 0:
     sys.exit(runtime_check.returncode)
 
 
-print(
-    "GoldRush executable found:"
-)
+print("GoldRush executable found:")
 
-print(
-    runtime_check.stdout.strip()
-)
+print(runtime_check.stdout.strip())
 
 
 # =============================================================================
@@ -253,16 +225,14 @@ help_command=[
     "--rm",
     goldrush_image,
     "goldrush",
-    "help",
-]
+    "help",]
 
 # Execute "goldrush help" inside a temporary container
 # and capture both standard output and errors
 help_check = subprocess.run(
     help_command,
     capture_output=True,
-    text=True
-)
+    text=True)
 
 # A non-zero return code means GoldRush could not start correctly.
 if help_check.returncode != 0:
@@ -296,21 +266,15 @@ print("  GoldRush command executed   [PASS]")
 
 print()
 print("Docker image:")
-print(
-    f"  {goldrush_image}" #print directly this string
-)
+print(f"  {goldrush_image}")
 
 print()
 print("Docker build context:")
-print(
-    f"  {goldrush_context}"
-)
+print(f"  {goldrush_context}")
 
 print()
 print("Build log:")
-print(
-    f"  {goldrush_log}"
-)
+print(f"  {goldrush_log}")
 
 print()
 print("No genome assembly was executed.")

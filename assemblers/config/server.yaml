@@ -10,13 +10,19 @@
 # samples.tsv must NEVER contain server-specific directories.
 # =============================================================================
 
-input_mode: "chr21_fastq"
+input_mode: "whole_genome"
 
 # ---------------------------------------------------------------------------
 # CHANGE THESE FOR THE SERVER
 # ---------------------------------------------------------------------------
 
 input_root: "/home/yu_j/smbshare/lrs_benchmarking/fastq/final"
+
+# Required: absolute path to the indexed GRCh38 reference FASTA on the server.
+# reference: "/path/to/GRCh38.fa"
+
+# Raw whole-genome FASTQ names relative to input_root.
+whole_genome_pattern: "{sample}.{technology}.30x.fastq.gz"
 
 # ---------------------------------------------------------------------------
 # Server resources

@@ -9,7 +9,7 @@ include: "../../header_assembler.smk"
 #################
 # GoldRush version
 GOLDRUSH_VERSION = "1.2.2"
-DOCKER_GOLDRUSH = "nicolasardila1/lrs-goldrush:" + GOLDRUSH_VERSION
+DOCKER_GOLDRUSH = "nicolasardila1/lrs-goldrush:1.2.2-ntlinkfix"
 
 print("GoldRush version: " + GOLDRUSH_VERSION)
 
@@ -120,6 +120,9 @@ rule goldrush_assemble:
                 gzip -cd "{input.fastq}" > "$READS_FASTQ.tmp"
                 mv "$READS_FASTQ.tmp" "$READS_FASTQ"
             fi
+
+            # Force ntLink to regenerate mappings after an interrupted run.
+            rm -f "{params.outdir}"/goldrush_intermediate_files/*.verbose_mapping.tsv
 
             docker run --rm \
                 --hostname goldrush-{wildcards.dataset} \
