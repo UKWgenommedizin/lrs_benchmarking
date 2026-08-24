@@ -120,10 +120,16 @@ if RAW_REFERENCE:
 
 INPUT_MODE = config.get("input_mode")
 
-if INPUT_MODE != "chr21_fastq":
+if INPUT_MODE not in {"chr21_fastq", "whole_genome"}:
     raise ValueError(
         "Missing or invalid input_mode. "
-        "Expected input_mode to be 'chr21_fastq'."
+        "Expected input_mode to be 'chr21_fastq' or 'whole_genome'."
+    )
+
+if INPUT_MODE == "whole_genome" and REFERENCE is None:
+    raise ValueError(
+        "Missing reference for whole-genome input. "
+        "Set reference in config/server.yaml or with --config."
     )
 
 
@@ -145,6 +151,15 @@ if not INPUT_ROOT.is_absolute():
     INPUT_ROOT = PROJECT_DIR / INPUT_ROOT
 
 INPUT_ROOT = INPUT_ROOT.resolve(strict=False)
+
+WHOLE_GENOME_PATTERN = str(
+    config.get(
+        "whole_genome_pattern",
+        "{sample}.{technology}.30x.fastq.gz"
+    )
+)
+
+CHR21_OUTPUT_DIR = "results/chr21"
 
 
 # -----------------------------------------------------------------------------
@@ -466,14 +481,14 @@ def source_fastq_for_values(
     technology
 ):
     """
-    Return the final normalized chromosome-21 FASTQ.
+    Return the configured raw input FASTQ.
 
-    The assembler workflow starts directly from already extracted
-    and normalized chromosome-21 reads.
+    Whole-genome inputs are mapped and normalized by rules/chr21.smk;
+    chr21_fastq inputs are already prepared for assembly.
 
     Examples:
         HG002 + ont
-        -> HG002/HG002.ont.chr21.primary.mapq20.30x.fastq.gz
+        -> HG002.ont.30x.fastq.gz
 
         HG002 + pb
         -> HG002/HG002.hifi.chr21.primary.mapq20.30x.fastq.gz
@@ -487,28 +502,23 @@ def source_fastq_for_values(
         technology
     )
 
-    if INPUT_MODE != "chr21_fastq":
-        raise ValueError(
-            f"Unsupported input_mode: {INPUT_MODE}. "
-            "Expected 'chr21_fastq'."
+    if INPUT_MODE == "whole_genome":
+        filename = WHOLE_GENOME_PATTERN.format(
+            sample=sample,
+            technology=technology,
+        )
+    else:
+        filename_technology = {
+            "ont": "ont",
+            "pb": "hifi",
+        }[technology]
+        filename = (
+            f"{sample}/{sample}."
+            f"{filename_technology}."
+            "chr21.primary.mapq20.30x.fastq.gz"
         )
 
-    filename_technology = {
-        "ont": "ont",
-        "pb": "hifi",
-    }[technology]
-
-    filename = (
-        f"{sample}."
-        f"{filename_technology}."
-        "chr21.primary.mapq20.30x.fastq.gz"
-    )
-
-    return str(
-        INPUT_ROOT
-        / sample
-        / filename
-    )
+    return str(INPUT_ROOT / filename)
 
 
 def source_fastq_for(wildcards):
@@ -541,6 +551,16 @@ def assembler_fastq_for_values(
     """
 
     _check_sample_technology(sample, technology)
+
+    if INPUT_MODE == "whole_genome":
+        filename_technology = {
+            "ont": "ont",
+            "pb": "hifi",
+        }[technology]
+        return str(
+            Path(CHR21_OUTPUT_DIR)
+            / f"{sample}.{filename_technology}.fastq.gz"
+        )
 
     return source_fastq_for_values(sample,technology)
 

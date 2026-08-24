@@ -1,7 +1,0 @@
-sample_sheet: samples.tsv
-
-active_assemblers:
-  - flye
-
-genome_size: 3.1g
-threads: 4

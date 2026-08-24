@@ -16,6 +16,9 @@ configfile: "config/base.yaml"
 # This file contains variables and Python functions shared by all assembler rules
 include: "rules/common.smk"
 
+# Whole-genome runs first prepare normalized Chr21 FASTQs for the assemblers.
+include: "rules/chr21.smk"
+
 
 # -----------------------------------------------------------------------------
 # Final target rule
