@@ -8,8 +8,7 @@ include: "../../header_assembler.smk"
 
 #################
 # GoldRush version
-GOLDRUSH_VERSION = "1.2.2"
-DOCKER_GOLDRUSH = "nicolasardila1/lrs-goldrush:1.2.2-ntlinkfix"
+
 GOLDRUSH_VERSION = "1.2.2-ntlinkfix"
 DOCKER_GOLDRUSH = "nicolasardila1/lrs-goldrush:" + GOLDRUSH_VERSION
 
@@ -99,6 +98,12 @@ rule goldrush_assemble:
         """
         mkdir -p "$(dirname "{log}")"
 
+        if [[ -s "{log}" ]]; then
+            PREVIOUS_LOG="{log}.previous.$(date +%Y%m%dT%H%M%S)"
+            cp -- "{log}" "$PREVIOUS_LOG"
+            echo "Previous GoldRush log saved to: $PREVIOUS_LOG"
+        fi
+
         (
             set -euo pipefail
 
@@ -117,23 +122,43 @@ rule goldrush_assemble:
             # The reads argument must be provided without the .fastq suffix.
             READS_FASTQ="{params.outdir}/{wildcards.dataset}.fastq"
 
-            if [[ ! -s "$READS_FASTQ" ]]; then
+            # Prepare the uncompressed FASTQ when it does not exist or when the
+            # compressed source FASTQ is newer than the prepared copy.
+            if [[ ! -s "$READS_FASTQ" || "{input.fastq}" -nt "$READS_FASTQ" ]]; then
                 echo "Preparing uncompressed GoldRush input..."
+
+                rm -f -- "$READS_FASTQ.tmp"
+
                 gzip -cd "{input.fastq}" > "$READS_FASTQ.tmp"
+
+            [[ -s "$READS_FASTQ.tmp" ]] || {{
+                echo "ERROR: decompressed GoldRush FASTQ is missing or empty"
+                exit 102
+            }}
+
                 mv "$READS_FASTQ.tmp" "$READS_FASTQ"
             fi
 
-            # Force ntLink to regenerate mappings after an interrupted run.
-            rm -f "{params.outdir}"/goldrush_intermediate_files/*.verbose_mapping.tsv
+            INTERMEDIATE_DIR="{params.outdir}/goldrush_intermediate_files"
+
+            if [[ -d "$INTERMEDIATE_DIR" ]]; then
+                echo "Removing previous GoldRush internal state:"
+                echo "$INTERMEDIATE_DIR"
+                rm -rf -- "$INTERMEDIATE_DIR"
+            fi
+
+            rm -f -- "{output.fasta}"
+
+
 
             docker run --rm \
                 --hostname goldrush-{wildcards.dataset} \
-                --workdir {params.outdir} \
+                --workdir "{params.outdir}" \
                 -u $UID:$(id -g) \
                 --cpus {threads} \
                 -m {resources.mem_mb}m \
                 --shm-size {params.shm_size} \
-                -v {CWD}:{CWD} \
+                -v "{CWD}:{CWD}" \
                 {DOCKER_GOLDRUSH} \
                 goldrush run \
                 reads={wildcards.dataset} \
@@ -171,6 +196,7 @@ rule goldrush_assemble:
             }}
 
             echo "[$(date -Is)] END goldrush_assemble {wildcards.dataset}"
+            echo "Assembly size: $(du -h "{output.fasta}" | cut -f1)"
 
         ) > "{log}" 2>&1
         """
