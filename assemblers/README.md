@@ -199,6 +199,21 @@ docker info
 The assembler rules use Docker. GoldRush and Flye require substantial memory;
 the supplied server configuration assigns up to 64 GB per such job.
 
+
+### Repository root
+
+The standalone WGS workflows use paths relative to the repository root.
+
+Local:
+
+```bash
+cd ~/lrs_benchmarking_wgs_clean
+
+Server:
+
+cd /data/genmedbfx/yu_j/lrs_benchmarking
+
+
 ## Running the workflow
 
 Run from the `assemblers/` directory:
@@ -291,13 +306,21 @@ snakemake --snakefile assemblers/whole_genome_asm/ont.assembly.flye2.smk \
 Run ONT and PacBio independently:
 
 ```bash
-snakemake --snakefile assemblers/whole_genome_asm/ont.assembly.Goldrush.smk \
-  --cores 32 --resources mem_mb=64000 \
-  --rerun-incomplete --printshellcmds
+snakemake \
+    --snakefile assemblers/whole_genome_asm/ont.assembly.Goldrush.smk \
+    --cores 32 \
+    --resources mem_mb=64000 \
+    --rerun-incomplete \
+    --printshellcmds \
+    --show-failed-logs
 
-snakemake --snakefile assemblers/whole_genome_asm/pb.assembly.Goldrush.smk \
-  --cores 32 --resources mem_mb=64000 \
-  --rerun-incomplete --printshellcmds
+snakemake \
+    --snakefile assemblers/whole_genome_asm/pb.assembly.Goldrush.smk \
+    --cores 32 \
+    --resources mem_mb=64000 \
+    --rerun-incomplete \
+    --printshellcmds \
+    --show-failed-logs
 ```
 
 GoldRush uses the patched
@@ -375,26 +398,43 @@ they are not substitutes for the server's whole-genome 30x datasets.
 
 ## GoldRush and ntLink
 
-GoldRush uses `nicolasardila1/lrs-goldrush:1.2.2-ntlinkfix`. The image includes
-the plain-FASTQ compatibility fix and a guard for empty ntLink checkpoint
-mappings. The GoldRush rules remove stale `*.verbose_mapping.tsv` files after
-interrupted runs so ntLink regenerates its mappings.
+## GoldRush and ntLink
+
+GoldRush uses `nicolasardila1/lrs-goldrush:1.2.2-ntlinkfix`.
+
+The image includes the plain-FASTQ compatibility fix required by the
+GoldRush-bundled ntLink workflow. ntLink reads the prepared uncompressed
+FASTQ directly instead of attempting to decompress it again.
+
+When a GoldRush assembly rule is executed, the workflow removes the complete
+`goldrush_intermediate_files/` directory before starting GoldRush. This
+prevents Make/ntLink intermediate files and stale checkpoints from previous
+failed or completed executions from being reused.
+
+The prepared uncompressed FASTQ is stored outside
+`goldrush_intermediate_files/` and is preserved between runs.
 
 ## Legacy workflows
 
-Files under `whole_genome_asm/` are older standalone workflows modelled on the
-upstream repository. For example, `ont.assembly.flye2.smk` includes
-`header_assembler.smk`, gets `CWD` from `os.getcwd()`, discovers
-`fastq/{dataset}.fastq.gz`, and writes to `assemblies/flye/{dataset}/`.
+## Standalone whole-genome workflows
 
-These standalone files do not use `config/base.yaml`, the local/server config
-files, or `samples.tsv`. The standalone GoldRush ONT and PB workflows likewise
-use CWD-based paths and hard-coded settings. They are retained for historical
-or isolated testing and must not be mixed with the modular `Snakefile`.
+The workflows under `whole_genome_asm/` are the production whole-genome
+assembly workflows.
 
-`benchmark_chr21_real/` is a separate workflow with its own Snakefile, config,
-sample sheet, and output tree.
+They are modelled on the original one-`.smk`-file-per-tool structure and use
+`header_assembler.smk`, which derives `CWD` from `os.getcwd()`.
 
-The upstream repository is therefore a useful reference for the original
-one-`.smk`-file-per-tool style, while this directory's modular workflow is the
-recommended centralized implementation.
+For this reason, these workflows must be launched from the repository root.
+They discover WGS inputs under:
+
+`fastq/{dataset}.fastq.gz`
+
+and write standardized final assemblies under:
+
+`assemblies/<tool>/<dataset>/assembly.fasta`
+
+These standalone WGS workflows do not use `config/base.yaml`,
+`config/local.yaml`, `config/server.yaml`, or `samples.tsv`.
+
+The modular `assemblers/Snakefile` workflow is maintained separately for
+prepared-Chr21 benchmarking and local validation.
