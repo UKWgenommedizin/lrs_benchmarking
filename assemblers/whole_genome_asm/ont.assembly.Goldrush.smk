@@ -141,13 +141,14 @@ rule goldrush_assemble:
             # -------------------------------------------------------------------------
             # Reset GoldRush internal workflow state.
             #
-            # GoldRush uses an internal Make/ntLink workflow that Snakemake cannot
-            # track individually. Intermediate files from a failed or previous run
-            # may otherwise be reused, including stale ntLink checkpoints.
+            # GoldRush manages an internal Make/ntLink workflow whose intermediate
+            # files are not declared as individual Snakemake outputs. Files left from
+            # a failed or previous run may therefore be reused by GoldRush/ntLink,
+            # including stale or incomplete ntLink checkpoints.
             #
-            # The prepared uncompressed FASTQ is outside this directory and is kept.
+            # The prepared uncompressed FASTQ is stored outside this directory and
+            # is intentionally preserved.
             # -------------------------------------------------------------------------
-
             INTERMEDIATE_DIR="{params.outdir}/goldrush_intermediate_files"
 
             if [[ -d "$INTERMEDIATE_DIR" ]]; then
