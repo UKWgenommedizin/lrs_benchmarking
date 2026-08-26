@@ -48,7 +48,7 @@ def get_flye_memory(wildcards):
     if ".chr21." in dataset:
         return 8
 
-    return 450
+    return 240
 
 ################
 #Rules
@@ -69,7 +69,7 @@ rule flye_assemble:
     message:
         "executing {rule} with output {output} and input {input}"
 
-    threads: 12
+    threads: 32
 
     resources:
         mem_gb = get_flye_memory
