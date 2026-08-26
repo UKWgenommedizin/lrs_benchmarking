@@ -287,7 +287,7 @@ snakemake --snakefile assemblers/whole_genome_asm/ont.assembly.flye2.smk \
   --rerun-incomplete --printshellcmds
 
 snakemake --snakefile assemblers/whole_genome_asm/pb.assembly.flye2.smk \
-  --cores 32 --resources mem_gb=450 \
+  --cores 32 --resources mem_gb=200 \
   --rerun-incomplete --printshellcmds
 ```
 

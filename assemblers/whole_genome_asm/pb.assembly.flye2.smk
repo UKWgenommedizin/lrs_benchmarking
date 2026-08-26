@@ -1,5 +1,5 @@
 # ************************************************************************************************
-# Flye ONT whole-genome assembly
+# Flye PacBio HiFi whole-genome assembly
 # ************************************************************************************************
 
 #################
@@ -48,7 +48,7 @@ def get_flye_memory(wildcards):
     if ".chr21." in dataset:
         return 8
 
-    return 450
+    return 240
 
 ################
 #Rules
@@ -69,7 +69,7 @@ rule flye_assemble:
     message:
         "executing {rule} with output {output} and input {input}"
 
-    threads: 12
+    threads: 32
 
     resources:
         mem_gb = get_flye_memory
@@ -83,8 +83,8 @@ rule flye_assemble:
 
             echo "[$(date -Is)] START flye_assemble {wildcards.dataset}"
             echo "Dataset: {wildcards.dataset}"
-            echo "Read technology: ONT"
-            echo "Read mode: --nano-hq"
+            echo "Read technology: PacBio HiFi"
+            echo "Read mode: --pacbio-hifi"
             echo "Threads: {threads}"
             echo "Memory: {resources.mem_gb} GB"
 
@@ -98,7 +98,7 @@ rule flye_assemble:
                 -v {CWD}:{CWD} \
                 {DOCKER_FLYE} \
                 flye \
-                --nano-hq \
+                --pacbio-hifi \
                 {input.fastq} \
                 --out-dir {params.outdir} \
                 --threads {threads}
