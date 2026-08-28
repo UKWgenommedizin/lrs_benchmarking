@@ -361,19 +361,15 @@ Verkko is a hybrid assembler and runs one sample at a time using both
 technologies:
 
 ```bash
-snakemake --snakefile assemblers/whole_genome_asm/hybrid.assembly.verkko.smk \
-  --cores 32 --resources mem_mb=72000 \
-  --rerun-incomplete --printshellcmds
+snakemake \
+  --snakefile assemblers/whole_genome_asm/hybrid.assembly.verkko.smk \
+  --configfile assemblers/config/server.yaml \
+  --cores 32 \
+  --resources mem_mb=200000 \
+  --rerun-incomplete \
+  --printshellcmds
 ```
 
-For one sample, use for example:
-
-```bash
-snakemake --snakefile assemblers/whole_genome_asm/hybrid.assembly.verkko.smk \
-  "$PWD/assemblies/verkko/HG002/assembly.fasta" \
-  --cores 32 --resources mem_mb=72000 \
-  --rerun-incomplete --printshellcmds
-```
 
 Verkko requires both files to exist:
 

@@ -75,7 +75,7 @@ wildcard_constraints:
 # to the Verkko workflow.
 # Verkko local jobs are limited to 64 GB memory.
 def get_verkko_memory(wildcards):
-    return 72000
+    return 2000000
 
 ################
 # Rules
