@@ -92,6 +92,7 @@ rule vg_map_sort:
         mkdir -p "{CWD}/cram/tmp"
 
         TMP_BAM="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.bam"
+        VG_STDERR="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.vg.stderr"
 
         # vg giraffe → BAM directly (ONT r10 produces malformed SAM aux tags)
         docker run --rm \
@@ -114,7 +115,19 @@ rule vg_map_sort:
             -o BAM \
             -R "ID:{wildcards.dataset}\tSM:{wildcards.dataset}" \
             -N {wildcards.dataset} \
-            > "$TMP_BAM"
+            > "$TMP_BAM" \
+            2> "$VG_STDERR"
+
+        VG_EXIT=$?
+        echo "vg giraffe exit code: $VG_EXIT" >&2
+        if [[ -s "$VG_STDERR" ]]; then
+            cat "$VG_STDERR" >&2
+        fi
+        if [[ "$VG_EXIT" -ne 0 ]]; then
+            echo "ERROR: vg giraffe failed with exit code $VG_EXIT (see warnings above, e.g. 'No seeds found'); failing rule" >&2
+            exit 101
+        fi
+        rm -f "$VG_STDERR"
 
         [[ -s "$TMP_BAM" ]] || {{ echo "ERROR: vg giraffe produced empty/missing $TMP_BAM"; exit 101; }}
 
