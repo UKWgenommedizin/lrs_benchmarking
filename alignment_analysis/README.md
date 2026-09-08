@@ -1,204 +1,400 @@
-# Long-Read Assembly Benchmarking
+# Long-Read Alignment Summary
 
-This directory documents the whole-genome long-read assembly benchmark. The
-benchmark compares Flye, GoldRush, Verkko and ntLink using ONT and PacBio HiFi
-data from HG002, HG003 and HG004.
+This workflow produces one comparable TSV for the four long-read aligners used
+in the project:
 
-This README concerns assembly results only. It does not describe read-mapping
-workflows or alignment statistics.
+- minimap2
+- pbmm2
+- VACMap
+- VG Giraffe
 
-## Assembly methods
+for both:
 
-| Assembler | Input | Description |
-|---|---|---|
-| Flye | ONT or PacBio HiFi | Independent long-read assembly for each technology. |
-| GoldRush | ONT or PacBio HiFi | Independent long-read assembly for each technology. |
-| ntLink | ONT or PacBio HiFi plus GoldRush draft | Scaffolding/refinement of the corresponding GoldRush assembly. |
-| Verkko | ONT and PacBio HiFi | Hybrid assembly using both technologies for the same sample. |
+- Oxford Nanopore (ONT)
+- PacBio HiFi
 
-## Repository structure
+The same columns and definitions are used for every aligner.
+
+## What is automatic
+
+The script uses existing `samtools stats` reports for the standard alignment
+metrics and, when an hg38 FASTA is provided, uses the corresponding CRAM files
+to calculate the remaining alignment-quality metrics with a pinned samtools
+Docker image.
+
+### Automatically obtained from `samtools stats`
+
+- total reads
+- mapped reads
+- unmapped reads
+- mapped-read percentage
+- MQ0 reads and MQ0 percentage
+- mean MAPQ
+- median MAPQ
+- secondary alignments
+- supplementary alignments
+- total read bases
+- mapped bases
+- CIGAR-mapped bases
+- mapped-bases percentage
+- mismatches
+- error rate / error percentage
+- insertion events
+- deletion events
+- inserted bases
+- deleted bases
+- insertion events per 100 kb
+- deletion events per 100 kb
+- average read length
+- maximum read length
+
+`samtools stats` 1.24 defines `reads MQ0`, secondary (`non-primary`) and
+supplementary alignments in its SN section, MAPQ distributions in the MAPQ
+section, and indel-size distributions in the ID section.
+
+### Automatically calculated from each CRAM
+
+When `--reference-fasta` is supplied:
+
+- soft-clipped bases
+- soft-clipped percentage
+- mean coverage
+- median coverage
+- breadth >=1x
+- breadth >=10x
+- breadth >=20x
+- breadth >=30x
+- samtools version
+- samtools Docker image
+
+Coverage is calculated with `samtools depth -aa`, so zero-depth reference
+positions are included. For comparability, coverage and clipping exclude
+unmapped, secondary, supplementary, QC-failed and duplicate records.
+
+The pinned default utility image is:
 
 ```text
-lrs_benchmarking_wgs_clean/
-├── assemblers/
-│   ├── whole_genome_asm/
-│   │   ├── ont.assembly.flye2.smk
-│   │   ├── pb.assembly.flye2.smk
-│   │   ├── ont.assembly.Goldrush.smk
-│   │   ├── pb.assembly.Goldrush.smk
-│   │   ├── ont.assembly.ntlink.smk
-│   │   ├── pb.assembly.ntlink.smk
-│   │   └── hybrid.assembly.verkko.smk
-│   ├── config/
-│   └── README.md
-├── fastq/
-│   ├── HG002.ont.30x.fastq.gz
-│   ├── HG002.pb.30x.fastq.gz
-│   ├── HG003.ont.30x.fastq.gz
-│   ├── HG003.pb.30x.fastq.gz
-│   ├── HG004.ont.30x.fastq.gz
-│   └── HG004.pb.30x.fastq.gz
-├── assemblies/
-│   ├── flye/
-│   ├── goldrush/
-│   ├── ntlink/
-│   └── verkko/
-├── results_assemblers/
-│   ├── quality_metrics/
-│   ├── run_metrics/
-│   └── scripts/
-└── figures/
+quay.io/biocontainers/samtools:1.24--h9dcdb79_1
 ```
 
-The FASTQ files and assembly outputs are normally kept on the server and are
-not pushed to GitHub. The repository should contain workflows, scripts,
-configuration files, documentation and appropriately sized summary tables.
+This respects the repository requirement that external bioinformatics tools run
+inside pinned Docker images.
 
-## Input naming convention
+## Metrics that must have been recorded during the mapper run
 
-Use the following pattern for whole-genome input files:
+These values describe the original mapper execution:
+
+- runtime_seconds
+- peak_ram_mb
+- threads
+- aligner_version
+- aligner_docker_image
+
+Runtime, peak RAM, thread count and the exact mapper image/version **cannot be
+reconstructed scientifically after an alignment has already finished if the
+workflow never recorded them**.
+
+The script therefore:
+
+1. reads this repository's real `run_metrics/*.run_metrics.tsv` files when an
+   exact sample/technology/coverage/mapper match exists;
+2. reads the configured mapper thread count from the corresponding root-level
+   `ont.read_mapping.*.smk` or `pb.read_mapping.*.smk` workflow;
+3. automatically looks for a uniquely matching Snakemake benchmark file and
+   reads `s` as runtime and `max_rss` as peak RAM when available;
+4. reads exact run provenance from
+   `alignment_analysis/tables/alignment_run_metadata.tsv` when present;
+5. writes `NA` rather than inventing any missing value.
+
+For the existing `run_metrics/mm2.run_metrics.tsv` format, `Real time` is
+stored as `runtime_seconds`, while `Peak RSS` is converted from GB to MB for
+`peak_ram_mb`.
+
+This is intentional.
+
+## Canonical datasets
+
+Coverage is part of the dataset identity:
 
 ```text
-{sample}.{technology}.30x.fastq.gz
+<sample>.<platform>.<coverage>
 ```
 
 Examples:
 
 ```text
-HG002.ont.30x.fastq.gz
-HG002.pb.30x.fastq.gz
-HG003.ont.30x.fastq.gz
-HG003.pb.30x.fastq.gz
-HG004.ont.30x.fastq.gz
-HG004.pb.30x.fastq.gz
+HG002.ont.1k
+HG002.ont.30x
+HG002.pb.30x
 ```
 
-Use `ont` for Oxford Nanopore and `pb` for PacBio HiFi. Verkko requires both
-technologies for the same sample. Files containing `.1k`, `.chr21`, `smoke` or
-`localtest` are reduced test data and must not be confused with production
-whole-genome 30x inputs.
+`1k` and `30x` are never deduplicated against each other.
 
-## Assembly outputs
-
-The expected output pattern is:
+The final row identity is:
 
 ```text
-assemblies/{assembler}/{sample}.{technology}.30x/assembly.fasta
+sample × technology × coverage × reference × mapper
 ```
 
-For Verkko, the output is sample-level because both technologies are used:
+For the production 30x benchmark:
 
 ```text
-assemblies/verkko/{sample}.30x/assembly.fasta
+3 samples × 2 technologies × 4 aligners = 24 possible rows
 ```
 
-ntLink uses the matching GoldRush assembly as its draft and should be run only
-after the corresponding GoldRush assembly is available.
+## Canonical mapper tags
 
-## Assembly-quality metrics
+| Aligner | ONT | PacBio HiFi |
+|---|---|---|
+| minimap2 | `mm2-ont` | `mm2-pb` |
+| pbmm2 | `pbmm2-ont` | `pbmm2-pb` |
+| VACMap | `vacmap-ont` | `vacmap-pb` |
+| VG Giraffe | `vg-ont` | `vg-pb` |
 
-The combined table should contain one row per assembly and the following
-parameters:
-
-| Parameter | Meaning |
-|---|---|
-| `sample` | HG002, HG003 or HG004. |
-| `technology` | ONT, PacBio HiFi or hybrid. |
-| `assembler` | Flye, GoldRush, ntLink or Verkko. |
-| `assembly_file` | Path to the assembly FASTA. |
-| `number_of_sequences` | Number of contigs or scaffolds. |
-| `total_length` | Total assembly length in base pairs. |
-| `largest_sequence` | Length of the largest contig or scaffold. |
-| `smallest_sequence` | Length of the smallest contig or scaffold. |
-| `mean_length` | Mean sequence length. |
-| `median_length` | Median sequence length. |
-| `N50` | Length at which 50% of the assembly is contained in sequences of that length or longer. |
-| `L50` | Number of sequences required to reach 50% of the assembly length. |
-| `N90` | Length at which 90% of the assembly is contained in sequences of that length or longer. |
-| `L90` | Number of sequences required to reach 90% of the assembly length. |
-| `A`, `C`, `G`, `T`, `N` | Base composition counts. |
-| `runtime_seconds` | Wall-clock assembly time, when available. |
-| `peak_ram_mb` | Maximum memory used, when available. |
-| `threads` | Number of threads used. |
-| `software_version` | Version of the assembler. |
-
-N50 and L50 should always be interpreted together with total length and the
-number of sequences. A high N50 alone does not prove that an assembly is more
-complete or more accurate.
-
-## Running the assembly workflows
-
-Run production workflows from the repository root:
-
-```bash
-cd /path/to/lrs_benchmarking_wgs_clean
-```
-
-Perform a dry run before submitting a production job:
-
-```bash
-snakemake \
-    --snakefile assemblers/whole_genome_asm/ont.assembly.flye2.smk \
-    --dry-run \
-    --printshellcmds
-```
-
-The production workflows are run according to the project execution plan. The
-workflow commands are kept separate from the quality-metric extraction command
-because assembly generation and assembly assessment are different stages.
-
-## Extracting metrics and creating one combined table
-
-After the assemblies have been generated, run the quality-metric extraction
-from the repository root. The extractor should scan the `assemblies/` directory
-recursively, identify Flye, GoldRush, ntLink and Verkko FASTA files, and write
-one table containing all detected assemblies.
-
-```bash
-cd /path/to/lrs_benchmarking_wgs_clean
-
-python3 results_assemblers/scripts/build_assembly_summary.py \
-    --assemblies assemblies \
-    --out results_assemblers/quality_metrics/assembly_quality_summary.tsv
-```
-
-The final table is:
+Legacy aliases are accepted:
 
 ```text
-results_assemblers/quality_metrics/assembly_quality_summary.tsv
+pbmm2-subread -> pbmm2-ont
+pbmm2-ccs     -> pbmm2-pb
 ```
 
-If the current extractor is named
-`results_assemblers/quality_metrics/calculate_quality_metrics.py` and accepts
-only one FASTA at a time, it must first be extended with a directory-scanning
-or table-aggregation mode. The desired behavior is one command that scans all
-assembly FASTA files and writes one TSV table, rather than manually creating a
-separate table for every assembler.
+## Canonical filenames
 
-## Checking the combined table
+New files should include `hg38`, for example:
+
+```text
+HG002.ont.30x.hg38.mm2-ont.cram
+HG002.ont.30x.hg38.mm2-ont.cram.stats
+
+HG002.pb.30x.hg38.pbmm2-pb.cram
+HG002.pb.30x.hg38.pbmm2-pb.cram.stats
+```
+
+Older recognized files without `.hg38.` remain readable for compatibility.
+
+## Files searched
+
+Statistics are searched recursively under:
+
+```text
+alignment_analysis/tables/
+cram/
+samtools_stats_30x_Christian/
+```
+
+The repository currently contains committed 30x SN extracts such as:
+
+```text
+samtools_stats_30x_Christian/HG002_ont_30x.hg38.mm2-ont.cram.stats.SN.txt
+```
+
+These files are sufficient for the SN summary metrics (mapped/unmapped reads,
+MQ0, secondary/supplementary counts, mapped bases, mismatches, error rate and
+read lengths). When the full server-side `cram/*.cram.stats` file exists, it is
+preferred automatically because the full report also contains the MAPQ and ID
+sections required for MAPQ-distribution and detailed indel metrics.
+
+Recognized statistics suffixes:
+
+```text
+*.samtools_stats.txt
+*.cram.stats.SN.txt
+*.cram.stats
+*.stats.txt
+*.stats
+```
+
+CRAM files are searched under:
+
+```text
+cram/
+```
+
+## Quick test in this clean branch
+
+The clean branch may not contain the large `cram/` directory locally. You can
+still verify the parser against the committed 30x SN reports:
 
 ```bash
-test -s results_assemblers/quality_metrics/assembly_quality_summary.tsv
-head -n 2 results_assemblers/quality_metrics/assembly_quality_summary.tsv
-column -t -s $'\t' \
-    results_assemblers/quality_metrics/assembly_quality_summary.tsv | less -S
+cd ~/lrs_benchmarking_clean_pr
+
+python3 alignment_analysis/scripts/30x/quality_check_aligners.py     --project "$PWD"
 ```
 
-Check the detected assemblies with:
+This should create:
+
+```text
+alignment_analysis/tables/alignment_summary.tsv
+```
+
+Rows built only from `*.cram.stats.SN.txt` will correctly leave metrics that
+require the full MAPQ/ID sections or the CRAM itself as `NA`.
+
+## Recommended full server command
+
+From the repository root:
 
 ```bash
-python3 - <<'PY'
-import pandas as pd
-
-path = "results_assemblers/quality_metrics/assembly_quality_summary.tsv"
-table = pd.read_csv(path, sep="\t")
-print(table.shape)
-print(table[["sample", "technology", "assembler"]].to_string(index=False))
-PY
+cd /data/genmedbfx/schilling_m/repos/lrs_benchmarking
 ```
 
-The final TSV is the source of truth for figures and summary tables. Missing
-metrics should be recorded as `NA`, not as zero. Runtime and RAM should only be
-reported when they were measured by the workflow or scheduler.
+Run:
 
+```bash
+python3 alignment_analysis/scripts/30x/quality_check_aligners.py \
+    --project /data/genmedbfx/schilling_m/repos/lrs_benchmarking \
+    --reference-fasta /PATH/TO/YOUR/hg38.fa \
+    --threads 8
+```
 
+Output:
+
+```text
+alignment_analysis/tables/alignment_summary.tsv
+```
+
+Replace `/PATH/TO/YOUR/hg38.fa` with the exact hg38 FASTA already used by the
+mapping workflow. Do not use a different reference for the summary analysis.
+
+If `--reference-fasta` is omitted, the script still builds all metrics that can
+be obtained from the existing `samtools stats` reports, but CRAM-derived
+coverage/clipping fields remain `NA`.
+
+## Optional run metadata
+
+If the mapper workflows already record runtime/provenance, place the exact
+values in:
+
+```text
+alignment_analysis/tables/alignment_run_metadata.tsv
+```
+
+Minimal header:
+
+```text
+sample	read_technology	coverage	reference	mapper_tag	runtime_seconds	peak_ram_mb	threads	aligner_version	aligner_docker_image
+```
+
+Example:
+
+```text
+HG002	ONT	30x	hg38	mm2-ont	1234.5	8192	32	2.27	your-pinned-minimap2-image:tag
+HG002	PacBio	30x	hg38	pbmm2-pb	1400.2	9100	32	1.13.1	your-pinned-pbmm2-image:tag
+```
+
+Do not copy the example values into real results. Use the values recorded by
+your actual workflow.
+
+## Final output columns
+
+The TSV contains:
+
+```text
+sample
+read_technology
+coverage
+dataset
+reference
+aligner
+preset
+mapper_tag
+configuration
+statistics_file
+cram_file
+
+raw_total_sequences
+reads_mapped
+reads_unmapped
+mapped_reads_percent
+
+reads_mq0
+reads_mq0_percent
+mapq_mean
+mapq_median
+
+secondary_alignments
+secondary_alignments_per_100_mapped_reads
+supplementary_alignments
+supplementary_alignments_per_100_mapped_reads
+
+total_length
+bases_mapped
+bases_mapped_cigar
+mapped_bases_percent
+mismatches
+error_rate
+error_percent
+
+insertion_events
+deletion_events
+inserted_bases
+deleted_bases
+insertion_events_per_100kb
+deletion_events_per_100kb
+
+soft_clipped_bases
+soft_clipped_percent
+
+average_length
+maximum_length
+
+mean_coverage
+median_coverage
+breadth_1x_percent
+breadth_10x_percent
+breadth_20x_percent
+breadth_30x_percent
+
+runtime_seconds
+peak_ram_mb
+threads
+
+aligner_version
+samtools_version
+aligner_docker_image
+samtools_docker_image
+
+metrics_complete
+missing_metrics
+```
+
+## How to know whether everything is present
+
+Two final columns make this explicit:
+
+```text
+metrics_complete
+missing_metrics
+```
+
+If a row has every requested metric:
+
+```text
+metrics_complete = YES
+missing_metrics   =
+```
+
+If something was never recorded, for example mapper RAM:
+
+```text
+metrics_complete = NO
+missing_metrics   = peak_ram_mb
+```
+
+This prevents incomplete rows from looking complete.
+
+## Interpretation notes
+
+Use the same dataset, reference and filtering rules for all four aligners.
+
+MAPQ is useful descriptively, but different aligners may calibrate MAPQ
+differently. Do not rank mapper accuracy solely by mean or median MAPQ.
+
+The `mismatches` and `error_rate` fields are those reported by `samtools stats`.
+The mismatch count is NM-derived, so it should not be described as a pure
+substitution-only count.
+
+Runtime should always be interpreted together with the thread count.
+
+The master TSV should be the single source used for downstream plots,
+statistics and the final report.
