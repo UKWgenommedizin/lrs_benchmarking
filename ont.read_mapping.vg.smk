@@ -148,7 +148,11 @@ rule vg_map_sort:
             {DOCKER_VG} \
             index {CWD}/{output.cram}
 
-        [[ $(du -b {output.cram} | cut -f 1) -le 64 ]] && exit 101
+        CRAM_SIZE=$(du -b {output.cram} | cut -f 1)
+        if [[ "$CRAM_SIZE" -le 64 ]]; then
+            echo "ERROR: CRAM {output.cram} is only ${CRAM_SIZE} bytes (<=64) -- vg giraffe produced no alignments (see 'No seeds found' warnings above); failing" >&2
+            exit 101
+        fi
 
         echo "[$(date -Is)] END vg_map_sort {wildcards.dataset}" >&2
         ) > {log} 2>&1
