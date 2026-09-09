@@ -97,8 +97,10 @@ rule vg_map_sort:
         mkdir -p "{CWD}/cram/tmp"
 
         TMP_SAM="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.sam"
+        VG_STDERR="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.vg.stderr"
 
         # vg giraffe → SAM file
+        set +e
         docker run --rm \
             --tmpfs /tmp:size=50g,exec \
             -u $UID:$(id -g) \
@@ -119,7 +121,25 @@ rule vg_map_sort:
             --output-format SAM \
             -R "ID:{wildcards.dataset}\tSM:{wildcards.dataset}" \
             -N {wildcards.dataset} \
-            > "$TMP_SAM"
+            > "$TMP_SAM" \
+            2> "$VG_STDERR"
+
+        VG_EXIT=$?
+        set -e
+
+        echo "vg giraffe exit code: $VG_EXIT" >&2
+        if [[ "$VG_EXIT" -ne 0 ]]; then
+            echo "ERROR: vg giraffe failed with exit code $VG_EXIT" >&2
+            if [[ -s "$VG_STDERR" ]]; then
+                echo "----- vg giraffe stderr -----" >&2
+                cat "$VG_STDERR" >&2
+                echo "-----------------------------" >&2
+            else
+                echo "vg giraffe wrote no stderr; check dmesg / container logs for an OOM kill (docker usually exits 137)" >&2
+            fi
+            exit 101
+        fi
+        rm -f "$VG_STDERR"
 
         [[ -s "$TMP_SAM" ]] || {{ echo "ERROR: vg giraffe produced empty/missing $TMP_SAM"; exit 101; }}
 

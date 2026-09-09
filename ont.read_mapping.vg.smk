@@ -95,6 +95,9 @@ rule vg_map_sort:
         VG_STDERR="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.vg.stderr"
 
         # vg giraffe → BAM directly (ONT r10 produces malformed SAM aux tags)
+        # NB: capture the exit code with set +e — otherwise set -e kills the
+        # subshell at the docker line and the stderr dump below is never reached
+        set +e
         docker run --rm \
             --tmpfs /tmp:size=50g,exec \
             -u $UID:$(id -g) \
@@ -119,12 +122,18 @@ rule vg_map_sort:
             2> "$VG_STDERR"
 
         VG_EXIT=$?
+        set -e
+
         echo "vg giraffe exit code: $VG_EXIT" >&2
-        if [[ -s "$VG_STDERR" ]]; then
-            cat "$VG_STDERR" >&2
-        fi
         if [[ "$VG_EXIT" -ne 0 ]]; then
-            echo "ERROR: vg giraffe failed with exit code $VG_EXIT (see warnings above, e.g. 'No seeds found'); failing rule" >&2
+            echo "ERROR: vg giraffe failed with exit code $VG_EXIT" >&2
+            if [[ -s "$VG_STDERR" ]]; then
+                echo "----- vg giraffe stderr -----" >&2
+                cat "$VG_STDERR" >&2
+                echo "-----------------------------" >&2
+            else
+                echo "vg giraffe wrote no stderr; check dmesg / container logs for an OOM kill (docker usually exits 137)" >&2
+            fi
             exit 101
         fi
         rm -f "$VG_STDERR"
