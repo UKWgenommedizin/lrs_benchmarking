@@ -89,6 +89,8 @@ rule vg_map_sort:
     log:
         "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".map_sort.log",
     threads: 16
+    resources:
+        mem_mb = 163840,
     shell:
         """
         (
@@ -102,10 +104,10 @@ rule vg_map_sort:
         # vg giraffe → SAM file
         set +e
         docker run --rm \
-            --tmpfs /tmp:size=50g,exec \
+            --tmpfs /tmp:size=20g,exec \
             -u $UID:$(id -g) \
             --cpus {threads} \
-            -m 64g \
+            -m 160g \
             -v {CWD}:{CWD} \
             -v {input.ref}:{input.ref}:ro \
             --entrypoint vg \
