@@ -1,4 +1,3 @@
-Whether it works for Perplace is that we get all of the bits, not them to the same feature, so you might have, and then we look at which sites and it should site can only go on we happen to because we now in a different data sets we had to look because I think it's for the holder flow that we have two samples so this is before the must action so we have# ************************************************************************************************
 #
 # assembly_quality_quast.smk
 #
