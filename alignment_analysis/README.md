@@ -1,148 +1,24 @@
-# Long-Read Alignment Summary
+# Long-Read Alignment Benchmarking
 
-This workflow produces one comparable TSV for the four long-read aligners used
-in the project:
+This module contains the analysis layer for the long-read alignment benchmark.
 
-- minimap2
-- pbmm2
-- VACMap
-- VG Giraffe
+The active mapper workflows remain at the repository root in accordance with the project constitution. This directory contains metric extraction, result tables, figures, and analysis documentation.
 
-for both:
+## Experimental design
 
-- Oxford Nanopore (ONT)
-- PacBio HiFi
+The production comparison covers:
 
-The same columns and definitions are used for every aligner.
+- samples: `HG002`, `HG003`, `HG004`
+- technologies: ONT and PacBio HiFi
+- aligners: minimap2, pbmm2, VACMap and VG Giraffe
 
-## What is automatic
-
-The script uses existing `samtools stats` reports for the standard alignment
-metrics and, when an hg38 FASTA is provided, uses the corresponding CRAM files
-to calculate the remaining alignment-quality metrics with a pinned samtools
-Docker image.
-
-### Automatically obtained from `samtools stats`
-
-- total reads
-- mapped reads
-- unmapped reads
-- mapped-read percentage
-- MQ0 reads and MQ0 percentage
-- mean MAPQ
-- median MAPQ
-- secondary alignments
-- supplementary alignments
-- total read bases
-- mapped bases
-- CIGAR-mapped bases
-- mapped-bases percentage
-- mismatches
-- error rate / error percentage
-- insertion events
-- deletion events
-- inserted bases
-- deleted bases
-- insertion events per 100 kb
-- deletion events per 100 kb
-- average read length
-- maximum read length
-
-`samtools stats` 1.24 defines `reads MQ0`, secondary (`non-primary`) and
-supplementary alignments in its SN section, MAPQ distributions in the MAPQ
-section, and indel-size distributions in the ID section.
-
-### Automatically calculated from each CRAM
-
-When `--reference-fasta` is supplied:
-
-- soft-clipped bases
-- soft-clipped percentage
-- mean coverage
-- median coverage
-- breadth >=1x
-- breadth >=10x
-- breadth >=20x
-- breadth >=30x
-- samtools version
-- samtools Docker image
-
-Coverage is calculated with `samtools depth -aa`, so zero-depth reference
-positions are included. For comparability, coverage and clipping exclude
-unmapped, secondary, supplementary, QC-failed and duplicate records.
-
-The pinned default utility image is:
+For the complete 30x design:
 
 ```text
-quay.io/biocontainers/samtools:1.24--h9dcdb79_1
+3 samples x 2 technologies x 4 aligners = 24 alignments
 ```
 
-This respects the repository requirement that external bioinformatics tools run
-inside pinned Docker images.
-
-## Metrics that must have been recorded during the mapper run
-
-These values describe the original mapper execution:
-
-- runtime_seconds
-- peak_ram_mb
-- threads
-- aligner_version
-- aligner_docker_image
-
-Runtime, peak RAM, thread count and the exact mapper image/version **cannot be
-reconstructed scientifically after an alignment has already finished if the
-workflow never recorded them**.
-
-The script therefore:
-
-1. reads this repository's real `run_metrics/*.run_metrics.tsv` files when an
-   exact sample/technology/coverage/mapper match exists;
-2. reads the configured mapper thread count from the corresponding root-level
-   `ont.read_mapping.*.smk` or `pb.read_mapping.*.smk` workflow;
-3. automatically looks for a uniquely matching Snakemake benchmark file and
-   reads `s` as runtime and `max_rss` as peak RAM when available;
-4. reads exact run provenance from
-   `alignment_analysis/tables/alignment_run_metadata.tsv` when present;
-5. writes `NA` rather than inventing any missing value.
-
-For the existing `run_metrics/mm2.run_metrics.tsv` format, `Real time` is
-stored as `runtime_seconds`, while `Peak RSS` is converted from GB to MB for
-`peak_ram_mb`.
-
-This is intentional.
-
-## Canonical datasets
-
-Coverage is part of the dataset identity:
-
-```text
-<sample>.<platform>.<coverage>
-```
-
-Examples:
-
-```text
-HG002.ont.1k
-HG002.ont.30x
-HG002.pb.30x
-```
-
-`1k` and `30x` are never deduplicated against each other.
-
-The final row identity is:
-
-```text
-sample × technology × coverage × reference × mapper
-```
-
-For the production 30x benchmark:
-
-```text
-3 samples × 2 technologies × 4 aligners = 24 possible rows
-```
-
-## Canonical mapper tags
+## Active mapper tags
 
 | Aligner | ONT | PacBio HiFi |
 |---|---|---|
@@ -151,250 +27,116 @@ For the production 30x benchmark:
 | VACMap | `vacmap-ont` | `vacmap-pb` |
 | VG Giraffe | `vg-ont` | `vg-pb` |
 
-Legacy aliases are accepted:
+Legacy pbmm2 aliases may still be recognized by the metric parser, but new results should use the canonical tags above.
+
+## Mapper workflows
+
+The canonical mapper workflows are intentionally kept at repository root:
 
 ```text
-pbmm2-subread -> pbmm2-ont
-pbmm2-ccs     -> pbmm2-pb
+ont.read_mapping.minimap2.smk
+pb.read_mapping.minimap2.smk
+ont.read_mapping.pbmm2.smk
+pb.read_mapping.pbmm2.smk
+ont.read_mapping.vacmap.smk
+pb.read_mapping.vacmap.smk
+ont.read_mapping.vg.smk
+pb.read_mapping.vg.smk
 ```
 
-## Canonical filenames
+Do not move these files without first updating the constitution, shared-header references, documentation, and all downstream path assumptions.
 
-New files should include `hg38`, for example:
+## Canonical metric extraction
+
+The production 30x alignment summary is generated by:
 
 ```text
-HG002.ont.30x.hg38.mm2-ont.cram
-HG002.ont.30x.hg38.mm2-ont.cram.stats
-
-HG002.pb.30x.hg38.pbmm2-pb.cram
-HG002.pb.30x.hg38.pbmm2-pb.cram.stats
+alignment_analysis/scripts/30x/quality_check_aligners.py
 ```
-
-Older recognized files without `.hg38.` remain readable for compatibility.
-
-## Files searched
-
-Statistics are searched recursively under:
-
-```text
-alignment_analysis/tables/
-cram/
-samtools_stats_30x_Christian/
-```
-
-The repository currently contains committed 30x SN extracts such as:
-
-```text
-samtools_stats_30x_Christian/HG002_ont_30x.hg38.mm2-ont.cram.stats.SN.txt
-```
-
-These files are sufficient for the SN summary metrics (mapped/unmapped reads,
-MQ0, secondary/supplementary counts, mapped bases, mismatches, error rate and
-read lengths). When the full server-side `cram/*.cram.stats` file exists, it is
-preferred automatically because the full report also contains the MAPQ and ID
-sections required for MAPQ-distribution and detailed indel metrics.
-
-Recognized statistics suffixes:
-
-```text
-*.samtools_stats.txt
-*.cram.stats.SN.txt
-*.cram.stats
-*.stats.txt
-*.stats
-```
-
-CRAM files are searched under:
-
-```text
-cram/
-```
-
-## Quick test in this clean branch
-
-The clean branch may not contain the large `cram/` directory locally. You can
-still verify the parser against the committed 30x SN reports:
-
-```bash
-cd ~/lrs_benchmarking_clean_pr
-
-python3 alignment_analysis/scripts/30x/quality_check_aligners.py     --project "$PWD"
-```
-
-This should create:
-
-```text
-alignment_analysis/tables/alignment_summary.tsv
-```
-
-Rows built only from `*.cram.stats.SN.txt` will correctly leave metrics that
-require the full MAPQ/ID sections or the CRAM itself as `NA`.
-
-## Recommended full server command
 
 From the repository root:
 
 ```bash
-cd /data/genmedbfx/schilling_m/repos/lrs_benchmarking
+python3 alignment_analysis/scripts/30x/quality_check_aligners.py --project "$PWD"
 ```
 
-Run:
+When the matching reference FASTA and CRAMs are available, provide the exact reference used for mapping so CRAM-derived metrics can be calculated consistently.
 
-```bash
-python3 alignment_analysis/scripts/30x/quality_check_aligners.py \
-    --project /data/genmedbfx/schilling_m/repos/lrs_benchmarking \
-    --reference-fasta /PATH/TO/YOUR/hg38.fa \
-    --threads 8
-```
-
-Output:
+The main generated table is:
 
 ```text
 alignment_analysis/tables/alignment_summary.tsv
 ```
 
-Replace `/PATH/TO/YOUR/hg38.fa` with the exact hg38 FASTA already used by the
-mapping workflow. Do not use a different reference for the summary analysis.
-
-If `--reference-fasta` is omitted, the script still builds all metrics that can
-be obtained from the existing `samtools stats` reports, but CRAM-derived
-coverage/clipping fields remain `NA`.
-
-## Optional run metadata
-
-If the mapper workflows already record runtime/provenance, place the exact
-values in:
+For final 30x analyses, a coverage-filtered table may be written as:
 
 ```text
-alignment_analysis/tables/alignment_run_metadata.tsv
+alignment_analysis/tables/alignment_summary_30x.tsv
 ```
 
-Minimal header:
+Missing metrics must remain `NA`; they must never be replaced with invented zeros.
+
+## Metric groups
+
+The analysis can include, where data are available and scientifically comparable:
+
+- mapped reads and unmapped reads
+- mapped-read percentage
+- mapped bases and CIGAR-mapped bases
+- MQ0 reads
+- MAPQ summaries
+- secondary and supplementary alignments
+- mismatches / error rate
+- insertion and deletion metrics
+- clipping
+- coverage and breadth
+- runtime, memory and threads
+- tool / Docker provenance
+
+Not every metric is necessarily available for every historical run. Completeness should therefore be checked before plotting a metric across aligners.
+
+## Figures
+
+Generated alignment figures belong in:
 
 ```text
-sample	read_technology	coverage	reference	mapper_tag	runtime_seconds	peak_ram_mb	threads	aligner_version	aligner_docker_image
+alignment_analysis/figures/
 ```
 
-Example:
+Plotting scripts currently under `alignment_analysis/scripts/` can be migrated to `alignment_analysis/scripts/plots/` only through the guarded migration procedure documented in `docs/f2/PATH_STABILITY.md`.
+
+The reorganization kit keeps compatibility entry points when scripts are moved so older commands do not immediately break.
+
+## Scientific cautions
+
+### VACMap denominator
+
+If a VACMap stats file contains only mapped reads, a reported `100%` mapped-read percentage is not comparable with aligners whose stats include all input reads. Confirm that the denominator represents the original FASTQ read set before interpreting a 100% value as mapping efficiency.
+
+### MAPQ
+
+MAPQ is useful descriptively, but aligners can calibrate mapping quality differently. Do not rank mapper accuracy solely by mean or median MAPQ.
+
+### Error-rate terminology
+
+If mismatch/error fields are derived from `samtools stats`, document them as such. NM-derived mismatch counts should not automatically be described as pure substitution counts.
+
+## Directory structure
 
 ```text
-HG002	ONT	30x	hg38	mm2-ont	1234.5	8192	32	2.27	your-pinned-minimap2-image:tag
-HG002	PacBio	30x	hg38	pbmm2-pb	1400.2	9100	32	1.13.1	your-pinned-pbmm2-image:tag
+alignment_analysis/
+├── README.md
+├── COMMAND_LOG.md
+├── scripts/
+│   ├── README.md
+│   ├── 30x/
+│   │   └── quality_check_aligners.py
+│   ├── plots/          # organized plotting scripts
+│   ├── validation/     # optional validation runners
+│   ├── utils/          # optional helpers
+│   └── legacy/         # deprecated but retained scripts
+├── tables/
+└── figures/
 ```
 
-Do not copy the example values into real results. Use the values recorded by
-your actual workflow.
-
-## Final output columns
-
-The TSV contains:
-
-```text
-sample
-read_technology
-coverage
-dataset
-reference
-aligner
-preset
-mapper_tag
-configuration
-statistics_file
-cram_file
-
-raw_total_sequences
-reads_mapped
-reads_unmapped
-mapped_reads_percent
-
-reads_mq0
-reads_mq0_percent
-mapq_mean
-mapq_median
-
-secondary_alignments
-secondary_alignments_per_100_mapped_reads
-supplementary_alignments
-supplementary_alignments_per_100_mapped_reads
-
-total_length
-bases_mapped
-bases_mapped_cigar
-mapped_bases_percent
-mismatches
-error_rate
-error_percent
-
-insertion_events
-deletion_events
-inserted_bases
-deleted_bases
-insertion_events_per_100kb
-deletion_events_per_100kb
-
-soft_clipped_bases
-soft_clipped_percent
-
-average_length
-maximum_length
-
-mean_coverage
-median_coverage
-breadth_1x_percent
-breadth_10x_percent
-breadth_20x_percent
-breadth_30x_percent
-
-runtime_seconds
-peak_ram_mb
-threads
-
-aligner_version
-samtools_version
-aligner_docker_image
-samtools_docker_image
-
-metrics_complete
-missing_metrics
-```
-
-## How to know whether everything is present
-
-Two final columns make this explicit:
-
-```text
-metrics_complete
-missing_metrics
-```
-
-If a row has every requested metric:
-
-```text
-metrics_complete = YES
-missing_metrics   =
-```
-
-If something was never recorded, for example mapper RAM:
-
-```text
-metrics_complete = NO
-missing_metrics   = peak_ram_mb
-```
-
-This prevents incomplete rows from looking complete.
-
-## Interpretation notes
-
-Use the same dataset, reference and filtering rules for all four aligners.
-
-MAPQ is useful descriptively, but different aligners may calibrate MAPQ
-differently. Do not rank mapper accuracy solely by mean or median MAPQ.
-
-The `mismatches` and `error_rate` fields are those reported by `samtools stats`.
-The mismatch count is NM-derived, so it should not be described as a pure
-substitution-only count.
-
-Runtime should always be interpreted together with the thread count.
-
-The master TSV should be the single source used for downstream plots,
-statistics and the final report.
+The canonical 30x extractor stays in `scripts/30x/`; it is not moved by the reorganization.

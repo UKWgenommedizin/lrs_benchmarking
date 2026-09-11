@@ -136,3 +136,10 @@ final_report_files/snakemake_assemblers_benchmarking/**/__pycache__/
 final_report_files/snakemake_assemblers_benchmarking/**/*.pyc
 
 # END CHR21 ASSEMBLER CONTAINER WORKFLOW
+.DS_Store
+**/.DS_Store
+.Rhistory
+**/.Rhistory
+.repo_reorganization_backup/
+*:Zone.Identifier
+.snakemake/
