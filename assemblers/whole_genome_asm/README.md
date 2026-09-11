@@ -4,6 +4,31 @@ These are the production whole-genome assembly workflows for Flye, GoldRush, Ver
 
 **Run from the repository root.** The workflow files intentionally remain in this directory because they include the shared root-level `header_assembler.smk` and use repository-root-based paths.
 
+## Repository explorer
+
+<!-- AUTO_REPOSITORY_TREE_START -->
+Generated from Git-tracked files. Expand only the directory you need. On GitHub, press **`t`** for fast filename search.
+
+- [`README.md`](README.md)
+- [`hybrid.assembly.verkko.smk`](hybrid.assembly.verkko.smk)
+- [`ont.assembly.Goldrush.smk`](ont.assembly.Goldrush.smk)
+- [`ont.assembly.flye2.smk`](ont.assembly.flye2.smk)
+- [`ont.assembly.ntlink.smk`](ont.assembly.ntlink.smk)
+- [`pb.assembly.Goldrush.smk`](pb.assembly.Goldrush.smk)
+- [`pb.assembly.flye2.smk`](pb.assembly.flye2.smk)
+- [`pb.assembly.ntlink.smk`](pb.assembly.ntlink.smk)
+
+<details>
+<summary><b>assessment/</b> — 3 files</summary>
+
+- [`README.md`](assessment/README.md)
+- [`assembly_quality_busco.smk`](assessment/assembly_quality_busco.smk)
+- [`assembly_quality_quast.smk`](assessment/assembly_quality_quast.smk)
+
+</details>
+
+<!-- AUTO_REPOSITORY_TREE_END -->
+
 ## Input convention
 
 Production inputs are expected under:

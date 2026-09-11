@@ -10,6 +10,283 @@ This repository contains shared project workflows as well as the F2 benchmarking
 
 The repository is governed by [`CONSTITUTION.md`](CONSTITUTION.md). In particular, Snakemake workflows are executed from the **repository root**, use pinned Docker images, and communicate through files on disk.
 
+## Repository explorer
+
+<!-- AUTO_REPOSITORY_TREE_START -->
+Generated from Git-tracked files. Expand only the area you need. On GitHub, press **`t`** to search tracked files by name.
+
+<details>
+<summary><b>Top-level files</b></summary>
+
+- [`.gitignore`](.gitignore)
+- [`CONSTITUTION.md`](CONSTITUTION.md)
+- [`README.md`](README.md)
+- [`Worflow and code implemented`](Worflow and code implemented)
+- [`caller_tools_inventory.csv`](caller_tools_inventory.csv)
+- [`cuteSV.hg38.smk`](cuteSV.hg38.smk)
+- [`header.smk`](header.smk)
+- [`header_assembler.smk`](header_assembler.smk)
+- [`header_mapper.smk`](header_mapper.smk)
+- [`ilmn.snv_calling.clair3.smk`](ilmn.snv_calling.clair3.smk)
+- [`lrs_benchmarking_tools_selection.R.Rmd`](lrs_benchmarking_tools_selection.R.Rmd)
+- [`lrs_benchmarking_tools_selection.xlsx`](lrs_benchmarking_tools_selection.xlsx)
+- [`ont.read_mapping.minimap2.smk`](ont.read_mapping.minimap2.smk)
+- [`ont.read_mapping.pbmm2.smk`](ont.read_mapping.pbmm2.smk)
+- [`ont.read_mapping.vacmap.smk`](ont.read_mapping.vacmap.smk)
+- [`ont.read_mapping.vg.smk`](ont.read_mapping.vg.smk)
+- [`ont.snv_calling.clair3.smk`](ont.snv_calling.clair3.smk)
+- [`ont.snv_calling.deepvariant.smk`](ont.snv_calling.deepvariant.smk)
+- [`ont.snv_filtering.v3.smk`](ont.snv_filtering.v3.smk)
+- [`pb.read_mapping.minimap2.smk`](pb.read_mapping.minimap2.smk)
+- [`pb.read_mapping.pbmm2.smk`](pb.read_mapping.pbmm2.smk)
+- [`pb.read_mapping.vacmap.smk`](pb.read_mapping.vacmap.smk)
+- [`pb.read_mapping.vg.smk`](pb.read_mapping.vg.smk)
+- [`pb.snv_calling.clair3.smk`](pb.snv_calling.clair3.smk)
+- [`pb.snv_calling.deepvariant.smk`](pb.snv_calling.deepvariant.smk)
+- [`pbsv.hg38.smk`](pbsv.hg38.smk)
+- [`run_happy.smk`](run_happy.smk)
+- [`sawfish.hg38.smk`](sawfish.hg38.smk)
+- [`sniffles2.hg38.smk`](sniffles2.hg38.smk)
+- [`sv_f1_barplots.png`](sv_f1_barplots.png)
+- [`truvari_anno.smk`](truvari_anno.smk)
+- [`wgs.snv_calling.deepvariant.smk`](wgs.snv_calling.deepvariant.smk)
+
+</details>
+
+<details>
+<summary><b>.githooks/</b> — 1 tracked file</summary>
+
+- [`pre-commit`](.githooks/pre-commit)
+
+</details>
+
+<details>
+<summary><b>.github/</b> — 1 tracked file</summary>
+
+- `workflows/` — 1 file
+
+</details>
+
+<details>
+<summary><b>SV aligners call/</b> — 11 tracked files</summary>
+
+- `configs/` — 1 file
+- `docs/` — 4 files
+- `scripts/` — 1 file
+- `workflow/` — 4 files
+- [`CONSTITUTION_NICOLAS.md`](SV aligners call/CONSTITUTION_NICOLAS.md)
+
+</details>
+
+<details>
+<summary><b>Workflow_and_code_implemented/</b> — 6 tracked files</summary>
+
+- Documentation: [`README.md`](Workflow_and_code_implemented/README.md)
+- [`ANALYSIS_INTERPRETATION.md`](Workflow_and_code_implemented/ANALYSIS_INTERPRETATION.md)
+- [`FILE_INPUT_OUTPUT_MAP.md`](Workflow_and_code_implemented/FILE_INPUT_OUTPUT_MAP.md)
+- [`PROJECT_WORKFLOW.md`](Workflow_and_code_implemented/PROJECT_WORKFLOW.md)
+- [`REPRODUCTION_CHECKLIST.md`](Workflow_and_code_implemented/REPRODUCTION_CHECKLIST.md)
+- [`REUSABLE_CODE_PATTERNS.md`](Workflow_and_code_implemented/REUSABLE_CODE_PATTERNS.md)
+
+</details>
+
+<details>
+<summary><b>alignment_analysis/</b> — 154 tracked files</summary>
+
+- Documentation: [`README.md`](alignment_analysis/README.md)
+- `figures/` — 44 files
+- `scripts/` — 36 files
+- `tables/` — 71 files
+- [`COMMAND_LOG.md`](alignment_analysis/COMMAND_LOG.md)
+- [`README_assemblers.md`](alignment_analysis/README_assemblers.md)
+
+</details>
+
+<details>
+<summary><b>archive/</b> — 4 tracked files</summary>
+
+- [`ont.read_mapping.ntlink.smk`](archive/ont.read_mapping.ntlink.smk)
+- [`ont.read_mapping.quicked.smk`](archive/ont.read_mapping.quicked.smk)
+- [`pb.read_mapping.ntlink.smk`](archive/pb.read_mapping.ntlink.smk)
+- [`pb.read_mapping.quicked.smk`](archive/pb.read_mapping.quicked.smk)
+
+</details>
+
+<details>
+<summary><b>assemblers/</b> — 54 tracked files</summary>
+
+- Documentation: [`README.md`](assemblers/README.md)
+- `benchmark_chr21_real/` — 14 files
+- `config/` — 3 files
+- `containers/` — 7 files
+- `envs/` — 1 file
+- `rules/` — 8 files
+- `scripts/` — 6 files
+- `whole_genome_asm/` — 11 files
+- [`Snakefile`](assemblers/Snakefile)
+- [`samples.tsv`](assemblers/samples.tsv)
+- [`snakemake_assemblers.smk`](assemblers/snakemake_assemblers.smk)
+
+</details>
+
+<details>
+<summary><b>assembly_analysis/</b> — 6 tracked files</summary>
+
+- Documentation: [`README.md`](assembly_analysis/README.md)
+- `figures/` — 1 file
+- `scripts/` — 3 files
+- `tables/` — 1 file
+
+</details>
+
+<details>
+<summary><b>docs/</b> — 5 tracked files</summary>
+
+- `f2/` — 3 files
+- [`mapper_cmds.sh`](docs/mapper_cmds.sh)
+- [`retag_docker_images.sh`](docs/retag_docker_images.sh)
+
+</details>
+
+<details>
+<summary><b>figures/</b> — 3 tracked files</summary>
+
+- [`repo1.2_SV_FP.Rmd`](figures/repo1.2_SV_FP.Rmd)
+- [`repo1_SV_type_differences.Rmd`](figures/repo1_SV_type_differences.Rmd)
+- [`repo1_SV_type_differences.html`](figures/repo1_SV_type_differences.html)
+
+</details>
+
+<details>
+<summary><b>final_report_files/</b> — 24 tracked files</summary>
+
+- `snakemake_aligners_benchmarking/` — 24 files
+
+</details>
+
+<details>
+<summary><b>happy_results/</b> — 146 tracked files</summary>
+
+- `146 direct files` — use GitHub's **`t`** file finder or the module README to locate a specific file
+
+</details>
+
+<details>
+<summary><b>mapper_legacy/</b> — 4 tracked files</summary>
+
+- [`ont.read_mapping.graphaligner.smk`](mapper_legacy/ont.read_mapping.graphaligner.smk)
+- [`ont.read_mapping.parahat.smk`](mapper_legacy/ont.read_mapping.parahat.smk)
+- [`pb.read_mapping.graphaligner.smk`](mapper_legacy/pb.read_mapping.graphaligner.smk)
+- [`pb.read_mapping.parahat.smk`](mapper_legacy/pb.read_mapping.parahat.smk)
+
+</details>
+
+<details>
+<summary><b>run_metrics/</b> — 2 tracked files</summary>
+
+- [`create_run_metrics.sh`](run_metrics/create_run_metrics.sh)
+- [`mm2.run_metrics.tsv`](run_metrics/mm2.run_metrics.tsv)
+
+</details>
+
+<details>
+<summary><b>samtools_stats_30x_Christian/</b> — 25 tracked files</summary>
+
+- `25 direct files` — use GitHub's **`t`** file finder or the module README to locate a specific file
+
+</details>
+
+<details>
+<summary><b>sawfish/</b> — 5 tracked files</summary>
+
+- `HG002.ont.30x.hg38.pbmm2-pb.discover_dir/` — 1 file
+- `HG002.pb.1k.hg38.pbmm2-ont.discover_dir/` — 1 file
+- `HG002.pb.1k.hg38.pbmm2-pb.discover_dir/` — 1 file
+- `HG002.pb.30x.hg38.pbmm2-ont.discover_dir/` — 1 file
+- `HG002.pb.30x.hg38.pbmm2-pb.discover_dir/` — 1 file
+
+</details>
+
+<details>
+<summary><b>scripts/</b> — 2 tracked files</summary>
+
+- [`install_git_hooks.sh`](scripts/install_git_hooks.sh)
+- [`update_repository_tree.py`](scripts/update_repository_tree.py)
+
+</details>
+
+<details>
+<summary><b>truvari/</b> — 1091 tracked files</summary>
+
+- `HG002.ont.1k.hg38.mm2-ont.cuteSV/` — 13 files
+- `HG002.ont.1k.hg38.mm2-ont.sniffles2/` — 13 files
+- `HG002.ont.1k.hg38.mm2-pb.cuteSV/` — 13 files
+- `HG002.ont.1k.hg38.mm2-pb.sniffles2/` — 13 files
+- `HG002.ont.1k.hg38.pbmm2-ont.cuteSV/` — 13 files
+- `HG002.ont.1k.hg38.pbmm2-ont.pbsv/` — 13 files
+- `HG002.ont.1k.hg38.pbmm2-ont.sniffles2/` — 13 files
+- `HG002.ont.1k.hg38.pbmm2-pb.cuteSV/` — 13 files
+- `HG002.ont.1k.hg38.pbmm2-pb.pbsv/` — 13 files
+- `HG002.ont.1k.hg38.pbmm2-pb.sniffles2/` — 13 files
+- `HG002.ont.30x.hg38.mm2-ont.cuteSV/` — 33 files
+- `HG002.ont.30x.hg38.mm2-ont.sniffles2/` — 33 files
+- `HG002.ont.30x.hg38.mm2-pb.cuteSV/` — 33 files
+- `HG002.ont.30x.hg38.mm2-pb.sniffles2/` — 33 files
+- `HG002.ont.30x.hg38.pbmm2-ont.cuteSV/` — 33 files
+- `HG002.ont.30x.hg38.pbmm2-ont.pbsv/` — 33 files
+- `HG002.ont.30x.hg38.pbmm2-ont.sniffles2/` — 33 files
+- `HG002.ont.30x.hg38.pbmm2-pb.cuteSV/` — 33 files
+- `HG002.ont.30x.hg38.pbmm2-pb.pbsv/` — 33 files
+- `HG002.ont.30x.hg38.pbmm2-pb.sawfish/` — 33 files
+- `HG002.ont.30x.hg38.pbmm2-pb.sniffles2/` — 33 files
+- `HG002.pb.1k.hg38.mm2-ont.cuteSV/` — 13 files
+- `HG002.pb.1k.hg38.mm2-ont.sniffles2/` — 13 files
+- `HG002.pb.1k.hg38.mm2-pb.cuteSV/` — 13 files
+- `HG002.pb.1k.hg38.mm2-pb.sniffles2/` — 13 files
+- `HG002.pb.1k.hg38.pbmm2-ont.cuteSV/` — 13 files
+- `HG002.pb.1k.hg38.pbmm2-ont.pbsv/` — 13 files
+- `HG002.pb.1k.hg38.pbmm2-ont.sawfish/` — 13 files
+- `HG002.pb.1k.hg38.pbmm2-ont.sniffles2/` — 13 files
+- `HG002.pb.1k.hg38.pbmm2-pb.cuteSV/` — 13 files
+- `HG002.pb.1k.hg38.pbmm2-pb.pbsv/` — 13 files
+- `HG002.pb.1k.hg38.pbmm2-pb.sawfish/` — 13 files
+- `HG002.pb.1k.hg38.pbmm2-pb.sniffles2/` — 13 files
+- `HG002.pb.30x.hg38.mm2-ont.cuteSV/` — 33 files
+- `HG002.pb.30x.hg38.mm2-ont.sniffles2/` — 33 files
+- `HG002.pb.30x.hg38.mm2-pb.cuteSV/` — 33 files
+- `HG002.pb.30x.hg38.mm2-pb.sniffles2/` — 33 files
+- `HG002.pb.30x.hg38.pbmm2-ont.cuteSV/` — 33 files
+- `HG002.pb.30x.hg38.pbmm2-ont.pbsv/` — 33 files
+- `HG002.pb.30x.hg38.pbmm2-ont.sawfish/` — 33 files
+- `HG002.pb.30x.hg38.pbmm2-ont.sniffles2/` — 33 files
+- `HG002.pb.30x.hg38.pbmm2-pb.cuteSV/` — 33 files
+- `HG002.pb.30x.hg38.pbmm2-pb.pbsv/` — 33 files
+- `HG002.pb.30x.hg38.pbmm2-pb.sawfish/` — 33 files
+- `HG002.pb.30x.hg38.pbmm2-pb.sniffles2/` — 33 files
+- `46 direct files` — use GitHub's **`t`** file finder or the module README to locate a specific file
+
+</details>
+
+<details>
+<summary><b>variant_calling_analysis/</b> — 5 tracked files</summary>
+
+- Documentation: [`README.md`](variant_calling_analysis/README.md)
+- `figures/` — 1 file
+- `scripts/` — 2 files
+- `tables/` — 1 file
+
+</details>
+
+<details>
+<summary><b>vcf_called/</b> — 25 tracked files</summary>
+
+- `snv_indel/` — 24 files
+- [`.DS_Store`](vcf_called/.DS_Store)
+
+</details>
+
+<!-- AUTO_REPOSITORY_TREE_END -->
+
 ## Benchmark overview
 
 ```text

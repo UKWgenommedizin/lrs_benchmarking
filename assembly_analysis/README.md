@@ -4,6 +4,50 @@ This module contains downstream metric aggregation, statistical analysis and fig
 
 It does **not** run the assemblers themselves. Production assembly workflows are under `assemblers/whole_genome_asm/`, and external assessment tools are run under `assemblers/whole_genome_asm/assessment/`.
 
+## Repository explorer
+
+<!-- AUTO_REPOSITORY_TREE_START -->
+Generated from Git-tracked files. Expand only the directory you need. On GitHub, press **`t`** for fast filename search.
+
+- [`README.md`](README.md)
+
+<details>
+<summary><b>figures/</b> — 1 file</summary>
+
+- [`.gitkeep`](figures/.gitkeep)
+
+</details>
+
+<details>
+<summary><b>scripts/</b> — 3 files</summary>
+
+- [`README.md`](scripts/README.md)
+
+<details open>
+<summary><b>metrics/</b> — 1 file</summary>
+
+- [`.gitkeep`](scripts/metrics/.gitkeep)
+
+</details>
+
+<details open>
+<summary><b>plots/</b> — 1 file</summary>
+
+- [`.gitkeep`](scripts/plots/.gitkeep)
+
+</details>
+
+</details>
+
+<details>
+<summary><b>tables/</b> — 1 file</summary>
+
+- [`.gitkeep`](tables/.gitkeep)
+
+</details>
+
+<!-- AUTO_REPOSITORY_TREE_END -->
+
 ## Intended structure
 
 ```text

@@ -7,6 +7,17 @@ The assessment is intentionally separated from `assembly_analysis/`:
 - `assemblers/whole_genome_asm/assessment/` **runs assessment tools**
 - `assembly_analysis/` **aggregates metrics, performs downstream analysis and creates figures**
 
+## Repository explorer
+
+<!-- AUTO_REPOSITORY_TREE_START -->
+Generated from Git-tracked files. Expand only the directory you need. On GitHub, press **`t`** for fast filename search.
+
+- [`README.md`](README.md)
+- [`assembly_quality_busco.smk`](assembly_quality_busco.smk)
+- [`assembly_quality_quast.smk`](assembly_quality_quast.smk)
+
+<!-- AUTO_REPOSITORY_TREE_END -->
+
 ## Input contract
 
 Assessment workflows discover completed assemblies using the standardized layout:

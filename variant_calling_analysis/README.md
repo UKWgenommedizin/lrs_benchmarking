@@ -16,6 +16,49 @@ variant_calling_analysis/
 └── figures/
 ```
 
+## Repository explorer
+
+<!-- AUTO_REPOSITORY_TREE_START -->
+Generated from Git-tracked files. Expand only the directory you need. On GitHub, press **`t`** for fast filename search.
+
+- [`README.md`](README.md)
+
+<details>
+<summary><b>figures/</b> — 1 file</summary>
+
+- [`.gitkeep`](figures/.gitkeep)
+
+</details>
+
+<details>
+<summary><b>scripts/</b> — 2 files</summary>
+
+
+<details open>
+<summary><b>metrics/</b> — 1 file</summary>
+
+- [`.gitkeep`](scripts/metrics/.gitkeep)
+
+</details>
+
+<details open>
+<summary><b>plots/</b> — 1 file</summary>
+
+- [`.gitkeep`](scripts/plots/.gitkeep)
+
+</details>
+
+</details>
+
+<details>
+<summary><b>tables/</b> — 1 file</summary>
+
+- [`.gitkeep`](tables/.gitkeep)
+
+</details>
+
+<!-- AUTO_REPOSITORY_TREE_END -->
+
 ## Intended responsibilities
 
 - collect caller outputs for a defined benchmark design
