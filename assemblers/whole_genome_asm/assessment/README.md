@@ -172,7 +172,7 @@ The lineage directory must be supplied explicitly:
 --config busco_lineage=/absolute/path/to/primates_odb12.2
 ```
 
-The workflow verifies that the lineage directory exists and contains a valid `dataset.cfg`.
+The workflow verifies that the lineage directory exists and contains `dataset.cfg`.
 
 The lineage directory is mounted read-only into the BUSCO container. BUSCO is executed in offline genome mode using Miniprot.
 

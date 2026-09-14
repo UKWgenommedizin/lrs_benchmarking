@@ -40,8 +40,6 @@ print("QUAST Docker image: " + DOCKER_QUAST)
 # Reference configuration
 # ************************************************************************************************
 
-PROJECT_DIR = CWD
-
 RAW_REFERENCE = config.get("reference")
 
 if not RAW_REFERENCE:
@@ -53,7 +51,9 @@ if not RAW_REFERENCE:
 REFERENCE = os.path.expanduser(RAW_REFERENCE)
 
 if not os.path.isabs(REFERENCE):
-    REFERENCE = os.path.join(PROJECT_DIR, REFERENCE)
+    raise ValueError(
+        "Reference genome path must be absolute after expansion: "
+        + REFERENCE)
 
 REFERENCE = os.path.abspath(REFERENCE)
 REFERENCE_DIR = os.path.dirname(REFERENCE)
@@ -152,14 +152,17 @@ rule quast_assembly:
         r"""
         set -eo pipefail
 
+        mkdir -p "{params.outdir}"
+        : > "{log}"
+
         docker run --rm \
             --cpus {threads} \
             -m {resources.mem_gb}g \
             --tmpfs /tmp:size=50g,exec \
             -u $UID:$(id -g) \
-            -v {CWD}:{CWD} \
-            -v {REFERENCE_DIR}:{REFERENCE_DIR}:ro \
-            --workdir {CWD} \
+            -v "{CWD}:{CWD}" \
+            -v "{REFERENCE_DIR}:{REFERENCE_DIR}:ro" \
+            --workdir "{CWD}" \
             {DOCKER_QUAST} \
             /bin/bash -c '
                 set -eo pipefail
@@ -198,7 +201,7 @@ rule quast_assembly:
                     echo
                     printf "End time:\t"
                     date -Is
-                ) > "{log}" 2>&1
+                ) >> "{log}" 2>&1
 
                 [[ -s "{output.quast_tsv}" ]] || {{
                     echo "ERROR: QUAST report.tsv is missing or empty" >> "{log}"

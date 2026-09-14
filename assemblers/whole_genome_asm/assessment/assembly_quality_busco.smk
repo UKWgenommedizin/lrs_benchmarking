@@ -51,7 +51,9 @@ if not RAW_BUSCO_LINEAGE:
 BUSCO_LINEAGE = os.path.expanduser(RAW_BUSCO_LINEAGE)
 
 if not os.path.isabs(BUSCO_LINEAGE):
-    BUSCO_LINEAGE = os.path.join(CWD, BUSCO_LINEAGE)
+    raise ValueError(
+        "BUSCO lineage path must be absolute after expansion: "
+        + BUSCO_LINEAGE)
 
 BUSCO_LINEAGE = os.path.abspath(BUSCO_LINEAGE)
 
@@ -98,13 +100,6 @@ TEST_MARKERS = (
     "smoke",
 )
 
-INCLUDE_TEST_ASSEMBLIES = str(
-    config.get("include_test_assemblies", "false")
-).lower() in {
-    "true",
-    "1",
-    "yes",}
-
 ASSEMBLIES = sorted(
     {
         (assembler, dataset)
@@ -114,11 +109,9 @@ ASSEMBLIES = sorted(
         )
         if assembler.lower() in ALLOWED_OUTPUTS
         and ".30x" in dataset.lower()
-        and (
-            INCLUDE_TEST_ASSEMBLIES
-            or not any(
-                marker in dataset.lower()
-                for marker in TEST_MARKERS))})
+        and not any(
+            marker in dataset.lower()
+            for marker in TEST_MARKERS)})
 
 if not ASSEMBLIES:
     raise ValueError(
@@ -198,7 +191,7 @@ rule busco_assembly:
         echo "Start time: $(date -Is)" >> "{log}"
         echo >> "{log}"
 
-        docker run --rm --cpus {threads} -m {resources.mem_gb}g --tmpfs /tmp:size=50g,exec -u $UID:$(id -g) -v {CWD}:{CWD} -v {BUSCO_LINEAGE_DIR}:{BUSCO_LINEAGE_DIR}:ro --workdir {CWD} {DOCKER_BUSCO} /bin/bash -c '
+        docker run --rm --cpus {threads} -m {resources.mem_gb}g --tmpfs /tmp:size=50g,exec -u $UID:$(id -g) -v "{CWD}:{CWD}" -v "{BUSCO_LINEAGE_DIR}:{BUSCO_LINEAGE_DIR}:ro" --workdir "{CWD}" {DOCKER_BUSCO} /bin/bash -c '
             set -eo pipefail
 
             printf "Container hostname:\t"
