@@ -76,13 +76,29 @@ ALLOWED_OUTPUTS = {
     "verkko",
     "ntlink",}
 
+
+TEST_MARKERS = (
+    ".1k",
+    ".chr21",
+    ".localtest",
+    "smoke",)
+
 ASSEMBLIES = sorted(
     {
         (assembler, dataset)
         for assembler, dataset in zip(
             ASSEMBLERS_FOUND,
             DATASETS_FOUND)
-        if assembler.lower() in ALLOWED_OUTPUTS})
+        if assembler.lower() in ALLOWED_OUTPUTS
+        and ".30x" in dataset.lower()
+        and not any(
+            marker in dataset.lower()
+            for marker in TEST_MARKERS)})
+
+if not os.path.isfile(REFERENCE):
+    raise ValueError(
+        "Reference genome does not exist: " + REFERENCE)
+
 
 if not ASSEMBLIES:
     raise ValueError(
@@ -151,7 +167,7 @@ rule quast_assembly:
                 mkdir -p "{params.outdir}"
 
                 (
-                    printf "Container ID:\t"
+                    printf "Container hostname:\t"
                     hostname
 
                     printf "Start time:\t"
