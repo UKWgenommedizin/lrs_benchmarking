@@ -11,12 +11,12 @@ Generated from Git-tracked files. Expand only the directory you need. On GitHub,
 
 - [`README.md`](README.md)
 - [`hybrid.assembly.verkko.smk`](hybrid.assembly.verkko.smk)
-- [`ont.assembly.Goldrush.smk`](ont.assembly.Goldrush.smk)
 - [`ont.assembly.flye2.smk`](ont.assembly.flye2.smk)
-- [`ont.assembly.ntlink.smk`](ont.assembly.ntlink.smk)
-- [`pb.assembly.Goldrush.smk`](pb.assembly.Goldrush.smk)
+- [`ont.assembly.goldrush.smk`](ont.assembly.goldrush.smk)
+- [`ont.scaffolding.ntlink.smk`](ont.scaffolding.ntlink.smk)
 - [`pb.assembly.flye2.smk`](pb.assembly.flye2.smk)
-- [`pb.assembly.ntlink.smk`](pb.assembly.ntlink.smk)
+- [`pb.assembly.goldrush.smk`](pb.assembly.goldrush.smk)
+- [`pb.scaffolding.ntlink.smk`](pb.scaffolding.ntlink.smk)
 
 <details>
 <summary><b>assessment/</b> — 3 files</summary>
@@ -55,11 +55,11 @@ Reduced `1k`, `chr21`, smoke-test and local-test inputs are validation fixtures 
 ```text
 ont.assembly.flye2.smk
 pb.assembly.flye2.smk
-ont.assembly.Goldrush.smk
-pb.assembly.Goldrush.smk
+ont.assembly.goldrush.smk
+pb.assembly.goldrush.smk
 hybrid.assembly.verkko.smk
-ont.assembly.ntlink.smk
-pb.assembly.ntlink.smk
+ont.scaffolding.ntlink.smk
+pb.scaffolding.ntlink.smk
 ```
 
 ## Output convention
@@ -109,8 +109,8 @@ assemblers/whole_genome_asm/pb.assembly.flye2.smk
 Use the technology-specific workflows:
 
 ```text
-assemblers/whole_genome_asm/ont.assembly.Goldrush.smk
-assemblers/whole_genome_asm/pb.assembly.Goldrush.smk
+assemblers/whole_genome_asm/ont.assembly.goldrush.smk
+assemblers/whole_genome_asm/pb.assembly.goldrush.smk
 ```
 
 Always dry-run before execution. Resource values should follow the values defined by the active workflow / server configuration rather than being silently duplicated in multiple documentation locations.
@@ -147,8 +147,8 @@ Run only after the corresponding draft assembly exists.
 Technology-specific workflows:
 
 ```text
-assemblers/whole_genome_asm/ont.assembly.ntlink.smk
-assemblers/whole_genome_asm/pb.assembly.ntlink.smk
+assemblers/whole_genome_asm/ont.scaffolding.ntlink.smk
+assemblers/whole_genome_asm/pb.scaffolding.ntlink.smk
 ```
 
 ## Quality assessment

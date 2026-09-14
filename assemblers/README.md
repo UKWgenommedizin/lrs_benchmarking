@@ -8,9 +8,7 @@ This directory contains assembly workflows, local / reduced validation infrastru
 Generated from Git-tracked files. Expand only the directory you need. On GitHub, press **`t`** for fast filename search.
 
 - [`README.md`](README.md)
-- [`Snakefile`](Snakefile)
 - [`samples.tsv`](samples.tsv)
-- [`snakemake_assemblers.smk`](snakemake_assemblers.smk)
 
 <details open>
 <summary><b>benchmark_chr21_real/</b> — 14 files</summary>
@@ -47,15 +45,6 @@ Generated from Git-tracked files. Expand only the directory you need. On GitHub,
 - [`input_data_path.example.yaml`](benchmark_chr21_real/user_settings/input_data_path.example.yaml)
 
 </details>
-
-</details>
-
-<details>
-<summary><b>config/</b> — 3 files</summary>
-
-- [`base.yaml`](config/base.yaml)
-- [`local.yaml`](config/local.yaml)
-- [`server.yaml`](config/server.yaml)
 
 </details>
 
@@ -103,20 +92,6 @@ Generated from Git-tracked files. Expand only the directory you need. On GitHub,
 
 </details>
 
-<details open>
-<summary><b>rules/</b> — 8 files</summary>
-
-- [`assessment.smk`](rules/assessment.smk)
-- [`chr21.smk`](rules/chr21.smk)
-- [`common.smk`](rules/common.smk)
-- [`flye.smk`](rules/flye.smk)
-- [`goldrush.smk`](rules/goldrush.smk)
-- [`ntlink.smk`](rules/ntlink.smk)
-- [`validation.smk`](rules/validation.smk)
-- [`verkko.smk`](rules/verkko.smk)
-
-</details>
-
 <details>
 <summary><b>scripts/</b> — 6 files</summary>
 
@@ -140,12 +115,12 @@ Generated from Git-tracked files. Expand only the directory you need. On GitHub,
 
 - [`README.md`](whole_genome_asm/README.md)
 - [`hybrid.assembly.verkko.smk`](whole_genome_asm/hybrid.assembly.verkko.smk)
-- [`ont.assembly.Goldrush.smk`](whole_genome_asm/ont.assembly.Goldrush.smk)
 - [`ont.assembly.flye2.smk`](whole_genome_asm/ont.assembly.flye2.smk)
-- [`ont.assembly.ntlink.smk`](whole_genome_asm/ont.assembly.ntlink.smk)
-- [`pb.assembly.Goldrush.smk`](whole_genome_asm/pb.assembly.Goldrush.smk)
+- [`ont.assembly.goldrush.smk`](whole_genome_asm/ont.assembly.goldrush.smk)
+- [`ont.scaffolding.ntlink.smk`](whole_genome_asm/ont.scaffolding.ntlink.smk)
 - [`pb.assembly.flye2.smk`](whole_genome_asm/pb.assembly.flye2.smk)
-- [`pb.assembly.ntlink.smk`](whole_genome_asm/pb.assembly.ntlink.smk)
+- [`pb.assembly.goldrush.smk`](whole_genome_asm/pb.assembly.goldrush.smk)
+- [`pb.scaffolding.ntlink.smk`](whole_genome_asm/pb.scaffolding.ntlink.smk)
 
 <details>
 <summary><b>assessment/</b> — 3 files</summary>

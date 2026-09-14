@@ -25,7 +25,6 @@ Generated from Git-tracked files. Expand only the area you need. On GitHub, pres
 - [`caller_tools_inventory.csv`](caller_tools_inventory.csv)
 - [`cuteSV.hg38.smk`](cuteSV.hg38.smk)
 - [`header.smk`](header.smk)
-- [`header_assembler.smk`](header_assembler.smk)
 - [`header_mapper.smk`](header_mapper.smk)
 - [`ilmn.snv_calling.clair3.smk`](ilmn.snv_calling.clair3.smk)
 - [`lrs_benchmarking_tools_selection.R.Rmd`](lrs_benchmarking_tools_selection.R.Rmd)
@@ -103,8 +102,9 @@ Generated from Git-tracked files. Expand only the area you need. On GitHub, pres
 </details>
 
 <details>
-<summary><b>archive/</b> — 4 tracked files</summary>
+<summary><b>archive/</b> — 17 tracked files</summary>
 
+- `legacy/` — 13 files
 - [`ont.read_mapping.ntlink.smk`](archive/ont.read_mapping.ntlink.smk)
 - [`ont.read_mapping.quicked.smk`](archive/ont.read_mapping.quicked.smk)
 - [`pb.read_mapping.ntlink.smk`](archive/pb.read_mapping.ntlink.smk)
@@ -113,19 +113,15 @@ Generated from Git-tracked files. Expand only the area you need. On GitHub, pres
 </details>
 
 <details>
-<summary><b>assemblers/</b> — 54 tracked files</summary>
+<summary><b>assemblers/</b> — 41 tracked files</summary>
 
 - Documentation: [`README.md`](assemblers/README.md)
 - `benchmark_chr21_real/` — 14 files
-- `config/` — 3 files
 - `containers/` — 7 files
 - `envs/` — 1 file
-- `rules/` — 8 files
 - `scripts/` — 6 files
 - `whole_genome_asm/` — 11 files
-- [`Snakefile`](assemblers/Snakefile)
 - [`samples.tsv`](assemblers/samples.tsv)
-- [`snakemake_assemblers.smk`](assemblers/snakemake_assemblers.smk)
 
 </details>
 
