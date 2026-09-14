@@ -41,8 +41,7 @@ SUPPORTED_SUFFIXES = (
     ".cram.stats.SN.txt",
     ".cram.stats",
     ".stats.txt",
-    ".stats",
-)
+    ".stats",)
 
 METHOD_SPECS = {
     "mm2-ont":       ("mm2-ont",    "minimap2",   "map-ont"),
@@ -54,8 +53,8 @@ METHOD_SPECS = {
     "vacmap-ont":    ("vacmap-ont", "VACMap",     "vacmap-ont"),
     "vacmap-pb":     ("vacmap-pb",  "VACMap",     "vacmap-pb"),
     "vg-ont":        ("vg-ont",     "VG Giraffe", "vg-ont"),
-    "vg-pb":         ("vg-pb",      "VG Giraffe", "vg-pb"),
-}
+    "vg-pb":         ("vg-pb",      "VG Giraffe", "vg-pb"),}
+
 METHOD_TAGS = sorted(METHOD_SPECS, key=len, reverse=True)
 
 RUN_METADATA_COLUMNS = [
@@ -63,8 +62,7 @@ RUN_METADATA_COLUMNS = [
     "peak_ram_mb",
     "threads",
     "aligner_version",
-    "aligner_docker_image",
-]
+    "aligner_docker_image",]
 
 OUTPUT_COLUMNS = [
     # identification
@@ -109,13 +107,11 @@ OUTPUT_COLUMNS = [
     "aligner_docker_image", "samtools_docker_image",
 
     # completeness
-    "metrics_complete", "missing_metrics",
-]
+    "metrics_complete", "missing_metrics",]
 
 DATASET_RE = re.compile(
     r"(?P<sample>HG00[234])[._](?P<technology>ont|pb)[._](?P<coverage>1k|30x)(?=[._])",
-    re.IGNORECASE,
-)
+    re.IGNORECASE,)
 
 CORE_REQUIRED = [
     "raw_total_sequences", "reads_mapped", "reads_unmapped",
@@ -125,8 +121,7 @@ CORE_REQUIRED = [
     "bases_mapped_cigar", "mapped_bases_percent", "mismatches",
     "error_rate", "error_percent", "insertion_events", "deletion_events",
     "inserted_bases", "deleted_bases", "insertion_events_per_100kb",
-    "deletion_events_per_100kb", "average_length", "maximum_length",
-]
+    "deletion_events_per_100kb", "average_length", "maximum_length",]
 
 FULL_REQUIRED = CORE_REQUIRED + [
     "soft_clipped_bases", "soft_clipped_percent",
@@ -135,9 +130,7 @@ FULL_REQUIRED = CORE_REQUIRED + [
     "breadth_20x_percent", "breadth_30x_percent",
     "runtime_seconds", "peak_ram_mb", "threads",
     "aligner_version", "samtools_version",
-    "aligner_docker_image", "samtools_docker_image",
-]
-
+    "aligner_docker_image", "samtools_docker_image",]
 
 def warn(msg: str) -> None:
     print(f"WARNING: {msg}", file=sys.stderr)
@@ -216,15 +209,13 @@ def identity_from_name(path: Path) -> Optional[Dict[str, str]]:
         "aligner": aligner,
         "preset": preset,
         "mapper_tag": canonical,
-        "configuration": canonical,
-    }
+        "configuration": canonical,}
 
 
 def row_key(d: Dict[str, str]) -> Tuple[str, str, str, str, str]:
     return (
         d["sample"], d["read_technology"], d["coverage"],
-        d["reference"], d["mapper_tag"]
-    )
+        d["reference"], d["mapper_tag"])
 
 
 def parse_stats(path: Path) -> Dict[str, object]:
@@ -327,8 +318,7 @@ def parse_stats(path: Path) -> Dict[str, object]:
         "deletion_events_per_100kb":
             per100k(del_events, cigar_bases) if saw_id else None,
         "average_length": S("average length"),
-        "maximum_length": S("maximum length"),
-    }
+        "maximum_length": S("maximum length"),}
 
 
 def discover_stats(project: Path) -> List[Path]:
@@ -337,8 +327,7 @@ def discover_stats(project: Path) -> List[Path]:
     roots = (
         project / "alignment_analysis" / "tables",
         project / "cram",
-        project / "samtools_stats_30x_Christian",
-    )
+        project / "samtools_stats_30x_Christian",)
     for root in roots:
         if not root.exists():
             continue
@@ -403,8 +392,7 @@ def docker_base(project: Path, reference: Path, image: str) -> Tuple[List[str], 
     except ValueError:
         mounts = [
             "-v", f"{project}:/work:ro",
-            "-v", f"{reference.parent}:/reference:ro",
-        ]
+            "-v", f"{reference.parent}:/reference:ro",]
         ref_in = f"/reference/{reference.name}"
 
     cmd = [
@@ -412,8 +400,7 @@ def docker_base(project: Path, reference: Path, image: str) -> Tuple[List[str], 
         "-u", f"{os.getuid()}:{os.getgid()}",
         *mounts,
         "-w", "/work",
-        image,
-    ]
+        image,]
     return cmd, "/work", ref_in
 
 
@@ -455,8 +442,7 @@ def compute_soft_clipping(
         "-@", str(threads),
         "-T", ref_in,
         "-F", str(EXCLUDE_FLAGS),
-        cram_in,
-    ]
+        cram_in,]
 
     proc = subprocess.Popen(
         cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
@@ -481,8 +467,7 @@ def compute_soft_clipping(
 
     return {
         "soft_clipped_bases": soft,
-        "soft_clipped_percent": pct(soft, total_length),
-    }
+        "soft_clipped_percent": pct(soft, total_length),}
 
 
 def compute_coverage(
@@ -505,13 +490,11 @@ def compute_coverage(
         f"samtools view -@ {threads} -T {shlex.quote(ref_in)} -b "
         f"{shlex.quote(cram_in)} | "
         f"samtools depth -aa -G {EXCLUDE_FLAGS} - | "
-        f"awk {shlex.quote(awk)}"
-    )
+        f"awk {shlex.quote(awk)}")
 
     proc = subprocess.run(
         base + ["sh", "-c", shell],
-        check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-    )
+        check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
     hist: Dict[int, int] = {}
     total_sum = total_n = None
@@ -529,8 +512,7 @@ def compute_coverage(
         return {
             "mean_coverage": None, "median_coverage": None,
             "breadth_1x_percent": None, "breadth_10x_percent": None,
-            "breadth_20x_percent": None, "breadth_30x_percent": None,
-        }
+            "breadth_20x_percent": None, "breadth_30x_percent": None,}
 
     mean_cov = total_sum / total_n if total_sum is not None else None
 
@@ -558,8 +540,7 @@ def compute_coverage(
         "breadth_1x_percent": breadth(1),
         "breadth_10x_percent": breadth(10),
         "breadth_20x_percent": breadth(20),
-        "breadth_30x_percent": breadth(30),
-    }
+        "breadth_30x_percent": breadth(30),}
 
 
 def load_run_metadata(path: Path) -> Dict[Tuple[str, str, str, str, str], Dict[str, str]]:
@@ -585,8 +566,7 @@ def load_run_metadata(path: Path) -> Dict[Tuple[str, str, str, str, str], Dict[s
                 tech,
                 row["coverage"].strip().lower(),
                 row["reference"].strip().lower() or "hg38",
-                canonical,
-            )
+                canonical,)
             data[key] = row
         return data
 
@@ -612,8 +592,7 @@ def discover_project_run_metrics(project: Path, ident: Dict[str, str]) -> Dict[s
         ident["sample"].upper(),
         target_tech,
         ident["coverage"].lower(),
-        ident["mapper_tag"].lower(),
-    )
+        ident["mapper_tag"].lower(),)
 
     matches = []
     for p in sorted(root.glob("*.run_metrics.tsv")):
@@ -689,8 +668,7 @@ def discover_mapper_threads(project: Path, ident: Dict[str, str]) -> Dict[str, s
             r"rule\s+(?:minimap2|pbmm2|vacmap|vg)[A-Za-z0-9_]*\s*:.*?"
             r"^\s*threads\s*:\s*(\d+)\s*$",
             text,
-            flags=re.I | re.M | re.S,
-        )
+            flags=re.I | re.M | re.S,)
 
     return {"threads": m.group(1)} if m else {}
 
@@ -706,13 +684,11 @@ def discover_snakemake_benchmark(project: Path, ident: Dict[str, str]) -> Dict[s
         project / "benchmarks",
         project / "benchmark",
         project / "alignment_analysis" / "benchmarks",
-        project / "alignment_analysis" / "benchmark",
-    ]
+        project / "alignment_analysis" / "benchmark",]
     tokens = [
         ident["sample"].lower(),
         ident["coverage"].lower(),
-        ident["mapper_tag"].lower(),
-    ]
+        ident["mapper_tag"].lower(),]
     tech_token = "ont" if ident["read_technology"] == "ONT" else "pb"
 
     candidates = []
@@ -790,8 +766,7 @@ def build(args) -> List[Dict[str, str]]:
         row: Dict[str, object] = {
             **ident,
             "statistics_file": rel(stats_file, project),
-            **parse_stats(stats_file),
-        }
+            **parse_stats(stats_file),}
 
         cram = discover_cram(project, ident)
         row["cram_file"] = rel(cram, project) if cram else NA
@@ -801,8 +776,7 @@ def build(args) -> List[Dict[str, str]]:
             "soft_clipped_bases", "soft_clipped_percent",
             "mean_coverage", "median_coverage",
             "breadth_1x_percent", "breadth_10x_percent",
-            "breadth_20x_percent", "breadth_30x_percent",
-        ]:
+            "breadth_20x_percent", "breadth_30x_percent",]:
             row[k] = NA
 
         if args.reference_fasta and cram:
@@ -845,8 +819,7 @@ def build(args) -> List[Dict[str, str]]:
 
         row["samtools_version"] = samtools_version
         row["samtools_docker_image"] = (
-            args.samtools_image if args.reference_fasta else NA
-        )
+            args.samtools_image if args.reference_fasta else NA)
 
         # Format all numeric objects.
         clean = {}
@@ -866,8 +839,7 @@ def build(args) -> List[Dict[str, str]]:
         r["sample"],
         order_tech.get(r["read_technology"], 9),
         r["coverage"],
-        order_aligner.get(r["aligner"], 9),
-    ))
+        order_aligner.get(r["aligner"], 9),))
     return rows
 
 
@@ -882,18 +854,15 @@ def parse_args():
     p.add_argument("--out", type=Path, default=None)
     p.add_argument(
         "--reference-fasta", type=Path, default=None,
-        help="hg38 FASTA. Required to automatically compute CRAM coverage/clipping."
-    )
+        help="hg38 FASTA. Required to automatically compute CRAM coverage/clipping.")
     p.add_argument(
         "--run-metadata", type=Path, default=None,
-        help="Optional alignment_run_metadata.tsv with mapper runtime/provenance."
-    )
+        help="Optional alignment_run_metadata.tsv with mapper runtime/provenance.")
     p.add_argument("--threads", type=int, default=8)
     p.add_argument(
         "--samtools-image",
         default=SAMTOOLS_IMAGE_DEFAULT,
-        help="Pinned Docker image used only for CRAM-derived metrics."
-    )
+        help="Pinned Docker image used only for CRAM-derived metrics.")
     return p.parse_args()
 
 
@@ -903,13 +872,11 @@ def main() -> int:
     args.out = (
         args.out.expanduser().resolve()
         if args.out
-        else args.project / "alignment_analysis" / "tables" / "alignment_summary.tsv"
-    )
+        else args.project / "alignment_analysis" / "tables" / "alignment_summary.tsv")
     args.run_metadata = (
         args.run_metadata.expanduser().resolve()
         if args.run_metadata
-        else args.project / "alignment_analysis" / "tables" / "alignment_run_metadata.tsv"
-    )
+        else args.project / "alignment_analysis" / "tables" / "alignment_run_metadata.tsv")
     if args.reference_fasta:
         args.reference_fasta = args.reference_fasta.expanduser().resolve()
         if not args.reference_fasta.exists():
@@ -925,8 +892,7 @@ def main() -> int:
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("w", encoding="utf-8", newline="") as fh:
         writer = csv.DictWriter(
-            fh, fieldnames=OUTPUT_COLUMNS, delimiter="\t", lineterminator="\n"
-        )
+            fh, fieldnames=OUTPUT_COLUMNS, delimiter="\t", lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 
@@ -937,8 +903,7 @@ def main() -> int:
         print(
             "Any remaining NA values are listed in the missing_metrics column. "
             "Mapper runtime/RAM/version/image cannot be reconstructed if the "
-            "original mapping workflow never recorded them."
-        )
+            "original mapping workflow never recorded them.")
     return 0
 
 

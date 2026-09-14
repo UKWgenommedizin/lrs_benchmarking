@@ -1,436 +1,203 @@
-# Long-Read Assembly Workflows
+# Long-Read Assembly Benchmark
 
-This directory contains Snakemake workflows for assembling whole-genome ONT
-and PacBio long-read data with Flye, GoldRush, ntLink, and Verkko.
+This directory contains assembly workflows, local / reduced validation infrastructure, and production whole-genome assembly workflows.
 
-Production whole-genome assembly uses the technology-specific workflows under
-`assemblers/whole_genome_asm/`. The modular `assemblers/Snakefile` is retained
-for prepared-Chr21 benchmarking and local validation.
+## Repository explorer
 
-## Workflow map
+<!-- AUTO_REPOSITORY_TREE_START -->
+Generated from Git-tracked files. Expand only the directory you need. On GitHub, press **`t`** for fast filename search.
 
-```mermaid
-flowchart TD
-  A[Whole-genome 30x FASTQ] --> B{Technology}
-  B -->|ONT| C[ont.assembly.*.smk]
-  B -->|PacBio HiFi| D[pb.assembly.*.smk]
-  C --> E[Flye or GoldRush]
-  D --> F[Flye or GoldRush]
-  E --> G[Matching ntLink workflow]
-  F --> H[Matching ntLink workflow]
-  A --> I[hybrid.assembly.verkko.smk]
-  E --> J[assemblies/]
-  F --> J
-  G --> J
-  H --> J
-  I --> J
-  K[Snakefile + config/*.yaml] --> L[Prepared-Chr21 benchmark]
-  L --> M[rules/chr21.smk and modular rules]
-```
+- [`README.md`](README.md)
+- [`samples.tsv`](samples.tsv)
 
-## File organization
+<details open>
+<summary><b>benchmark_chr21_real/</b> — 14 files</summary>
 
-```text
-assemblers/
-├── Snakefile                  # Primary entry point
-├── samples.tsv                # Sample and technology metadata
-├── config/
-│   ├── base.yaml              # Shared workflow defaults
-│   ├── local.yaml             # Local test/prepared-read settings
-│   └── server.yaml            # Server whole-genome settings
-├── rules/
-│   ├── common.smk             # Paths, samples, resources, targets
-│   ├── validation.smk         # Input and Docker validation
-│   ├── chr21.smk              # Whole-genome to Chr21 preprocessing
-│   ├── flye.smk
-│   ├── goldrush.smk
-│   ├── ntlink.smk
-│   ├── verkko.smk
-│   └── assessment.smk
-├── scripts/chr21/             # Filtering and normalization scripts
-└── containers/                # Dockerfiles and image build helpers
-```
+- [`BENCHMARK_CONTRACT.md`](benchmark_chr21_real/BENCHMARK_CONTRACT.md)
+- [`README.md`](benchmark_chr21_real/README.md)
+- [`Snakefile.assemblers`](benchmark_chr21_real/Snakefile.assemblers)
+- [`Snakefile.inputs`](benchmark_chr21_real/Snakefile.inputs)
 
-`Snakefile` loads `config/base.yaml`, then includes `rules/common.smk` and the
-rule modules. A file supplied with `--configfiles` overrides values from
-`base.yaml`. `samples.tsv` contains metadata only.
+<details>
+<summary><b>config/</b> — 5 files</summary>
 
-## Samples
+- [`config.assemblers.yaml`](benchmark_chr21_real/config/config.assemblers.yaml)
+- [`containers.yaml`](benchmark_chr21_real/config/containers.yaml)
+- [`dockerhub_images.lock.tsv`](benchmark_chr21_real/config/dockerhub_images.lock.tsv)
+- [`samples.assemblers.tsv`](benchmark_chr21_real/config/samples.assemblers.tsv)
+- [`sources.resolved.tsv`](benchmark_chr21_real/config/sources.resolved.tsv)
 
-```text
-sample  technology
-HG002   ont
-HG002   pb
-HG003   ont
-HG003   pb
-HG004   ont
-HG004   pb
-```
+</details>
 
-Use `ont` for Oxford Nanopore and `pb` for PacBio HiFi. Verkko requires both
-technologies for each sample. Do not put absolute paths in this file.
+<details>
+<summary><b>scripts/</b> — 4 files</summary>
 
-## Production input: whole-genome 30x FASTQs
+- [`filter_sam_start_window.py`](benchmark_chr21_real/scripts/filter_sam_start_window.py)
+- [`normalize_chr21_bam_to_coverage.py`](benchmark_chr21_real/scripts/normalize_chr21_bam_to_coverage.py)
+- [`resolve_chr21_sources.py`](benchmark_chr21_real/scripts/resolve_chr21_sources.py)
+- [`validate_extracted_chr21_bam.py`](benchmark_chr21_real/scripts/validate_extracted_chr21_bam.py)
 
-The production target is whole-genome assembly from the server's 30x FASTQ
-files. The production workflow passes complete whole-genome FASTQs to Flye,
-GoldRush, ntLink, and Verkko; it does not assemble only chromosome 21.
+</details>
 
-The expected server input layout is:
+<details open>
+<summary><b>user_settings/</b> — 1 file</summary>
 
-```text
-input_root/
-├── HG002.ont.30x.fastq.gz
-├── HG002.pb.30x.fastq.gz
-├── HG003.ont.30x.fastq.gz
-├── HG003.pb.30x.fastq.gz
-├── HG004.ont.30x.fastq.gz
-└── HG004.pb.30x.fastq.gz
-```
+- [`input_data_path.example.yaml`](benchmark_chr21_real/user_settings/input_data_path.example.yaml)
 
-The production standalone workflows under `whole_genome_asm/` discover these
-files from `fastq/` using `fastq/{dataset}.fastq.gz`. They select `.ont.` or
-`.pb.` datasets and exclude `.1k`, `.chr21`, and `.localtest` test inputs.
+</details>
 
-## Local test inputs
+</details>
 
-Local reduced datasets are test fixtures, not production inputs. The repository
-may contain:
+<details>
+<summary><b>containers/</b> — 7 files</summary>
 
-```text
-fastq/
-├── HG002SMOKE.ont.30x.fastq.gz  # Small ONT smoke input
-├── HG002SMOKE.pb.30x.fastq.gz   # Small PacBio smoke input
-├── HG002.ont.1k.fastq.gz        # Small 1k-read test input
-├── HG002.pb.1k.fastq.gz         # Small 1k-read test input
-└── *chr21*.fastq.gz             # Prepared Chr21 test inputs
-```
 
-Smoke, 1k, and Chr21 files are useful for checking Snakemake wiring, Docker
-invocation, input conversion, and short tool runs. They are not representative
-of a human whole-genome assembly and may fail tools configured for a 3 Gb
-genome because those tools can allocate substantial memory.
+<details open>
+<summary><b>flye2/</b> — 1 file</summary>
 
-The active modular workflow's `config/local.yaml` is configured for prepared
-Chr21 testing. It is a local validation profile, not the production WGS
-profile.
+- [`Dockerfile`](containers/flye2/Dockerfile)
 
-## Input modes
+</details>
 
-### Local prepared-Chr21 mode
+<details open>
+<summary><b>goldrush/</b> — 2 files</summary>
 
-`config/local.yaml` uses `input_mode: "chr21_fastq"`. Its `input_root` must
-contain already normalized inputs such as:
+- [`Dockerfile`](containers/goldrush/Dockerfile)
+- [`build_goldrush_container.py`](containers/goldrush/build_goldrush_container.py)
 
-```text
-input_root/
-├── HG002/HG002.ont.chr21.primary.mapq20.30x.fastq.gz
-├── HG002/HG002.hifi.chr21.primary.mapq20.30x.fastq.gz
-└── ...
-```
+</details>
 
-No mapping or extraction is performed in this mode.
+<details open>
+<summary><b>ntlink/</b> — 2 files</summary>
 
-### Server whole-genome mode
+- [`Dockerfile`](containers/ntlink/Dockerfile)
+- [`build_ntlink_container.py`](containers/ntlink/build_ntlink_container.py)
 
-Edit `config/server.yaml` with the real paths:
+</details>
 
-```yaml
-input_mode: "whole_genome"
-input_root: "/server/path/to/fastq"
-reference: "/server/path/to/GRCh38.fa"
-whole_genome_pattern: "{sample}.{technology}.30x.fastq.gz"
-```
+<details open>
+<summary><b>verkko2/</b> — 2 files</summary>
 
-The default input layout is:
+- [`Dockerfile`](containers/verkko2/Dockerfile)
+- [`build_verkko_container.py`](containers/verkko2/build_verkko_container.py)
 
-```text
-input_root/
-├── HG002.ont.30x.fastq.gz
-├── HG002.pb.30x.fastq.gz
-├── HG003.ont.30x.fastq.gz
-├── HG003.pb.30x.fastq.gz
-├── HG004.ont.30x.fastq.gz
-└── HG004.pb.30x.fastq.gz
-```
+</details>
 
-For sample subdirectories, use for example:
+</details>
 
-```yaml
-whole_genome_pattern: "{sample}/{sample}.{technology}.fastq.gz"
-```
+<details open>
+<summary><b>envs/</b> — 1 file</summary>
 
-Whole-genome mode in the modular workflow is a Chr21 preprocessing mode: it
-maps reads to the reference and produces normalized Chr21 inputs under
-`results/chr21/` before assembly. It is intended for the prepared-Chr21
-benchmark. Production whole-genome assembly should use the standalone
-workflows in `whole_genome_asm/`, which pass WGS FASTQs directly to the
-assemblers. The reference should use the expected chromosome name, normally
-`chr21` for GRCh38.
+- [`flye.yaml`](envs/flye.yaml)
 
-## Outputs
+</details>
+
+<details>
+<summary><b>scripts/</b> — 6 files</summary>
+
+- [`check_assembler_container_definitions.sh`](scripts/check_assembler_container_definitions.sh)
+- [`workflow_status.py`](scripts/workflow_status.py)
+
+<details open>
+<summary><b>chr21/</b> — 4 files</summary>
+
+- [`filter_sam_start_window.py`](scripts/chr21/filter_sam_start_window.py)
+- [`normalize_chr21_bam_to_coverage.py`](scripts/chr21/normalize_chr21_bam_to_coverage.py)
+- [`select_one_primary_per_qname.py`](scripts/chr21/select_one_primary_per_qname.py)
+- [`validate_extracted_chr21_bam.py`](scripts/chr21/validate_extracted_chr21_bam.py)
+
+</details>
+
+</details>
+
+<details open>
+<summary><b>whole_genome_asm/</b> — 11 files</summary>
+
+- [`README.md`](whole_genome_asm/README.md)
+- [`hybrid.assembly.verkko.smk`](whole_genome_asm/hybrid.assembly.verkko.smk)
+- [`ont.assembly.flye2.smk`](whole_genome_asm/ont.assembly.flye2.smk)
+- [`ont.assembly.goldrush.smk`](whole_genome_asm/ont.assembly.goldrush.smk)
+- [`ont.scaffolding.ntlink.smk`](whole_genome_asm/ont.scaffolding.ntlink.smk)
+- [`pb.assembly.flye2.smk`](whole_genome_asm/pb.assembly.flye2.smk)
+- [`pb.assembly.goldrush.smk`](whole_genome_asm/pb.assembly.goldrush.smk)
+- [`pb.scaffolding.ntlink.smk`](whole_genome_asm/pb.scaffolding.ntlink.smk)
+
+<details>
+<summary><b>assessment/</b> — 3 files</summary>
+
+- [`README.md`](whole_genome_asm/assessment/README.md)
+- [`assembly_quality_busco.smk`](whole_genome_asm/assessment/assembly_quality_busco.smk)
+- [`assembly_quality_quast.smk`](whole_genome_asm/assessment/assembly_quality_quast.smk)
+
+</details>
+
+</details>
+
+<!-- AUTO_REPOSITORY_TREE_END -->
+
+## Benchmark scope
+
+Production assembly benchmarking uses GIAB samples `HG002`, `HG003`, and `HG004` with ONT and PacBio HiFi data.
+
+| Method | Role | Input |
+|---|---|---|
+| Flye | long-read assembler | ONT or PacBio HiFi |
+| GoldRush | long-read assembler | ONT or PacBio HiFi |
+| Verkko | hybrid assembler | ONT + PacBio HiFi |
+| ntLink | post-assembly scaffolder | draft assembly + long reads |
+
+`ntLink` is evaluated as a scaffolding / post-assembly step, not as an independent fourth assembler.
+
+## Two workflow layers
+
+### Production whole-genome workflows
+
+Canonical production workflows are under:
 
 ```text
-results/
-├── chr21/                  # Normalized inputs in whole-genome mode
-├── flye/{sample}.{technology}.fasta
-├── goldrush/{sample}.{technology}.fasta
-├── ntlink/{sample}.{technology}.fasta
-├── verkko/{sample}.fasta
-├── work/                   # Tool working directories
-├── logs/                   # Validation and tool logs
-└── progress/               # Completion and failure markers
+assemblers/whole_genome_asm/
 ```
 
-ntLink uses the matching GoldRush assembly as its draft. Verkko combines ONT
-and PacBio reads from each sample.
+See [`whole_genome_asm/README.md`](whole_genome_asm/README.md) for exact execution instructions.
 
-## Prerequisites
+### Modular / reduced validation workflow
 
-```bash
-command -v python3
-command -v snakemake
-command -v docker
-command -v minimap2
-command -v samtools
-docker info
-```
+The existing `assemblers/Snakefile`, `config/`, `rules/`, `samples.tsv`, and related scripts support prepared-Chr21 and local validation workflows.
 
-The assembler rules use Docker. GoldRush and Flye require substantial memory;
-the supplied server configuration assigns up to 64 GB per such job.
+They are retained because they serve a different validation purpose from the standalone production whole-genome workflows.
 
+## Assembly quality assessment
 
-### Repository root
-
-The standalone WGS workflows use paths relative to the repository root.
-
-Local:
-
-```bash
-cd ~/lrs_benchmarking_wgs_clean
-
-Server:
-
-cd /data/genmedbfx/yu_j/lrs_benchmarking
-
-
-## Running the workflow
-
-Run from the `assemblers/` directory:
-
-```bash
-cd /path/to/lrs_benchmarking_wgs_clean/assemblers
-```
-
-Inspect local prepared-Chr21 test inputs:
-
-```bash
-snakemake --snakefile Snakefile \
-  --configfiles config/local.yaml \
-  --cores 4 --resources mem_mb=12000 \
-  --dry-run --printshellcmds
-```
-
-Inspect the modular server Chr21-preprocessing DAG after setting the reference:
-
-```bash
-snakemake --snakefile Snakefile \
-  --configfiles config/server.yaml \
-  --cores 128 --resources mem_mb=240000 \
-  --dry-run --printshellcmds
-```
-
-Check that the displayed paths match the server before running jobs. This is
-the modular Chr21-preprocessing workflow, not direct WGS assembly. Test one
-modular assembly first:
-
-```bash
-snakemake --snakefile Snakefile results/flye/HG002.ont.fasta \
-  --configfiles config/server.yaml \
-  --cores 32 --resources mem_mb=64000 \
-  --rerun-incomplete --printshellcmds
-```
-
-Then run all assemblers selected in `config/base.yaml`:
-
-```bash
-snakemake --snakefile Snakefile \
-  --configfiles config/server.yaml \
-  --cores 128 --resources mem_mb=240000 \
-  --rerun-incomplete --printshellcmds
-```
-
-Use `config/local.yaml` instead of `config/server.yaml` for prepared local
-Chr21 inputs.
-
-## Running production whole-genome assemblers
-
-Run these standalone workflows from the repository root, not from
-`assemblers/`. They use `CWD` from `header_assembler.smk`, so the current
-directory must contain `fastq/`:
-
-```bash
-cd /path/to/lrs_benchmarking_wgs_clean
-```
-
-These production workflows use the server's complete whole-genome 30x FASTQs
-directly. They do not use `config/server.yaml`, do not extract Chr21, and do
-not require a reference FASTA.
-
-### Flye
-
-Run ONT and PacBio independently:
-
-```bash
-snakemake --snakefile assemblers/whole_genome_asm/ont.assembly.flye2.smk \
-  --cores 32 --resources mem_gb=450 \
-  --rerun-incomplete --printshellcmds
-
-snakemake --snakefile assemblers/whole_genome_asm/pb.assembly.flye2.smk \
-  --cores 32 --resources mem_gb=200 \
-  --rerun-incomplete --printshellcmds
-```
-
-To run one dataset only, use its absolute output path because the workflows
-define outputs with `CWD`:
-
-```bash
-snakemake --snakefile assemblers/whole_genome_asm/ont.assembly.flye2.smk \
-  "$PWD/assemblies/flye/HG002.ont.30x/assembly.fasta" \
-  --cores 32 --resources mem_gb=450 \
-  --rerun-incomplete --printshellcmds
-```
-
-### GoldRush
-
-Run ONT and PacBio independently:
-
-```bash
-snakemake \
-    --snakefile assemblers/whole_genome_asm/ont.assembly.Goldrush.smk \
-    --cores 32 \
-    --resources mem_mb=64000 \
-    --rerun-incomplete \
-    --printshellcmds \
-    --show-failed-logs
-
-snakemake \
-    --snakefile assemblers/whole_genome_asm/pb.assembly.Goldrush.smk \
-    --cores 32 \
-    --resources mem_mb=64000 \
-    --rerun-incomplete \
-    --printshellcmds \
-    --show-failed-logs
-```
-
-GoldRush uses the patched
-`nicolasardila1/lrs-goldrush:1.2.2-ntlinkfix` image. It requires substantial
-memory and should run on the server rather than on a small workstation.
-
-### ntLink
-
-ntLink uses the matching GoldRush assembly as its draft. Run the matching
-technology-specific workflow after GoldRush succeeds:
-
-```bash
-snakemake --snakefile assemblers/whole_genome_asm/ont.assembly.ntlink.smk \
-  --cores 16 --resources mem_mb=32000 \
-  --rerun-incomplete --printshellcmds
-
-snakemake --snakefile assemblers/whole_genome_asm/pb.assembly.ntlink.smk \
-  --cores 16 --resources mem_mb=32000 \
-  --rerun-incomplete --printshellcmds
-```
-
-For example, the ONT ntLink workflow consumes:
+QUAST, BUSCO and Merqury assessment workflows belong under:
 
 ```text
-assemblies/goldrush/HG002.ont.30x/assembly.fasta
-fastq/HG002.ont.30x.fastq.gz
+assemblers/whole_genome_asm/assessment/
 ```
 
-and writes:
+See [`whole_genome_asm/assessment/README.md`](whole_genome_asm/assessment/README.md).
+
+## Downstream analysis
+
+Metric aggregation, quality-summary tables and assembler figures belong in:
 
 ```text
-assemblies/ntlink/HG002.ont.30x/assembly.fasta
+assembly_analysis/
 ```
 
-### Verkko
+This separation keeps **workflow execution** distinct from **result analysis and visualization**.
 
-Verkko is a hybrid assembler and runs one sample at a time using both
-technologies:
+## Production outputs
 
-```bash
-snakemake \
-  --snakefile assemblers/whole_genome_asm/hybrid.assembly.verkko.smk \
-  --configfile assemblers/config/server.yaml \
-  --cores 32 \
-  --resources mem_mb=200000 \
-  --rerun-incomplete \
-  --printshellcmds
-```
-
-
-Verkko requires both files to exist:
+The standardized assembly target is:
 
 ```text
-fastq/HG002.ont.30x.fastq.gz
-fastq/HG002.pb.30x.fastq.gz
+assemblies/{assembler}/{dataset}/assembly.fasta
 ```
 
-### Server dry-runs
+Verkko may use sample-level output naming because it consumes both technologies for the same sample.
 
-Before executing a production job, run the selected workflow with `--dry-run`.
-The dry-run must show the expected whole-genome FASTQ paths and no Chr21
-preprocessing rules:
+## Important path rule
 
-```bash
-snakemake --snakefile assemblers/whole_genome_asm/ont.assembly.flye2.smk \
-  --dry-run --printshellcmds
-```
+Run production whole-genome workflows from the repository root. Several standalone workflows include the shared root-level `header_assembler.smk` using their current relative location. Moving these `.smk` files would require a coordinated code change and dry-run validation.
 
-The local `HG002SMOKE`, `1k`, and Chr21 files can be used for wiring tests, but
-they are not substitutes for the server's whole-genome 30x datasets.
-
-## GoldRush and ntLink
-
-## GoldRush and ntLink
-
-GoldRush uses `nicolasardila1/lrs-goldrush:1.2.2-ntlinkfix`.
-
-The image includes the plain-FASTQ compatibility fix required by the
-GoldRush-bundled ntLink workflow. ntLink reads the prepared uncompressed
-FASTQ directly instead of attempting to decompress it again.
-
-When a GoldRush assembly rule is executed, the workflow removes the complete
-`goldrush_intermediate_files/` directory before starting GoldRush. This
-prevents Make/ntLink intermediate files and stale checkpoints from previous
-failed or completed executions from being reused.
-
-The prepared uncompressed FASTQ is stored outside
-`goldrush_intermediate_files/` and is preserved between runs.
-
-## Legacy workflows
-
-## Standalone whole-genome workflows
-
-The workflows under `whole_genome_asm/` are the production whole-genome
-assembly workflows.
-
-They are modelled on the original one-`.smk`-file-per-tool structure and use
-`header_assembler.smk`, which derives `CWD` from `os.getcwd()`.
-
-For this reason, these workflows must be launched from the repository root.
-They discover WGS inputs under:
-
-`fastq/{dataset}.fastq.gz`
-
-and write standardized final assemblies under:
-
-`assemblies/<tool>/<dataset>/assembly.fasta`
-
-These standalone WGS workflows do not use `config/base.yaml`,
-`config/local.yaml`, `config/server.yaml`, or `samples.tsv`.
-
-The modular `assemblers/Snakefile` workflow is maintained separately for
-prepared-Chr21 benchmarking and local validation.
+For this reason, the repository reorganization deliberately leaves all production assembler `.smk` files in place.

@@ -136,3 +136,44 @@ final_report_files/snakemake_assemblers_benchmarking/**/__pycache__/
 final_report_files/snakemake_assemblers_benchmarking/**/*.pyc
 
 # END CHR21 ASSEMBLER CONTAINER WORKFLOW
+.DS_Store
+**/.DS_Store
+.Rhistory
+**/.Rhistory
+.repo_reorganization_backup/
+*:Zone.Identifier
+.snakemake/
+
+# Local historical/manual backup files
+**/*.bak
+**/*.backup_*
+**/*.before_*
+**/*backup_before_*
+archive/backups/
+archive/migration_snapshots/
+archive/unclassified/
+
+# Generated benchmarking/runtime outputs
+/assemblies/
+/assembly_quality/
+/container_validation/
+/results/
+
+# LaTeX generated files
+final_report_files/*.aux
+final_report_files/*.bbl
+final_report_files/*.fdb_latexmk
+final_report_files/*.fls
+final_report_files/*.out
+final_report_files/*.toc
+
+# Temporary aligner workflow artifacts
+final_report_files/snakemake_aligners_benchmarking/.dryrun_inputs/
+final_report_files/snakemake_aligners_benchmarking/.vacmap_repro_test/
+final_report_files/snakemake_aligners_benchmarking/results/logs/
+final_report_files/snakemake_aligners_benchmarking/results/checkpoints/
+final_report_files/snakemake_aligners_benchmarking/results/provenance/
+final_report_files/snakemake_aligners_benchmarking/results/stats/
+final_report_files/snakemake_aligners_benchmarking/results/vacmap_diagnostic/
+final_report_files/snakemake_aligners_benchmarking/results/vacmap_diagnostic_20260806/
+final_report_files/snakemake_aligners_benchmarking/results/vacmap_manual_test/

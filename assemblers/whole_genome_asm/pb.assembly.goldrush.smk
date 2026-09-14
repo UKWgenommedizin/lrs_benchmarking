@@ -4,7 +4,15 @@
 
 #################
 # Include shared assembler header
-include: "../../header_assembler.smk"
+import os
+
+CWD = os.getcwd()
+print("Current working directory: " + CWD)
+
+try:
+    DATASET_FILTER = config["dataset_filter"]
+except (KeyError, NameError):
+    DATASET_FILTER = None
 
 #################
 # GoldRush version
@@ -27,7 +35,8 @@ DATASETS = [
     if ".pb." in dataset.lower()
     and ".1k" not in dataset.lower()
     and ".chr21." not in dataset.lower()
-    and ".localtest." not in dataset.lower()]
+    and ".localtest." not in dataset.lower()
+    and "smoke" not in dataset.lower()]
 
 
 ##############
@@ -162,6 +171,7 @@ rule goldrush_assemble:
 
 
             docker run --rm \
+                --tmpfs /tmp:size=50g,exec \
                 --hostname goldrush-{wildcards.dataset} \
                 --workdir "{params.outdir}" \
                 -u $UID:$(id -g) \
