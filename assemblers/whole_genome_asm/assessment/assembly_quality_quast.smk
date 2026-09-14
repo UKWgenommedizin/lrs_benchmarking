@@ -40,24 +40,22 @@ print("QUAST Docker image: " + DOCKER_QUAST)
 # Reference configuration
 # ************************************************************************************************
 
-PROJECT_DIR = os.getcwd()
-
-DEFAULT_REFERENCE = os.path.join(
-    PROJECT_DIR,
-    "reference",
-    "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta",
-)
+PROJECT_DIR = CWD
 
 RAW_REFERENCE = config.get("reference")
 
-if RAW_REFERENCE:
-    REFERENCE = os.path.expanduser(RAW_REFERENCE)
-    if not os.path.isabs(REFERENCE):
-        REFERENCE = os.path.join(PROJECT_DIR, REFERENCE)
-    REFERENCE = os.path.abspath(REFERENCE)
-else:
-    REFERENCE = os.path.abspath(DEFAULT_REFERENCE)
+if not RAW_REFERENCE:
+    raise ValueError(
+        "Missing reference genome. Provide the GRCh38 FASTA with "
+        "--config reference=/absolute/path/to/"
+        "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta")
 
+REFERENCE = os.path.expanduser(RAW_REFERENCE)
+
+if not os.path.isabs(REFERENCE):
+    REFERENCE = os.path.join(PROJECT_DIR, REFERENCE)
+
+REFERENCE = os.path.abspath(REFERENCE)
 REFERENCE_DIR = os.path.dirname(REFERENCE)
 
 print("Reference genome: " + REFERENCE)
@@ -67,8 +65,7 @@ print("Reference genome: " + REFERENCE)
 # Discover completed assembly FASTAs
 # ************************************************************************************************
 
-ASSEMBLERS_FOUND, DATASETS_FOUND = glob_wildcards(
-    CWD + r"/assemblies/{assembler}/{dataset}/assembly.fasta")
+ASSEMBLERS_FOUND, DATASETS_FOUND = glob_wildcards(CWD + r"/assemblies/{assembler}/{dataset}/assembly.fasta")
 
 print("Raw assemblers found:", ASSEMBLERS_FOUND)
 print("Raw datasets found:", DATASETS_FOUND)
@@ -84,8 +81,7 @@ ASSEMBLIES = sorted(
         (assembler, dataset)
         for assembler, dataset in zip(
             ASSEMBLERS_FOUND,
-            DATASETS_FOUND
-        )
+            DATASETS_FOUND)
         if assembler.lower() in ALLOWED_OUTPUTS})
 
 if not ASSEMBLIES:
