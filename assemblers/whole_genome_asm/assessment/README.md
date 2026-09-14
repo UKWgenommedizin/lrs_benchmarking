@@ -130,6 +130,17 @@ A missing or inaccessible reference causes the workflow to stop before QUAST exe
 
 Docker exit code `125` together with missing repository or reference files generally indicates a bind-mount or execution-path problem rather than a QUAST installation problem.
 
+### Production run
+
+After the dry run completes successfully, execute the workflow from the configured Snakemake environment by removing `--dry-run`:
+
+```bash
+snakemake --snakefile assemblers/whole_genome_asm/assessment/assembly_quality_quast.smk --cores 16 --resources mem_gb=128 --config reference=/absolute/path/to/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta --printshellcmds
+```
+
+On the UKW server, this command is executed within the configured `snakemake-orchestrator` environment. The outer Docker invocation and server-side bind mounts are infrastructure-specific and are therefore not hard-coded here.
+
+
 ## BUSCO
 
 Workflow:
@@ -174,3 +185,49 @@ snakemake --snakefile assemblers/whole_genome_asm/assessment/assembly_quality_bu
 ```
 
 The exact BUSCO lineage path is server-specific and is not hard-coded in the workflow or this README.
+
+### Production run
+
+After the dry run completes successfully, execute the workflow from the configured Snakemake environment by removing `--dry-run`:
+
+```bash
+snakemake --snakefile assemblers/whole_genome_asm/assessment/assembly_quality_busco.smk --cores 16 --resources mem_gb=64 --config busco_lineage=/absolute/path/to/primates_odb12.2 --printshellcmds
+```
+
+On the UKW server, this command is executed within the configured `snakemake-orchestrator` environment. The exact BUSCO lineage path and outer Docker invocation are server-specific and are not hard-coded in the workflow or this README.
+
+## Merqury
+
+Workflow when present:
+
+```text
+assembly_quality_merqury.smk
+```
+
+Merqury should use the intended trusted k-mer source for the scientific comparison. The exact input data, k-mer database construction, container image, and output contract should be documented in the workflow and here once finalized.
+
+Do not invent missing Merqury provenance or substitute a different k-mer source silently.
+
+## Interpretation
+
+### Contiguity
+
+N50 is useful descriptively but is not sufficient to establish assembly correctness. Reference-aware metrics such as NG50 / NGA50, structural discrepancies, genome fraction and duplication should be considered where appropriate.
+
+### Completeness
+
+BUSCO completeness and k-mer completeness measure different properties and should be reported separately.
+
+### Verkko representation
+
+A haplotype-resolved / diploid Verkko output can have a different total representation from a collapsed assembly. Duplicated BUSCOs, total assembly size and related metrics must therefore be interpreted in the context of assembly representation rather than treated automatically as errors.
+
+## Downstream aggregation
+
+Final cross-tool tables and plots belong in:
+
+```text
+assembly_analysis/
+```
+
+This keeps raw tool outputs reproducible while allowing downstream analysis scripts to evolve independently.
