@@ -4,7 +4,15 @@
 
 #################
 # Include shared assembler header
-include: "../../header_assembler.smk"
+import os
+
+CWD = os.getcwd()
+print("Current working directory: " + CWD)
+
+try:
+    DATASET_FILTER = config["dataset_filter"]
+except (KeyError, NameError):
+    DATASET_FILTER = None
 
 #################
 # ntLink version
@@ -26,7 +34,8 @@ DATASETS = [
     if ".ont." in dataset.lower()
     and ".1k" not in dataset.lower()
     and ".chr21." not in dataset.lower()
-    and ".localtest." not in dataset.lower()]
+    and ".localtest." not in dataset.lower()
+    and "smoke" not in dataset.lower()]
 
 ##############
 # Targets
@@ -111,6 +120,7 @@ rule ntLink_scaffold:
             mv "$READS_FASTQ.tmp" "$READS_FASTQ"
 
             docker run --rm \
+                --tmpfs /tmp:size=50g,exec \
             --hostname ntLink-{wildcards.dataset} \
             --workdir {params.outdir} \
             -u $UID:$(id -g) \

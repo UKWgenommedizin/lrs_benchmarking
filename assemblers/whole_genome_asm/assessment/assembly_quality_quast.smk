@@ -1,4 +1,3 @@
-# ************************************************************************************************
 #
 # assembly_quality_quast.smk
 #
@@ -31,8 +30,7 @@ QUAST_VERSION = "5.3.0"
 
 DOCKER_QUAST = (
     "quay.io/biocontainers/"
-    "quast:5.3.0--py313pl5321h5ca1c30_2"
-)
+    "quast:5.3.0--py313pl5321h5ca1c30_2")
 
 print("QUAST version: " + QUAST_VERSION)
 print("QUAST Docker image: " + DOCKER_QUAST)
@@ -42,17 +40,23 @@ print("QUAST Docker image: " + DOCKER_QUAST)
 # Reference configuration
 # ************************************************************************************************
 
-DEFAULT_REFERENCE = os.path.expanduser(
-    "~/smb/Analyses/Reference_sequence/hg38_KGGM/"
-    "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_"
-    "MAP2K3_KMT2C_KCNJ18.fasta"
+PROJECT_DIR = os.getcwd()
+
+DEFAULT_REFERENCE = os.path.join(
+    PROJECT_DIR,
+    "reference",
+    "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta",
 )
 
-REFERENCE = os.path.abspath(
-    os.path.expanduser(
-        config.get("reference", DEFAULT_REFERENCE)
-    )
-)
+RAW_REFERENCE = config.get("reference")
+
+if RAW_REFERENCE:
+    REFERENCE = os.path.expanduser(RAW_REFERENCE)
+    if not os.path.isabs(REFERENCE):
+        REFERENCE = os.path.join(PROJECT_DIR, REFERENCE)
+    REFERENCE = os.path.abspath(REFERENCE)
+else:
+    REFERENCE = os.path.abspath(DEFAULT_REFERENCE)
 
 REFERENCE_DIR = os.path.dirname(REFERENCE)
 
@@ -64,8 +68,7 @@ print("Reference genome: " + REFERENCE)
 # ************************************************************************************************
 
 ASSEMBLERS_FOUND, DATASETS_FOUND = glob_wildcards(
-    CWD + r"/assemblies/{assembler}/{dataset}/assembly.fasta"
-)
+    CWD + r"/assemblies/{assembler}/{dataset}/assembly.fasta")
 
 print("Raw assemblers found:", ASSEMBLERS_FOUND)
 print("Raw datasets found:", DATASETS_FOUND)
@@ -74,8 +77,7 @@ ALLOWED_OUTPUTS = {
     "flye",
     "goldrush",
     "verkko",
-    "ntlink",
-}
+    "ntlink",}
 
 ASSEMBLIES = sorted(
     {
@@ -84,15 +86,12 @@ ASSEMBLIES = sorted(
             ASSEMBLERS_FOUND,
             DATASETS_FOUND
         )
-        if assembler.lower() in ALLOWED_OUTPUTS
-    }
-)
+        if assembler.lower() in ALLOWED_OUTPUTS})
 
 if not ASSEMBLIES:
     raise ValueError(
         "No completed assembly FASTAs were discovered under "
-        "assemblies/{assembler}/{dataset}/assembly.fasta"
-    )
+        "assemblies/{assembler}/{dataset}/assembly.fasta")
 
 print("Discovered assemblies:")
 
@@ -106,8 +105,7 @@ for assembler, dataset in ASSEMBLIES:
 
 OUTPUT = [
     f"assembly_quality/quast/{assembler}/{dataset}/report.tsv"
-    for assembler, dataset in ASSEMBLIES
-]
+    for assembler, dataset in ASSEMBLIES]
 
 print("QUAST targets:")
 

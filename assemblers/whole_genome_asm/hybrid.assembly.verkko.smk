@@ -4,7 +4,15 @@
 
 #################
 # Include shared assembler header
-include: "../../header_assembler.smk"
+import os
+
+CWD = os.getcwd()
+print("Current working directory: " + CWD)
+
+try:
+    DATASET_FILTER = config["dataset_filter"]
+except (KeyError, NameError):
+    DATASET_FILTER = None
 
 #################
 # Verkko version
@@ -23,14 +31,19 @@ ONT_SAMPLES, = glob_wildcards(CWD + r"/fastq/{sample,[A-Za-z0-9_-]+}.ont.30x.fas
 
 PB_SAMPLES, = glob_wildcards(CWD + r"/fastq/{sample,[A-Za-z0-9_-]+}.pb.30x.fastq.gz")
 
-ONT_SAMPLE_SET = set(ONT_SAMPLES)
-PB_SAMPLE_SET = set(PB_SAMPLES)
+TEST_SAMPLE_MARKERS = ("SMOKE", "LOCALTEST")
+
+def is_production_sample(sample):
+    upper = sample.upper()
+    return not any(marker in upper for marker in TEST_SAMPLE_MARKERS)
+
+ONT_SAMPLE_SET = {sample for sample in ONT_SAMPLES if is_production_sample(sample)}
+PB_SAMPLE_SET = {sample for sample in PB_SAMPLES if is_production_sample(sample)}
 
 SAMPLES = sorted(ONT_SAMPLE_SET & PB_SAMPLE_SET)
 
 ######################
 #Input samples and unpaired control checkpoint
-
 MISSING_PB = sorted(ONT_SAMPLE_SET - PB_SAMPLE_SET)
 MISSING_ONT = sorted(PB_SAMPLE_SET - ONT_SAMPLE_SET)
 
@@ -41,16 +54,15 @@ if MISSING_ONT:
     raise ValueError("Missing ONT input for samples: " + ", ".join(MISSING_ONT))
 
 if not SAMPLES:
-    raise ValueError("No paired Verkko WGS inputs were found. " "Expected files such as "
-        f"{CWD}/fastq/HG002.pb.30x.fastq.gz and "
-        f"{CWD}/fastq/HG002.ont.30x.fastq.gz")
+    raise ValueError("No paired Verkko WGS inputs were found. " "Expected files such as " 
+    f"{CWD}/fastq/HG002.pb.30x.fastq.gz and " f"{CWD}/fastq/HG002.ont.30x.fastq.gz")
 
 ##############
 # Targets
 
 OUTPUT = []
 
-OUTPUT += expand(CWD + "/assemblies/verkko/{sample}/assembly.fasta", sample=SAMPLES)
+OUTPUT += expand(CWD + "/assemblies/verkko/{sample}/assembly.fasta",sample=SAMPLES)
 
 rule all:
     input:
@@ -75,7 +87,7 @@ wildcard_constraints:
 # to the Verkko workflow.
 # Verkko local jobs are limited to 64 GB memory.
 def get_verkko_memory(wildcards):
-    return 200000
+    return 72000
 
 ################
 # Rules
@@ -122,38 +134,21 @@ rule verkko_assemble:
 
             mkdir -p "{params.outdir}"
 
-            HIFI_REAL="$(readlink -f "{input.hifi}")"
-            ONT_REAL="$(readlink -f "{input.ont}")"
-
-            echo "Resolved HiFi input: $HIFI_REAL"
-            echo "Resolved ONT input: $ONT_REAL"
-
-            [[ -r "$HIFI_REAL" ]] || {{
-                echo "ERROR: Resolved HiFi input is not readable: $HIFI_REAL"
-                exit 101
-            }}
-
-            [[ -r "$ONT_REAL" ]] || {{
-                echo "ERROR: Resolved ONT input is not readable: $ONT_REAL"
-                exit 101
-            }}
-
             docker run --rm \
                 --hostname verkko-{wildcards.sample} \
                 --cpus {threads} \
                 -m {resources.mem_mb}m \
+                --tmpfs /tmp:size=50g,exec \
                 --user "$(id -u):$(id -g)" \
                 -e HOME=/tmp \
                 -e TMPDIR=/tmp \
                 --workdir {CWD} \
                 -v {CWD}:{CWD} \
-                -v "$HIFI_REAL:/tmp/verkko_hifi.fastq.gz:ro" \
-                -v "$ONT_REAL:/tmp/verkko_ont.fastq.gz:ro" \
                 {DOCKER_VERKKO} \
                 verkko \
                     -d "{params.outdir}" \
-                    --hifi "/tmp/verkko_hifi.fastq.gz" \
-                    --nano "/tmp/verkko_ont.fastq.gz" \
+                    --hifi "{input.hifi}" \
+                    --nano "{input.ont}" \
                     --local \
                     --local-cpus {threads} \
                     --local-memory {params.local_memory_gb}

@@ -16,6 +16,8 @@
 
 include: "header_mapper.smk"
 
+import os
+
 ####################
 # Docker image
 
@@ -24,8 +26,17 @@ DOCKER_VG = "schimar/lrs-vg:v1.73.0"
 ####################
 # Reference / index paths
 
-REF = (CWD + "/ref/"
-    "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta")
+LOCAL_REFERENCE = os.path.join(
+    CWD,
+    "reference",
+    "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta",
+)
+
+RAW_REFERENCE = config.get("reference", LOCAL_REFERENCE)
+REF = os.path.expanduser(RAW_REFERENCE)
+if not os.path.isabs(REF):
+    REF = os.path.join(CWD, REF)
+REF = os.path.abspath(REF)
 
 VG_INDEX_DIR = CWD + "/vg_index"
 VG_GBZ       = VG_INDEX_DIR + "/hg38.giraffe.gbz"
@@ -103,8 +114,10 @@ rule vg_map_sort:
 
         # vg giraffe → SAM file
         set +e
+        echo "Container hostname: vg-pb"
         docker run --rm \
-            --tmpfs /tmp:size=20g,exec \
+            --hostname "vg-pb" \
+            --tmpfs /tmp:size=50g,exec \
             -u $UID:$(id -g) \
             --cpus {threads} \
             -m 160g \
@@ -146,7 +159,10 @@ rule vg_map_sort:
         [[ -s "$TMP_SAM" ]] || {{ echo "ERROR: vg giraffe produced empty/missing $TMP_SAM"; exit 101; }}
 
         # samtools sort SAM → CRAM
+        echo "Container hostname: vg-pb"
         docker run --rm \
+            --hostname "vg-pb" \
+            --tmpfs /tmp:size=50g,exec \
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus 4 \
@@ -164,7 +180,10 @@ rule vg_map_sort:
 
         rm -f "$TMP_SAM"
 
+        echo "Container hostname: vg-pb"
         docker run --rm \
+            --hostname "vg-pb" \
+            --tmpfs /tmp:size=50g,exec \
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus 4 \
@@ -173,7 +192,12 @@ rule vg_map_sort:
             -v {input.ref}:{input.ref}:ro \
             --entrypoint samtools \
             {DOCKER_SAMTOOLS} \
-            index {CWD}/{output.cram}
+            index {CWD}/{output.cram} {CWD}/{output.crai}
+
+        if [[ ! -s "{output.crai}" ]]; then
+            echo "ERROR: CRAI is missing or empty" >&2
+            exit 101
+        fi
 
         [[ $(du -b {output.cram} | cut -f 1) -le 64 ]] && exit 101
 
@@ -205,7 +229,9 @@ rule build_vg_index:
         set -eo pipefail
         echo "[$(date -Is)] START build_vg_index" >&2
 
+        echo "Container hostname: vg-pb"
         docker run --rm \
+            --hostname "vg-pb" \
             --tmpfs /tmp:size=50g,exec \
             -u $UID:$(id -g) \
             --cpus {threads} \
@@ -244,7 +270,10 @@ rule vg_idxstats:
         set -eo pipefail
         echo "[$(date -Is)] START vg_idxstats {wildcards.dataset}" >&2
 
+        echo "Container hostname: vg-pb"
         docker run --rm \
+            --hostname "vg-pb" \
+            --tmpfs /tmp:size=50g,exec \
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus {threads} \
@@ -278,7 +307,10 @@ rule vg_stats:
         set -eo pipefail
         echo "[$(date -Is)] START vg_stats {wildcards.dataset}" >&2
 
+        echo "Container hostname: vg-pb"
         docker run --rm \
+            --hostname "vg-pb" \
+            --tmpfs /tmp:size=50g,exec \
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus {threads} \
