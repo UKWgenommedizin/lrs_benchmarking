@@ -113,6 +113,7 @@ ASSEMBLIES = sorted(
             DATASETS_FOUND
         )
         if assembler.lower() in ALLOWED_OUTPUTS
+        and ".30x" in dataset.lower()
         and (
             INCLUDE_TEST_ASSEMBLIES
             or not any(
@@ -197,7 +198,30 @@ rule busco_assembly:
         echo "Start time: $(date -Is)" >> "{log}"
         echo >> "{log}"
 
-        docker run --rm --cpus {threads} -m {resources.mem_gb}g --tmpfs /tmp:size=50g,exec -u $UID:$(id -g) -v {CWD}:{CWD} -v {BUSCO_LINEAGE_DIR}:{BUSCO_LINEAGE_DIR}:ro --workdir {CWD} {DOCKER_BUSCO} /bin/bash -c 'busco --version && busco --in "{input.assembly}" --mode genome --lineage_dataset "{BUSCO_LINEAGE}" --cpu {threads} --out "{params.run_name}" --out_path "{params.outdir}" --offline --miniprot --opt-out-run-stats' >> "{log}" 2>&1
+        docker run --rm --cpus {threads} -m {resources.mem_gb}g --tmpfs /tmp:size=50g,exec -u $UID:$(id -g) -v {CWD}:{CWD} -v {BUSCO_LINEAGE_DIR}:{BUSCO_LINEAGE_DIR}:ro --workdir {CWD} {DOCKER_BUSCO} /bin/bash -c '
+            set -eo pipefail
+
+            printf "Container hostname:\t"
+            hostname
+
+            echo
+            echo "BUSCO version:"
+            busco --version
+
+            echo
+            echo "Running BUSCO"
+
+            busco \
+                --in "{input.assembly}" \
+                --mode genome \
+                --lineage_dataset "{BUSCO_LINEAGE}" \
+                --cpu {threads} \
+                --out "{params.run_name}" \
+                --out_path "{params.outdir}" \
+                --offline \
+                --miniprot \
+                --opt-out-run-stats
+        ' >> "{log}" 2>&1
 
         echo >> "{log}"
         echo "End time: $(date -Is)" >> "{log}"
