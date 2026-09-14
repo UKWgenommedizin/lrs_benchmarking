@@ -1,228 +1,293 @@
-# ************************************************************************************************
-# 
-# ************************************************************************************************
+##
+# ont.read_mapping.pbmm2.smk
+# Read mapping workflow for Oxford Nanopore data using pbmm2.
+# mapper_tag: pbmm2-ont
+# Benchmark note: pbmm2 is PacBio-oriented; SUBREAD is used here as the
+# project's high-error long-read preset for the cross-technology ONT benchmark.
+# Constitution: Articles I-VIII
+##
 
-#################
-# Include header
+include: "header_mapper.smk"
 
-include: "header.smk"
+import os
 
+####################
+# Containers
 
-#VarCAD_db processing version
-VARCAD_DB_VERSION="1.0.0"
-print("VarCAD_db procssing version: " + VARCAD_DB_VERSION)
+PBMM2_VERSION = "1.17.0"
+SAMTOOLS_VERSION = "1.24"
 
+DOCKER_PBMM2 = "schimar/lrs-pbmm2:v1.17.0"
+DOCKER_SAMTOOLS = "quay.io/biocontainers/samtools:1.24--h9dcdb79_1"
 
-# Create wildcards
-DATASETS_FASTQ, = glob_wildcards(CWD + "/fastq/{dataset, [A-Za-z0-9\-\_\.]+}.fastq.gz")
-DATASETS_BAM, = glob_wildcards(CWD + "/bam_unmapped/{dataset, [A-Za-z0-9\-\_\.]+}.bam")
+print("pbmm2 version: " + PBMM2_VERSION)
+print("pbmm2 Docker image: " + DOCKER_PBMM2)
+print("samtools version: " + SAMTOOLS_VERSION)
+print("samtools Docker image: " + DOCKER_SAMTOOLS)
 
-DATASETS = DATASETS_FASTQ + DATASETS_BAM
+####################
+# Reference
 
+REFERENCE = "hg38"
+MAPPER_TAG = "pbmm2-ont"
+PBMM2_PRESET = "SUBREAD"
 
-# *** Define Output
-OUTPUT = []
+LOCAL_REFERENCE = os.path.join(
+    CWD,
+    "reference",
+    "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta",
+)
 
-OUTPUT = OUTPUT + expand(CWD + "/cram/{dataset}." + VARCAD_GENOME_BUILD + ".pbmm2-ont.cram", zip, dataset=DATASETS)
+RAW_REFERENCE = config.get("reference", LOCAL_REFERENCE)
+REF = os.path.expanduser(RAW_REFERENCE)
+if not os.path.isabs(REF):
+    REF = os.path.join(CWD, REF)
+REF = os.path.abspath(REF)
+REFERENCE_DIR = os.path.dirname(REF)
 
-#OUTPUT = OUTPUT + expand(CWD + "/cram/{dataset}." + VARCAD_GENOME_BUILD + ".pbmm2-ont.cram.md5", zip, dataset=DATASETS)
+print("Reference genome: " + REF)
+print("pbmm2 preset: " + PBMM2_PRESET)
 
-OUTPUT = OUTPUT + expand(CWD + "/cram/{dataset}." + VARCAD_GENOME_BUILD + ".pbmm2-ont.cram.idxstats", zip, dataset=DATASETS)
+####################
+# Discover FASTQ inputs
 
-#OUTPUT = OUTPUT + expand(CWD + "/cram/{dataset}." + VARCAD_GENOME_BUILD + ".pbmm2-ont.cram.flagstat", zip, dataset=DATASETS)
+FASTQ_DIR = "fastq"
+DATASETS, = glob_wildcards(FASTQ_DIR + "/{dataset}.fastq.gz")
+DATASETS = [d for d in DATASETS if ".ont." in d.lower()]
 
-OUTPUT = OUTPUT + expand(CWD + "/cram/{dataset}." + VARCAD_GENOME_BUILD + ".pbmm2-ont.cram.stats", zip, dataset=DATASETS)
+if DATASET_FILTER:
+    DATASETS = [d for d in DATASETS if DATASET_FILTER in d]
 
-
-# ************************************************************************************************
-
+####################
+# Targets
 
 rule all:
-    input: OUTPUT
+    input:
+        expand(
+            "cram/{dataset}.{ref}.{tag}.cram",
+            dataset=DATASETS,
+            ref=REFERENCE,
+            tag=MAPPER_TAG,
+        ),
+        expand(
+            "cram/{dataset}.{ref}.{tag}.cram.crai",
+            dataset=DATASETS,
+            ref=REFERENCE,
+            tag=MAPPER_TAG,
+        ),
+        expand(
+            "cram/{dataset}.{ref}.{tag}.cram.idxstats",
+            dataset=DATASETS,
+            ref=REFERENCE,
+            tag=MAPPER_TAG,
+        ),
+        expand(
+            "cram/{dataset}.{ref}.{tag}.cram.stats",
+            dataset=DATASETS,
+            ref=REFERENCE,
+            tag=MAPPER_TAG,
+        ),
 
-rule test:
-    shell:  print(OUTPUT) # print(DATASETS),
+####################
+# Mapping
 
+rule pbmm2_ont_map_sort:
+    input:
+        fastq=FASTQ_DIR + "/{dataset}.fastq.gz",
+        ref=lambda wildcards: REF,
+    output:
+        cram="cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram",
+        crai="cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram.crai",
+    log:
+        "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".map_sort.log",
+    threads: 64
+    resources:
+        mem_mb=131072,
+    params:
+        map_threads=48,
+        sort_threads=16,
+        map_mem_gb=64,
+        sort_mem_gb=64,
+    shell:
+        r"""
+        (
+            set -eo pipefail
 
-# ************************************************************************************************	
-# Rules
-# ************************************************************************************************		
+            echo "[$(date -Is)] START pbmm2_ont_map_sort {wildcards.dataset}"
+            echo "Dataset: {wildcards.dataset}"
+            echo "Reference: {input.ref}"
+            echo "Mapper: pbmm2 {PBMM2_VERSION}"
+            echo "Preset: {PBMM2_PRESET}"
+            echo "Mapper container hostname: pbmm2-ont-{wildcards.dataset}"
+            echo "Sort container hostname: samtools-sort-{wildcards.dataset}"
+            echo "Threads: {threads}"
+            echo "Memory resource: {resources.mem_mb} MB"
 
+            mkdir -p "{CWD}/cram/tmp"
 
-ruleorder: pbmm2_ont_unmapped_bam > pbmm2_ont_fastq
+            docker run --rm \
+                --hostname "pbmm2-ont-{wildcards.dataset}" \
+                --tmpfs /tmp:size=50g,exec \
+                -u $UID:$(id -g) \
+                --cpus {params.map_threads} \
+                -m {params.map_mem_gb}g \
+                --workdir "{CWD}" \
+                -v "{CWD}:{CWD}" \
+                -v "{REFERENCE_DIR}:{REFERENCE_DIR}:ro" \
+                --entrypoint pbmm2 \
+                "{DOCKER_PBMM2}" \
+                align \
+                "{input.ref}" \
+                "{CWD}/{input.fastq}" \
+                --preset "{PBMM2_PRESET}" \
+                -j {params.map_threads} \
+                --log-level INFO \
+                --unmapped \
+                --rg '@RG\tID:{wildcards.dataset}\tSM:{wildcards.dataset}' \
+            | docker run --rm -i \
+                --hostname "samtools-sort-{wildcards.dataset}" \
+                --tmpfs /tmp:size=50g,exec \
+                -u $UID:$(id -g) \
+                --cpus {params.sort_threads} \
+                -m {params.sort_mem_gb}g \
+                --workdir "{CWD}" \
+                -v "{CWD}:{CWD}" \
+                -v "{REFERENCE_DIR}:{REFERENCE_DIR}:ro" \
+                --entrypoint samtools \
+                "{DOCKER_SAMTOOLS}" \
+                sort \
+                -@ {params.sort_threads} \
+                -m 3G \
+                --reference "{input.ref}" \
+                --no-PG \
+                -O CRAM \
+                -T "{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}" \
+                -o "{CWD}/{output.cram}" \
+                -
 
+            if [[ $(du -b "{output.cram}" | cut -f 1) -le 64 ]]; then
+                echo "ERROR: CRAM is missing or truncated"
+                exit 101
+            fi
 
-rule pbmm2_ont_fastq:
-	input:	fastq="{cwd}/fastq/{dataset}.fastq.gz",
-		fasta=VARCAD_DB_PATH + "/{genome_build}/Reference_sequence/" + VARCAD_DB_VERSION + "/{genome_build}.fasta.gz"
-	output:	cram="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram"
-	params:	prefix="{cwd}/cram/tmp/{dataset}.{genome_build}.pbmm2-ont"
-	log:	"{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.log"
-	message:"executing {rule} with output {output} and input {input}"
-	threads:64
-	resources:
-		mem_gb=128
-	shell:	"umask 0027; \
-		mkdir -p $(dirname {output.cram})/tmp; \
-		srun -p all -c {threads} --mem={resources.mem_gb}GB /bin/bash -c \" \
-			printf 'Container ID:\\t'; hostname; \
-			printf 'Start time:\\t'; date; \
-			umask 0027; \
-			$VARCAD_PATH/bin/pbmm2 align \
-				-j {threads} \
-				--preset SUBREAD \
-				--log-level INFO \
-				--unmapped \
-				--rg '@RG\\tID:{wildcards.dataset}\\tSM:{wildcards.dataset}' \
-				{input.fasta} \
-				{input.fastq} | \
-			\\$VARCAD_PATH/bin/samtools sort \
-				-@ {threads} \
-				--reference {input.fasta} \
-				-m 1G \
-				-T {params.prefix} \
-				--no-PG \
-				-O cram \
-				-o {output.cram} \
-				-; \
-			[[ \$(du -b {output.cram} | cut -f 1) -le 64 ]] && exit 101 || echo 'File size: OK'; \
-			\\$VARCAD_PATH/bin/samtools index -@ {threads} {output.cram}; \
-			printf 'End time:\\t'; date; \" \
-		&> {log};"
+            docker run --rm \
+                --hostname "samtools-index-{wildcards.dataset}" \
+                --tmpfs /tmp:size=50g,exec \
+                -u $UID:$(id -g) \
+                --cpus 8 \
+                -m 16g \
+                --workdir "{CWD}" \
+                -v "{CWD}:{CWD}" \
+                -v "{REFERENCE_DIR}:{REFERENCE_DIR}:ro" \
+                --entrypoint samtools \
+                "{DOCKER_SAMTOOLS}" \
+                index \
+                -@ 8 \
+                -o "{CWD}/{output.crai}" \
+                "{CWD}/{output.cram}"
 
-#grep -v '^@PG' | \
+            if [[ ! -s "{output.crai}" ]]; then
+                echo "ERROR: CRAI is missing or empty"
+                exit 101
+            fi
 
+            echo "[$(date -Is)] END pbmm2_ont_map_sort {wildcards.dataset}"
+        ) > "{log}" 2>&1
+        """
 
-rule pbmm2_ont_unmapped_bam:
-	input:	unmapped_bam="{cwd}/bam_unmapped/{dataset}.bam",
-		fasta=VARCAD_DB_PATH + "/{genome_build}/Reference_sequence/" + VARCAD_DB_VERSION + "/{genome_build}.fasta.gz"
-	output:	cram="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram"
-	params:	prefix="{cwd}/cram/tmp/{dataset}.{genome_build}.pbmm2-ont"
-	log:	"{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.log"
-	message:"executing {rule} with output {output} and input {input}"
-	threads:64
-	resources:
-		mem_gb=128
-	shell:	"umask 0027; \
-		mkdir -p $(dirname {output.cram})/tmp; \
-		srun -p all -c {threads} --mem={resources.mem_gb}GB /bin/bash -c \" \
-			printf 'Container ID:\\t'; hostname; \
-			printf 'Start time:\\t'; date; \
-			umask 0027; \
-			$VARCAD_PATH/bin/pbmm2 align \
-				-j {threads} \
-				--preset SUBREAD \
-				--log-level INFO \
-				--unmapped \
-				--rg '@RG\\tID:{wildcards.dataset}\\tSM:{wildcards.dataset}' \
-				{input.fasta} \
-				{input.unmapped_bam} | \
-			\\$VARCAD_PATH/bin/samtools sort \
-				-@ {threads} \
-				-m 1G \
-				-T {params.prefix} \
-				--no-PG \
-				--reference {input.fasta} \
-				-O cram \
-				-o {output.cram} \
-				-; \
-			[[ \$(du -b {output.cram} | cut -f 1) -le 64 ]] && exit 101 || echo 'File size: OK'; \
-			\\$VARCAD_PATH/bin/samtools index -@ {threads} {output.cram}; \
-			printf 'End time:\\t'; date; \" \
-		&> {log};"
+####################
+# idxstats
 
-#grep -v '^@PG' | \
+rule pbmm2_ont_idxstats:
+    input:
+        cram="cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram",
+        crai="cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram.crai",
+        ref=lambda wildcards: REF,
+    output:
+        idxstats="cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram.idxstats",
+    log:
+        "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".idxstats.log",
+    threads: 2
+    resources:
+        mem_mb=4096,
+    shell:
+        r"""
+        (
+            set -eo pipefail
 
+            echo "[$(date -Is)] START pbmm2_ont_idxstats {wildcards.dataset}"
+            echo "Container hostname: samtools-idxstats-{wildcards.dataset}"
 
-rule md5sum_cram:
-	input:	cram="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram"
-	output:	md5="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.md5"
-	log:	"{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.md5.log"
-	message:"executing {rule} with output {output} and input {input}"
-	threads:1
-	resources:
-		mem_gb=2
-	shell:	"umask 0027; \
-		mkdir -p $(dirname {output}); \
-		srun -p all -c {threads} --mem={resources.mem_gb}GB \
-		docker run --cpus {threads} -m {resources.mem_gb}g -u $UID:1002 --workdir /tmp --rm -v {CWD}:{CWD} -v {VARCAD_DB_PATH}:{VARCAD_DB_PATH}:ro {DOCKER_VARCAD} /bin/bash -c \" \
-			printf 'Container ID:\\t'; hostname; \
-			printf 'Start time:\\t'; date; \
-			umask 0027; \
-			md5sum {input.cram} | awk '{{print \\$1}}' > {output.md5}; \
-			printf 'End time:\\t'; date; \" \
-		&> {log};"
+            docker run --rm \
+                --hostname "samtools-idxstats-{wildcards.dataset}" \
+                --tmpfs /tmp:size=50g,exec \
+                -u $UID:$(id -g) \
+                --cpus {threads} \
+                -m 4g \
+                --workdir "{CWD}" \
+                -v "{CWD}:{CWD}" \
+                -v "{REFERENCE_DIR}:{REFERENCE_DIR}:ro" \
+                --entrypoint samtools \
+                "{DOCKER_SAMTOOLS}" \
+                idxstats \
+                "{CWD}/{input.cram}" \
+                > "{output.idxstats}"
 
+            if [[ ! -s "{output.idxstats}" ]]; then
+                echo "ERROR: idxstats output is missing or empty"
+                exit 101
+            fi
 
-rule samtools_idxstats:
-	input:	cram="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram"
-	output:	idxstats="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.idxstats"
-	log:	"{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.idxstats.log"
-	message:"executing {rule} with output {output} and input {input}"
-	threads:2
-	resources:
-		mem_gb=4
-	shell:	"umask 0027; \
-		srun -p all -c {threads} --mem={resources.mem_gb}GB \
-		docker run --cpus {threads} -m {resources.mem_gb}g -u $UID:1002 --workdir /tmp --rm -v {CWD}:{CWD} -v {VARCAD_DB_PATH}:{VARCAD_DB_PATH}:ro {DOCKER_VARCAD} /bin/bash -c \" \
-			printf 'Container ID:\\t'; hostname; \
-			printf 'Start time:\\t'; date; \
-			umask 0027; \
-			\\$VARCAD_PATH/bin/samtools idxstats \
-				-@ {threads} \
-				{input.cram} \
-				> {output.idxstats}; \
-			[[ \$(du -b {output.idxstats} | cut -f 1) -le 0 ]] && exit 101 || echo 'File size: OK'; \
-			printf 'End time:\\t'; date; \" \
-		&> {log};"
+            echo "[$(date -Is)] END pbmm2_ont_idxstats {wildcards.dataset}"
+        ) > "{log}" 2>&1
+        """
 
+####################
+# samtools stats
 
-rule samtools_flagstat:
-	input:	cram="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram"
-	output:	flagstat="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.flagstat"
-	log:	"{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.flagstat.log"
-	message:"executing {rule} with output {output} and input {input}"
-	threads:2
-	resources:
-		mem_gb=4
-	shell:	"umask 0027; \
-		srun -p all -c {threads} --mem={resources.mem_gb}GB \
-		docker run --cpus {threads} -m {resources.mem_gb}g -u $UID:1002 --workdir /tmp --rm -v {CWD}:{CWD} -v {VARCAD_DB_PATH}:{VARCAD_DB_PATH}:ro {DOCKER_VARCAD} /bin/bash -c \" \
-			printf 'Container ID:\\t'; hostname; \
-			printf 'Start time:\\t'; date; \
-			umask 0027; \
-			\\$VARCAD_PATH/bin/samtools idxstats \
-				-@ {threads} \
-				{input.cram} \
-				> {output.flagstat}; \
-			[[ \$(du -b {output.flagstat} | cut -f 1) -le 0 ]] && exit 101 || echo 'File size: OK'; \
-			printf 'End time:\\t'; date; \" \
-		&> {log};"
+rule pbmm2_ont_stats:
+    input:
+        cram="cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram",
+        crai="cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram.crai",
+        ref=lambda wildcards: REF,
+    output:
+        stats="cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".cram.stats",
+    log:
+        "cram/{dataset}." + REFERENCE + "." + MAPPER_TAG + ".stats.log",
+    threads: 16
+    resources:
+        mem_mb=32768,
+    shell:
+        r"""
+        (
+            set -eo pipefail
 
+            echo "[$(date -Is)] START pbmm2_ont_stats {wildcards.dataset}"
+            echo "Container hostname: samtools-stats-{wildcards.dataset}"
 
-rule samtools_stats:
-	input:	cram="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram",
-		fasta=VARCAD_DB_PATH + "/{genome_build}/Reference_sequence/" + VARCAD_DB_VERSION + "/{genome_build}.fasta.gz"
-	output:	stats="{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.stats"
-	log:	"{cwd}/cram/{dataset}.{genome_build}.pbmm2-ont.cram.stats.log"
-	message:"executing {rule} with output {output} and input {input}"
-	threads:16
-	resources:
-		mem_gb=32
-	shell:	"umask 0027; \
-		srun -p all -c {threads} --mem={resources.mem_gb}GB /bin/bash -c \" \
-			printf 'Container ID:\\t'; hostname; \
-			printf 'Start time:\\t'; date; \
-			umask 0027; \
-			\\$VARCAD_PATH/bin/samtools stats \
-				-@ {threads} \
-				--reference {input.fasta} \
-				--remove-overlaps \
-				{input.cram} \
-				> {output.stats}; \
-			[[ \$(du -b {output.stats} | cut -f 1) -lt 5000 ]] && exit 101 || echo 'File size: OK'; \
-			printf 'End time:\\t'; date; \" \
-		&> {log};"
+            docker run --rm \
+                --hostname "samtools-stats-{wildcards.dataset}" \
+                --tmpfs /tmp:size=50g,exec \
+                -u $UID:$(id -g) \
+                --cpus {threads} \
+                -m 32g \
+                --workdir "{CWD}" \
+                -v "{CWD}:{CWD}" \
+                -v "{REFERENCE_DIR}:{REFERENCE_DIR}:ro" \
+                --entrypoint samtools \
+                "{DOCKER_SAMTOOLS}" \
+                stats \
+                -@ {threads} \
+                --reference "{input.ref}" \
+                --remove-overlaps \
+                "{CWD}/{input.cram}" \
+                > "{output.stats}"
 
+            if [[ $(du -b "{output.stats}" | cut -f 1) -lt 5000 ]]; then
+                echo "ERROR: samtools stats output is too small"
+                exit 101
+            fi
 
-# ************************************************************************************************
+            echo "[$(date -Is)] END pbmm2_ont_stats {wildcards.dataset}"
+        ) > "{log}" 2>&1
+        """
