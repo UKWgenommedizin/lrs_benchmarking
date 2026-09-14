@@ -7,6 +7,8 @@
 
 include: "header_mapper.smk"
 
+import os
+
 ####################
 # Docker image
 
@@ -15,8 +17,17 @@ DOCKER_VACMAP = "schimar/lrs-vacmap:v1.2.0"
 ####################
 # Reference
 
-REF = (CWD + "/ref/"
-    "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta")
+LOCAL_REFERENCE = os.path.join(
+    CWD,
+    "reference",
+    "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta",
+)
+
+RAW_REFERENCE = config.get("reference", LOCAL_REFERENCE)
+REF = os.path.expanduser(RAW_REFERENCE)
+if not os.path.isabs(REF):
+    REF = os.path.join(CWD, REF)
+REF = os.path.abspath(REF)
 
 MAPPER_TAG = "vacmap-pb"
 REFERENCE  = "hg38"
@@ -75,7 +86,10 @@ rule vacmap_map_sort:
         # VACmap → temp SAM file (pipe breaks occur with docker | docker)
         TMP_SAM="{CWD}/cram/tmp/{wildcards.dataset}.{REFERENCE}.{MAPPER_TAG}.sam"
 
+        echo "Container hostname: vacmap-pb"
         docker run --rm \
+            --hostname "vacmap-pb" \
+            --tmpfs /tmp:size=50g,exec \
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus {threads} \
@@ -96,7 +110,10 @@ rule vacmap_map_sort:
         [[ -s "$TMP_SAM" ]] || {{ echo "ERROR: VACmap produced empty/missing $TMP_SAM"; exit 101; }}
 
         # samtools sort SAM → CRAM
+        echo "Container hostname: vacmap-pb"
         docker run --rm \
+            --hostname "vacmap-pb" \
+            --tmpfs /tmp:size=50g,exec \
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus 4 \
@@ -114,7 +131,10 @@ rule vacmap_map_sort:
 
         rm -f "$TMP_SAM"
 
+        echo "Container hostname: vacmap-pb"
         docker run --rm \
+            --hostname "vacmap-pb" \
+            --tmpfs /tmp:size=50g,exec \
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus 4 \
@@ -123,7 +143,12 @@ rule vacmap_map_sort:
             -v {input.ref}:{input.ref}:ro \
             --entrypoint samtools \
             {DOCKER_VACMAP} \
-            index {CWD}/{output.cram}
+            index {CWD}/{output.cram} {CWD}/{output.crai}
+
+        if [[ ! -s "{output.crai}" ]]; then
+            echo "ERROR: CRAI is missing or empty" >&2
+            exit 101
+        fi
 
         # Validate CRAM size
         [[ $(du -b {output.cram} | cut -f 1) -le 64 ]] && exit 101
@@ -148,7 +173,10 @@ rule vacmap_idxstats:
         set -eo pipefail
         echo "[$(date -Is)] START vacmap_idxstats {wildcards.dataset}" >&2
 
+        echo "Container hostname: vacmap-pb"
         docker run --rm \
+            --hostname "vacmap-pb" \
+            --tmpfs /tmp:size=50g,exec \
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus {threads} \
@@ -182,7 +210,10 @@ rule vacmap_stats:
         set -eo pipefail
         echo "[$(date -Is)] START vacmap_stats {wildcards.dataset}" >&2
 
+        echo "Container hostname: vacmap-pb"
         docker run --rm \
+            --hostname "vacmap-pb" \
+            --tmpfs /tmp:size=50g,exec \
             --workdir /tmp \
             -u $UID:$(id -g) \
             --cpus {threads} \
