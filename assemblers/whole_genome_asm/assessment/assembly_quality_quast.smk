@@ -17,7 +17,7 @@ import os
 # Repository root
 # ************************************************************************************************
 
-CWD = os.getcwd()
+CWD = os.path.abspath(os.getcwd())
 
 print("Current working directory: " + CWD)
 
@@ -44,31 +44,45 @@ RAW_REFERENCE = config.get("reference")
 
 if not RAW_REFERENCE:
     raise ValueError(
-        "Missing reference genome. Provide the GRCh38 FASTA with "
-        "--config reference=/absolute/path/to/"
-        "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta")
+        "Missing reference genome. Provide it with "
+        "--config reference=/absolute/path/to/reference.fasta")
 
-REFERENCE = os.path.expanduser(RAW_REFERENCE)
 
-if not os.path.isabs(REFERENCE):
+REFERENCE = os.path.abspath(os.path.expanduser(RAW_REFERENCE))
+
+if not os.path.isfile(REFERENCE):
     raise ValueError(
-        "Reference genome path must be absolute after expansion: "
-        + REFERENCE)
+        "Reference genome does not exist: " + REFERENCE)
 
-REFERENCE = os.path.abspath(REFERENCE)
 REFERENCE_DIR = os.path.dirname(REFERENCE)
 
 print("Reference genome: " + REFERENCE)
 
 
 # ************************************************************************************************
+# Assembly-root configuration
+# ************************************************************************************************
+
+ASSEMBLIES_ROOT = os.path.join(CWD, "assemblies")
+
+if not os.path.isdir(ASSEMBLIES_ROOT):
+    raise ValueError(
+        "Assemblies directory does not exist: " + ASSEMBLIES_ROOT)
+
+print("Assemblies root: " + ASSEMBLIES_ROOT)
+
+
+# ************************************************************************************************
 # Discover completed assembly FASTAs
 # ************************************************************************************************
 
-ASSEMBLERS_FOUND, DATASETS_FOUND = glob_wildcards(CWD + r"/assemblies/{assembler}/{dataset}/assembly.fasta")
+ASSEMBLERS_FOUND, DATASETS_FOUND = glob_wildcards(
+    ASSEMBLIES_ROOT
+    + r"/{assembler}/{dataset}/assembly.fasta")
 
 print("Raw assemblers found:", ASSEMBLERS_FOUND)
 print("Raw datasets found:", DATASETS_FOUND)
+
 
 ALLOWED_OUTPUTS = {
     "flye",
@@ -76,34 +90,56 @@ ALLOWED_OUTPUTS = {
     "verkko",
     "ntlink",}
 
-
 TEST_MARKERS = (
     ".1k",
     ".chr21",
     ".localtest",
     "smoke",)
 
+PRODUCTION_SAMPLES = {
+    "hg002",
+    "hg003",
+    "hg004",}
+
+
+def is_production_assembly(assembler, dataset):
+
+    assembler = assembler.lower()
+    dataset = dataset.lower()
+
+    if assembler not in ALLOWED_OUTPUTS:
+        return False
+
+    if any(marker in dataset for marker in TEST_MARKERS):
+        return False
+
+    # Verkko is hybrid and uses sample-level names:
+    # HG002, HG003, HG004
+    if assembler == "verkko":
+        return dataset in PRODUCTION_SAMPLES
+
+    # Flye / GoldRush / ntLink use technology-specific 30x datasets
+    return ".30x" in dataset
+
+
 ASSEMBLIES = sorted(
     {
         (assembler, dataset)
         for assembler, dataset in zip(
             ASSEMBLERS_FOUND,
-            DATASETS_FOUND)
-        if assembler.lower() in ALLOWED_OUTPUTS
-        and ".30x" in dataset.lower()
-        and not any(
-            marker in dataset.lower()
-            for marker in TEST_MARKERS)})
-
-if not os.path.isfile(REFERENCE):
-    raise ValueError(
-        "Reference genome does not exist: " + REFERENCE)
+            DATASETS_FOUND
+        )
+        if is_production_assembly(
+            assembler,
+            dataset)})
 
 
 if not ASSEMBLIES:
     raise ValueError(
-        "No completed assembly FASTAs were discovered under "
-        "assemblies/{assembler}/{dataset}/assembly.fasta")
+        "No completed production assembly FASTAs were discovered under "
+        + ASSEMBLIES_ROOT
+        + "/{assembler}/{dataset}/assembly.fasta")
+
 
 print("Discovered assemblies:")
 
@@ -119,6 +155,7 @@ OUTPUT = [
     f"assembly_quality/quast/{assembler}/{dataset}/report.tsv"
     for assembler, dataset in ASSEMBLIES]
 
+
 print("QUAST targets:")
 
 for target in OUTPUT:
@@ -126,7 +163,8 @@ for target in OUTPUT:
 
 
 rule all:
-    input: OUTPUT
+    input:
+        OUTPUT
 
 
 # ************************************************************************************************
@@ -134,7 +172,9 @@ rule all:
 # ************************************************************************************************
 
 rule quast_assembly:
-    input: assembly = "assemblies/{assembler}/{dataset}/assembly.fasta", reference = REFERENCE
+    input:
+        assembly = "assemblies/{assembler}/{dataset}/assembly.fasta",
+        reference = REFERENCE
 
     output: quast_tsv = "assembly_quality/quast/{assembler}/{dataset}/report.tsv"
 
@@ -169,48 +209,46 @@ rule quast_assembly:
 
                 mkdir -p "{params.outdir}"
 
-                (
-                    printf "Container hostname:\t"
-                    hostname
+                printf "Container hostname:\t"
+                hostname
 
-                    printf "Start time:\t"
-                    date -Is
+                printf "Start time:\t"
+                date -Is
 
-                    echo "Assembler: {wildcards.assembler}"
-                    echo "Dataset: {wildcards.dataset}"
-                    echo "Assembly: {input.assembly}"
-                    echo "Reference: {input.reference}"
-                    echo "Threads: {threads}"
-                    echo "Memory: {resources.mem_gb} GB"
+                echo "Assembler: {wildcards.assembler}"
+                echo "Dataset: {wildcards.dataset}"
+                echo "Assembly: {input.assembly}"
+                echo "Reference: {input.reference}"
+                echo "Threads: {threads}"
+                echo "Memory: {resources.mem_gb} GB"
 
-                    echo
-                    echo "QUAST version:"
-                    quast.py --version
+                echo
+                echo "QUAST version:"
+                quast.py --version
 
-                    echo
-                    echo "Running QUAST-LG"
+                echo
+                echo "Running QUAST-LG"
 
-                    quast.py \
-                        --large \
-                        --threads {threads} \
-                        --min-contig 500 \
-                        --reference "{input.reference}" \
-                        --output-dir "{params.outdir}" \
-                        "{input.assembly}"
+                quast.py \
+                    --large \
+                    --threads {threads} \
+                    --min-contig 500 \
+                    --reference "{input.reference}" \
+                    --output-dir "{params.outdir}" \
+                    "{input.assembly}"
 
-                    echo
-                    printf "End time:\t"
-                    date -Is
-                ) >> "{log}" 2>&1
+                echo
+                printf "End time:\t"
+                date -Is
 
                 [[ -s "{output.quast_tsv}" ]] || {{
-                    echo "ERROR: QUAST report.tsv is missing or empty" >> "{log}"
+                    echo "ERROR: QUAST report.tsv is missing or empty"
                     exit 101
                 }}
 
                 grep -q "^N50" "{output.quast_tsv}" || {{
-                    echo "ERROR: N50 not found in QUAST report" >> "{log}"
+                    echo "ERROR: N50 not found in QUAST report"
                     exit 101
                 }}
-            '
+            ' >> "{log}" 2>&1
         """
