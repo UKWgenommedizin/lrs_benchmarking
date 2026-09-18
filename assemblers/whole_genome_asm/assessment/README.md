@@ -74,20 +74,6 @@ The workflow expects the GRCh38 reference:
 /data/genmedbfx/schilling_m/repos/lrs_benchmarking/ref/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta
 ```
 
-By default, the project-local reference is expected under:
-
-```text
---config reference=/absolute/path/to/reference.fasta
-```
-
-If the reference is stored elsewhere on the execution machine, provide its real absolute path with:
-
-```bash
---config reference=/absolute/path/to/reference.fasta
-```
-
-Do not copy placeholder paths such as `/REAL/PATH/TO/...` literally. The configured FASTA must exist on the machine running Snakemake.
-
 Before execution, verify the reference path and the assembly to be assessed:
 
 ```bash
@@ -101,22 +87,30 @@ ls -lh assemblies/{assembler}/{dataset}/assembly.fasta
 The current production layout is:
 
 Flye assemblies:
+```text
   /data/genmedbfx/yu_j/lrs_benchmarking/assemblies/flye/
+```
 
 GoldRush assemblies:
+```text
   /home/stoiber_l/smbshare/lrs_benchmarking/assemblies/goldrush/
+```
 
 Verkko assemblies:
+```text
   /home/stoiber_l/smbshare/lrs_benchmarking/assemblies/verkko/
+```
 
 Genome reference:
+```text
   /data/genmedbfx/schilling_m/repos/lrs_benchmarking/ref/
   GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta
+```
 
 QUAST workflow and output repository:
+```text
   /data/genmedbfx/yu_j/lrs_benchmarking
-
-
+```
 
 ### Server execution
 
