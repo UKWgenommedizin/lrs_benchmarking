@@ -114,15 +114,25 @@ Using the project-local reference:
 snakemake --snakefile assemblers/whole_genome_asm/assessment/assembly_quality_quast.smk --cores 16 --resources mem_gb=128 --dry-run --printshellcmds
 ```
 
-Using a reference stored elsewhere:
+Using a reference stored based on the genmedbfx location:
 
 ```bash
-snakemake --snakefile assemblers/whole_genome_asm/assessment/assembly_quality_quast.smk --cores 16 --resources mem_gb=128 --config reference=/absolute/path/to/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta --dry-run --printshellcmds
+snakemake --snakefile assemblers/whole_genome_asm/assessment/assembly_quality_quast.smk --cores 16 --resources mem_gb=128 --config reference=/data/genmedbfx/schilling_m/repos/lrs_benchmarking/ref/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta --dry-run --printshellcmds
 ```
 
 A `MissingInputException` for the reference means that the configured FASTA path is not accessible from the Snakemake execution environment.
 
 Docker exit code `125` together with missing repository files inside the QUAST container generally indicates a bind-mount or execution-path problem rather than a QUAST installation problem.
+
+
+### Real Run
+
+The '--dry-run' command is removed to proceed with the real run based on the reference path in genmedbfx. Any other user changes such as user should be adjust in the directory path.
+
+```bash
+snakemake --snakefile assemblers/whole_genome_asm/assessment/assembly_quality_quast.smk --cores 16 --resources mem_gb=128 --config reference=/data/genmedbfx/schilling_m/repos/lrs_benchmarking/ref/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta --printshellcmds
+```
+
 
 ## BUSCO
 
@@ -134,13 +144,22 @@ assembly_quality_busco.smk
 
 For human whole-genome assemblies, the F2 workflow is designed around a primate BUSCO lineage. The lineage directory must be supplied explicitly and should contain a valid `dataset.cfg`.
 
-Example dry-run pattern:
+### Dry run
 
 ```bash
-snakemake --snakefile assemblers/whole_genome_asm/assessment/assembly_quality_busco.smk --cores 16 --resources mem_gb=64 --config busco_lineage=/path/to/primates_odb12.2 --dry-run --printshellcmds
+snakemake --snakefile assemblers/whole_genome_asm/assessment/assembly_quality_busco.smk --cores 16 --resources mem_gb=64 --config busco_lineage=/data/genmedbfx/ref/busco/lineages/primates_odb12.2 --dry-run --printshellcmds
 ```
 
 Do not copy the example lineage path literally; use the real extracted lineage directory on the execution server.
+
+### Real Run
+
+The '--dry-run' command is removed to proceed with the real run based on the reference path in genmedbfx.
+
+```bash
+snakemake --snakefile assemblers/whole_genome_asm/assessment/assembly_quality_busco.smk --cores 16 --resources mem_gb=64 --config busco_lineage=/data/genmedbfx/ref/busco/lineages/primates_odb12.2 --printshellcmds
+```
+
 
 ## Merqury
 
