@@ -90,11 +90,11 @@ Generated from Git-tracked files. Expand only the area you need. On GitHub, pres
 </details>
 
 <details>
-<summary><b>alignment_analysis/</b> — 154 tracked files</summary>
+<summary><b>alignment_analysis/</b> — 155 tracked files</summary>
 
 - Documentation: [`README.md`](alignment_analysis/README.md)
 - `figures/` — 44 files
-- `scripts/` — 36 files
+- `scripts/` — 37 files
 - `tables/` — 71 files
 - [`COMMAND_LOG.md`](alignment_analysis/COMMAND_LOG.md)
 - [`README_assemblers.md`](alignment_analysis/README_assemblers.md)

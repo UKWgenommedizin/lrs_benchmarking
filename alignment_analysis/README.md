@@ -64,7 +64,7 @@ Generated from Git-tracked files. Expand only the directory you need. On GitHub,
 </details>
 
 <details>
-<summary><b>scripts/</b> — 36 files</summary>
+<summary><b>scripts/</b> — 37 files</summary>
 
 - [`01_count_fastq_reads.sh`](scripts/01_count_fastq_reads.sh)
 - [`README.md`](scripts/README.md)
@@ -99,9 +99,10 @@ Generated from Git-tracked files. Expand only the directory you need. On GitHub,
 - [`setup_samples_try.sh`](scripts/setup_samples_try.sh)
 
 <details open>
-<summary><b>30x/</b> — 1 file</summary>
+<summary><b>30x/</b> — 2 files</summary>
 
 - [`quality_check_aligners.py`](scripts/30x/quality_check_aligners.py)
+- [`quality_check_aligners_indels.py`](scripts/30x/quality_check_aligners_indels.py)
 
 </details>
 
