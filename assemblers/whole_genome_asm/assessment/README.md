@@ -31,7 +31,9 @@ The assessed methods can include:
 - Flye
 - GoldRush
 - Verkko
-- ntLink outputs, interpreted as scaffolder results rather than an independent assembler
+
+
+ntLink is not included in the current assembly-quality comparison.
 
 ## Complementary assessment tools
 
@@ -48,7 +50,7 @@ No single metric should be used as the sole assembly-quality criterion.
 Workflow:
 
 ```text
-assembly_quality_quast.smk
+assemblers/whole_genome_asm/assessment/assembly_quality_quast.smk
 ```
 
 Expected output pattern:
@@ -69,13 +71,13 @@ quay.io/biocontainers/quast:5.3.0--py313pl5321h5ca1c30_2
 The workflow expects the GRCh38 reference:
 
 ```text
-GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta
+/data/genmedbfx/schilling_m/repos/lrs_benchmarking/ref/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta
 ```
 
 By default, the project-local reference is expected under:
 
 ```text
-reference/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta
+--config reference=/absolute/path/to/reference.fasta
 ```
 
 If the reference is stored elsewhere on the execution machine, provide its real absolute path with:
@@ -89,35 +91,84 @@ Do not copy placeholder paths such as `/REAL/PATH/TO/...` literally. The configu
 Before execution, verify the reference path and the assembly to be assessed:
 
 ```bash
-ls -lh reference/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta
+ls -lh /data/genmedbfx/schilling_m/repos/lrs_benchmarking/ref/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.*
 ls -lh assemblies/{assembler}/{dataset}/assembly.fasta
 ```
+
+
+### Server layout
+
+The current production layout is:
+
+Flye assemblies:
+  /data/genmedbfx/yu_j/lrs_benchmarking/assemblies/flye/
+
+GoldRush assemblies:
+  /home/stoiber_l/smbshare/lrs_benchmarking/assemblies/goldrush/
+
+Verkko assemblies:
+  /home/stoiber_l/smbshare/lrs_benchmarking/assemblies/verkko/
+
+Genome reference:
+  /data/genmedbfx/schilling_m/repos/lrs_benchmarking/ref/
+  GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta
+
+QUAST workflow and output repository:
+  /data/genmedbfx/yu_j/lrs_benchmarking
+
+
 
 ### Server execution
 
 Run Snakemake from the actual repository root on the machine that owns the Docker daemon:
 
 ```bash
-cd /path/to/lrs_benchmarking
-pwd
+cd /data/genmedbfx/yu_j/lrs_benchmarking
 ```
+
+Verify the working directory:
+pwd
+
+Expected:
+/data/genmedbfx/yu_j/lrs_benchmarking
+
 
 Avoid running this workflow from inside an additional Docker container and then launching QUAST through another `docker run`. A path visible inside the outer container may not represent the same path on the Docker host, which can produce invalid bind mounts and missing input files inside the QUAST container.
 
 For example, a container-visible repository path such as `/lrs_benchmarking` may correspond to a different host-side path such as `/data/.../lrs_benchmarking`.
 
-### Dry run
+The workflow should be launched from the host environment that owns the Docker
+daemon. Avoid launching the workflow inside an additional Docker container and
+then invoking another docker run, because host and container paths may not
+refer to the same filesystem locations.
 
-Using the project-local reference:
+Input checks
+
+Before running QUAST, the production assembly locations and genome reference
+can be checked with:
 
 ```bash
-snakemake --snakefile assemblers/whole_genome_asm/assessment/assembly_quality_quast.smk --cores 16 --resources mem_gb=128 --dry-run --printshellcmds
+find /data/genmedbfx/yu_j/lrs_benchmarking/assemblies/flye -type f -name 'assembly.fasta' -print
+
+find /home/stoiber_l/smbshare/lrs_benchmarking/assemblies/goldrush -type f -name 'assembly.fasta' -print
+
+find /home/stoiber_l/smbshare/lrs_benchmarking/assemblies/verkko -type f -name 'assembly.fasta' -print
+
+ls -lh /data/genmedbfx/schilling_m/repos/lrs_benchmarking/ref/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta
 ```
 
-Using a reference stored based on the genmedbfx location:
 
+
+### Dry run
+
+From:
 ```bash
-snakemake --snakefile assemblers/whole_genome_asm/assessment/assembly_quality_quast.smk --cores 16 --resources mem_gb=128 --config reference=/data/genmedbfx/schilling_m/repos/lrs_benchmarking/ref/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta --dry-run --printshellcmds
+cd /data/genmedbfx/yu_j/lrs_benchmarking
+```
+
+run:
+```bash
+snakemake --snakefile assemblers/whole_genome_asm/assessment/assembly_quality_quast.smk --cores 16 --resources mem_gb=128 --config reference=/data/genmedbfx/schilling_m/repos/lrs_benc
 ```
 
 A `MissingInputException` for the reference means that the configured FASTA path is not accessible from the Snakemake execution environment.
@@ -133,7 +184,6 @@ The '--dry-run' command is removed to proceed with the real run based on the ref
 snakemake --snakefile assemblers/whole_genome_asm/assessment/assembly_quality_quast.smk --cores 16 --resources mem_gb=128 --config reference=/data/genmedbfx/schilling_m/repos/lrs_benchmarking/ref/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta --printshellcmds
 ```
 
-
 ## BUSCO
 
 Workflow when present:
@@ -143,6 +193,14 @@ assembly_quality_busco.smk
 ```
 
 For human whole-genome assemblies, the F2 workflow is designed around a primate BUSCO lineage. The lineage directory must be supplied explicitly and should contain a valid `dataset.cfg`.
+
+### BUSCO lineage
+
+Human whole-genome assemblies are evaluated using the BUSCO lineage:
+
+```text
+primates_odb12.2
+```
 
 ### Dry run
 
