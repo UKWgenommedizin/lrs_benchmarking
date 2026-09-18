@@ -4,7 +4,6 @@
 # Whole-genome assembly quality assessment with QUAST-LG.
 #
 # Evaluates existing Flye, GoldRush and Verkko assemblies.
-#
 
 import os
 
@@ -234,39 +233,26 @@ rule all:
 # ************************************************************************************************
 
 rule quast_assembly:
-
     input:
-        assembly = assembly_path,
-        reference = REFERENCE
+        assembly=assembly_path,
+        reference=REFERENCE
 
     output:
-        quast_tsv = (
-            "assembly_quality/quast/"
-            "{assembler}/{dataset}/report.tsv"
-        )
+        quast_tsv="assembly_quality/quast/{assembler}/{dataset}/report.tsv"
 
     params:
-        outdir = (
-            "assembly_quality/quast/"
-            "{assembler}/{dataset}"
-        )
+        outdir="assembly_quality/quast/{assembler}/{dataset}"
 
     log:
-        (
-            "assembly_quality/quast/"
-            "{assembler}/{dataset}/quast.log"
-        )
+        "assembly_quality/quast/{assembler}/{dataset}/quast.log"
 
     threads: 16
 
     resources:
-        mem_gb = 128
+        mem_gb=128
 
     message:
-        (
-            "Evaluating {wildcards.assembler} "
-            "{wildcards.dataset} with QUAST-LG"
-        )
+        "Evaluating {wildcards.assembler} {wildcards.dataset} with QUAST-LG"
 
     shell:
         r"""
