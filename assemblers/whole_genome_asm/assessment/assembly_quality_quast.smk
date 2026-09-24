@@ -68,11 +68,11 @@ print("Reference genome: " + REFERENCE)
 # ************************************************************************************************
 
 ASSEMBLY_ROOTS = {
-    "flye": os.path.join(
-        YU_ROOT,
-        "assemblies",
-        "flye"
-    ),
+    #"flye": os.path.join(
+    #    YU_ROOT,
+    #    "assemblies",
+    #    "flye"
+    #),
     "goldrush": os.path.join(
         STOIBER_ROOT,
      #   "assemblies",
