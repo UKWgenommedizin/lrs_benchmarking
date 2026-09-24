@@ -75,12 +75,12 @@ ASSEMBLY_ROOTS = {
     ),
     "goldrush": os.path.join(
         STOIBER_ROOT,
-        "assemblies",
+     #   "assemblies",
         "goldrush"
     ),
     "verkko": os.path.join(
         STOIBER_ROOT,
-        "assemblies",
+     #   "assemblies",
         "verkko"
     ),
 }
