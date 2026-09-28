@@ -16,7 +16,7 @@ Generated from version-control candidates. Directories remain compact; use this 
 - **envs/** — 1 file
 - **results/** — 1 file
 - **scripts/** — 6 files
-- **whole_genome_asm/** — 11 files; [`guide`](whole_genome_asm/README.md)
+- **whole_genome_asm/** — 17 files; [`guide`](whole_genome_asm/README.md)
 
 <!-- AUTO_REPOSITORY_TREE_END -->
 

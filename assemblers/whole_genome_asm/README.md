@@ -9,12 +9,18 @@ These are the production whole-genome assembly workflows for Flye, GoldRush, Ver
 <!-- AUTO_REPOSITORY_TREE_START -->
 Generated from version-control candidates. Directories remain compact; use this module's curated sections for canonical files.
 
+- [`BENCHMARK_README.md`](BENCHMARK_README.md)
 - [`README.md`](README.md)
+- [`hybrid.assembly.verkko.benchmark.smk`](hybrid.assembly.verkko.benchmark.smk)
 - [`hybrid.assembly.verkko.smk`](hybrid.assembly.verkko.smk)
+- [`ont.assembly.flye2.benchmark.smk`](ont.assembly.flye2.benchmark.smk)
 - [`ont.assembly.flye2.smk`](ont.assembly.flye2.smk)
+- [`ont.assembly.goldrush.benchmark.smk`](ont.assembly.goldrush.benchmark.smk)
 - [`ont.assembly.goldrush.smk`](ont.assembly.goldrush.smk)
 - [`ont.scaffolding.ntlink.smk`](ont.scaffolding.ntlink.smk)
+- [`pb.assembly.flye2.benchmark.smk`](pb.assembly.flye2.benchmark.smk)
 - [`pb.assembly.flye2.smk`](pb.assembly.flye2.smk)
+- [`pb.assembly.goldrush.benchmark.smk`](pb.assembly.goldrush.benchmark.smk)
 - [`pb.assembly.goldrush.smk`](pb.assembly.goldrush.smk)
 - [`pb.scaffolding.ntlink.smk`](pb.scaffolding.ntlink.smk)
 
