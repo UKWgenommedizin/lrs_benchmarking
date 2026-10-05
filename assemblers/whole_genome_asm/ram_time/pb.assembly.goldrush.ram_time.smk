@@ -14,7 +14,7 @@
 # Rules (per dataset):
 #   goldrush_run      -> runs GoldRush in a temp() scratch directory
 #   goldrush_record   -> parses the stage *.time files into {dataset}.ram_time.tsv
-#                        (the only result this workflow keeps)
+#                        (plus {dataset}.raw/ with the raw time and resource-sample files)
 #
 # The scratch directory is a temp() output, so Snakemake deletes it automatically
 # (decompressed reads, assembly, intermediates, *.time files) as soon as the
@@ -58,6 +58,12 @@ print("RAM/time scratch: " + SCRATCH_DIR)
 # GoldRush version (identical to pb.assembly.goldrush.smk)
 GOLDRUSH_VERSION = "1.2.2-ntlinkfix"
 DOCKER_GOLDRUSH = "nicolasardila1/lrs-goldrush:" + GOLDRUSH_VERSION
+
+# Background sampler for whole-container memory and scratch disk use
+# (see sample_container_resources.sh and the README).
+SAMPLER = os.path.join(workflow.basedir, "sample_container_resources.sh")
+if not os.path.isfile(SAMPLER):
+    raise FileNotFoundError("Resource sampler not found: " + SAMPLER)
 
 print("GoldRush version: " + GOLDRUSH_VERSION)
 
@@ -156,8 +162,8 @@ rule goldrush_run:
 
             echo "Checking gzip and python3 are available inside {DOCKER_GOLDRUSH} ..."
             docker run --rm --entrypoint sh "{DOCKER_GOLDRUSH}" \
-                -c 'command -v gzip && command -v python3' || {{
-                echo "ERROR: gzip or python3 (needed by the record rule) is not available inside {DOCKER_GOLDRUSH}"
+                -c 'command -v gzip && command -v python3 && du -sb /tmp >/dev/null' || {{
+                echo "ERROR: gzip, python3 or a du supporting -sb (needed by the record rule and the sampler) is not available inside {DOCKER_GOLDRUSH}"
                 exit 103;
             }}
 
@@ -177,7 +183,20 @@ rule goldrush_run:
                 exit 102
             }}
 
+            docker stats --no-stream >/dev/null || {{
+                echo "ERROR: docker stats does not work on this host; the resource sampler needs it"
+                exit 105;
+            }}
+
+            # Sample whole-container memory and scratch disk use while the assembler runs.
+            CONTAINER="ramtime-goldrush-{wildcards.dataset}"
+            bash "{SAMPLER}" "$CONTAINER" "{output.scratch}" "{output.scratch}/resource_samples.tsv" &
+            SAMPLER_PID=$!
+            trap 'kill $SAMPLER_PID 2>/dev/null || true' EXIT
+            echo "Resource sampler started (pid $SAMPLER_PID, container $CONTAINER)"
+
             docker run --rm \
+                --name "$CONTAINER" \
                 --tmpfs /tmp:size=50g,exec \
                 --hostname goldrush-ram-time-{wildcards.dataset} \
                 --workdir "{output.scratch}" \
@@ -195,6 +214,19 @@ rule goldrush_run:
                 P=0 \
                 p={params.prefix} \
                 track_time=1
+
+            kill $SAMPLER_PID 2>/dev/null || true
+            wait $SAMPLER_PID 2>/dev/null || true
+            trap - EXIT
+
+            # Final scratch size, after the last sample.
+            FINAL_DISK=$(docker run --rm -u $UID:$(id -g) -v {CWD}:{CWD} --entrypoint du {DOCKER_GOLDRUSH} -sb "{output.scratch}" | cut -f1)
+            printf '%s\\tNA\\t%s\\n' "$(date +%s)" "$FINAL_DISK" >> "{output.scratch}/resource_samples.tsv"
+
+            [[ $(wc -l < "{output.scratch}/resource_samples.tsv") -gt 2 ]] || {{
+                echo "ERROR: resource sampler recorded no samples ({output.scratch}/resource_samples.tsv)"
+                exit 106;
+            }}
 
             FINAL_ASSEMBLY=$(find \
                 "{output.scratch}/goldrush_intermediate_files" \
@@ -220,7 +252,8 @@ rule goldrush_record:
         scratch = SCRATCH_DIR + "/{dataset}"
 
     output:
-        ram_time = RAM_TIME_DIR + "/{dataset}.ram_time.tsv"
+        ram_time = RAM_TIME_DIR + "/{dataset}.ram_time.tsv",
+        raw = directory(RAM_TIME_DIR + "/{dataset}.raw")
 
     log:
         RAM_TIME_DIR + "/{dataset}.record.log"
@@ -260,11 +293,21 @@ rule goldrush_record:
                 --technology pb \
                 --threads {RAM_TIME_THREADS} \
                 --time-file "${{TIME_FILES[@]}}" \
+                --resource-samples "{input.scratch}/resource_samples.tsv" \
                 --output "{output.ram_time}"
 
             [[ $(wc -l < "{output.ram_time}") -eq 2 ]] || {{
                 echo "ERROR: {output.ram_time} must contain exactly one header and one data row"
                 exit 101;
+            }}
+
+            # Keep the raw time file(s) and resource samples so every number can be re-checked.
+            mkdir -p "{output.raw}"
+            cp "${{TIME_FILES[@]}}" "{input.scratch}/resource_samples.tsv" "{output.raw}/"
+
+            [[ -s "{output.raw}/resource_samples.tsv" ]] || {{
+                echo "ERROR: raw files were not copied to {output.raw}"
+                exit 102;
             }}
 
             echo "[$(date -Is)] END goldrush_record {wildcards.dataset}"

@@ -9,7 +9,7 @@
 #   verkko_run      -> runs Verkko under /usr/bin/time -v inside the container,
 #                      writing everything to a temp() scratch directory
 #   verkko_record   -> parses the time file into {sample}.ram_time.tsv
-#                      (the only result this workflow keeps)
+#                      (plus {sample}.raw/ with the raw time and resource-sample files)
 #
 # The scratch directory is a temp() output, so Snakemake deletes it automatically
 # as soon as the record rule succeeds (and also removes it if the run fails).
@@ -55,6 +55,12 @@ print("RAM/time scratch: " + SCRATCH_DIR)
 # Verkko version (identical to hybrid.assembly.verkko.smk)
 VERKKO_VERSION = "2.3.2"
 DOCKER_VERKKO = "nicolasardila1/lrs-verkko2:" + VERKKO_VERSION
+
+# Background sampler for whole-container memory and scratch disk use
+# (see sample_container_resources.sh and the README).
+SAMPLER = os.path.join(workflow.basedir, "sample_container_resources.sh")
+if not os.path.isfile(SAMPLER):
+    raise FileNotFoundError("Resource sampler not found: " + SAMPLER)
 
 print("Verkko version: " + VERKKO_VERSION)
 
@@ -170,12 +176,25 @@ rule verkko_run:
 
             echo "Checking /usr/bin/time -v is available inside {DOCKER_VERKKO} ..."
             docker run --rm --entrypoint sh "{DOCKER_VERKKO}" \
-                -c 'command -v /usr/bin/time && command -v python3' || {{
-                echo "ERROR: /usr/bin/time or python3 (needed by the record rule) is not available inside {DOCKER_VERKKO}"
+                -c 'command -v /usr/bin/time && command -v python3 && du -sb /tmp >/dev/null' || {{
+                echo "ERROR: /usr/bin/time, python3 or a du supporting -sb (needed by the record rule and the sampler) is not available inside {DOCKER_VERKKO}"
                 exit 103;
             }}
 
+            docker stats --no-stream >/dev/null || {{
+                echo "ERROR: docker stats does not work on this host; the resource sampler needs it"
+                exit 105;
+            }}
+
+            # Sample whole-container memory and scratch disk use while the assembler runs.
+            CONTAINER="ramtime-verkko-{wildcards.sample}"
+            bash "{SAMPLER}" "$CONTAINER" "{output.scratch}" "{output.scratch}/resource_samples.tsv" &
+            SAMPLER_PID=$!
+            trap 'kill $SAMPLER_PID 2>/dev/null || true' EXIT
+            echo "Resource sampler started (pid $SAMPLER_PID, container $CONTAINER)"
+
             docker run --rm \
+                --name "$CONTAINER" \
                 --hostname verkko-ram-time-{wildcards.sample} \
                 --cpus {threads} \
                 -m {resources.mem_mb}m \
@@ -195,6 +214,19 @@ rule verkko_run:
                     --local \
                     --local-cpus {threads} \
                     --local-memory {params.local_memory_gb}
+
+            kill $SAMPLER_PID 2>/dev/null || true
+            wait $SAMPLER_PID 2>/dev/null || true
+            trap - EXIT
+
+            # Final scratch size, after the last sample.
+            FINAL_DISK=$(docker run --rm -u $UID:$(id -g) -v {CWD}:{CWD} --entrypoint du {DOCKER_VERKKO} -sb "{output.scratch}" | cut -f1)
+            printf '%s\\tNA\\t%s\\n' "$(date +%s)" "$FINAL_DISK" >> "{output.scratch}/resource_samples.tsv"
+
+            [[ $(wc -l < "{output.scratch}/resource_samples.tsv") -gt 2 ]] || {{
+                echo "ERROR: resource sampler recorded no samples ({output.scratch}/resource_samples.tsv)"
+                exit 106;
+            }}
 
             [[ -s "{output.scratch}/work/assembly.fasta" ]] && grep -q '^>' "{output.scratch}/work/assembly.fasta" || {{
                 echo "ERROR: Verkko assembly.fasta is missing, empty or not FASTA -- run did not complete"
@@ -216,7 +248,8 @@ rule verkko_record:
         scratch = SCRATCH_DIR + "/{sample}"
 
     output:
-        ram_time = RAM_TIME_DIR + "/{sample}.ram_time.tsv"
+        ram_time = RAM_TIME_DIR + "/{sample}.ram_time.tsv",
+        raw = directory(RAM_TIME_DIR + "/{sample}.raw")
 
     log:
         RAM_TIME_DIR + "/{sample}.record.log"
@@ -246,11 +279,21 @@ rule verkko_record:
                 --technology hybrid \
                 --threads {RAM_TIME_THREADS} \
                 --time-file "{input.scratch}/time_v.txt" \
+                --resource-samples "{input.scratch}/resource_samples.tsv" \
                 --output "{output.ram_time}"
 
             [[ $(wc -l < "{output.ram_time}") -eq 2 ]] || {{
                 echo "ERROR: {output.ram_time} must contain exactly one header and one data row"
                 exit 101;
+            }}
+
+            # Keep the raw time file(s) and resource samples so every number can be re-checked.
+            mkdir -p "{output.raw}"
+            cp "{input.scratch}/time_v.txt" "{input.scratch}/resource_samples.tsv" "{output.raw}/"
+
+            [[ -s "{output.raw}/resource_samples.tsv" ]] || {{
+                echo "ERROR: raw files were not copied to {output.raw}"
+                exit 102;
             }}
 
             echo "[$(date -Is)] END verkko_record {wildcards.sample}"

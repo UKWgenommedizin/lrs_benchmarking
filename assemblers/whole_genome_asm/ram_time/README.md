@@ -1,8 +1,9 @@
 # Assembler RAM / Time Measurement
 
-Companion to [`../README.md`](../README.md). This folder only measures
-**wall-clock time and peak RAM** for the whole-genome assemblers. It never
-produces assemblies used in the report.
+Companion to [`../README.md`](../README.md). This folder only measures the
+**computational cost** of the whole-genome assemblers: wall-clock time, peak
+RAM, CPU time and peak scratch disk use. It never produces assemblies used in
+the report.
 
 ```text
 ont.assembly.flye2.ram_time.smk
@@ -10,6 +11,7 @@ pb.assembly.flye2.ram_time.smk
 ont.assembly.goldrush.ram_time.smk
 pb.assembly.goldrush.ram_time.smk
 hybrid.assembly.verkko.ram_time.smk
+sample_container_resources.sh   # background memory/disk sampler used by all five
 ```
 
 ## Why this folder exists
@@ -43,12 +45,33 @@ report a near-zero RAM value. Instead:
   and fails if the final `*ntLink-5rounds.polished.fa` is missing, so a
   partial run is never reported as a full one.
 
+`time -v` gives wall-clock time, CPU time, exit status and the peak RAM of the
+**largest single process**. That last value is wrong for a tool that runs
+many processes at once, so every run also starts
+`sample_container_resources.sh` in the background:
+
+- Every **30 s** it reads the memory of the **whole container** (all
+  processes together, page cache excluded) with `docker stats`.
+- Every **5 min** it measures the size of the scratch directory with `du`,
+  run *inside* the assembler container through `docker exec` (CONSTITUTION
+  II.1), plus once more after the assembler finishes.
+- It waits for the named container (`ramtime-<tool>-<dataset>`) to start and
+  stops when it exits; the run rule also stops it if anything fails.
+
+Before the assembly starts, the run step also checks that `du` is in the
+image and that `docker stats` works on the host, and fails within seconds
+otherwise. After the run it fails if the sampler recorded no samples.
+
+The same checks and the sampler apply to all three tools. Only what is
+timed differs (one `time -v` file for Flye/Verkko, one per stage for
+GoldRush).
+
 ## Rules: run -> record
 
 | Rule | What it does | Kept? |
 |---|---|---|
 | `<tool>_run` | Runs the assembler inside a scratch directory declared as `temp(directory(...))` | No |
-| `<tool>_record` | Parses the time file(s) into `{dataset}.ram_time.tsv` with `assembly_analysis/scripts/metrics/parse_assembler_time_v.py`, run with `python3` inside the assembler's own image (CONSTITUTION II.1) | **Yes** |
+| `<tool>_record` | Parses the time file(s) and the resource samples into `{dataset}.ram_time.tsv` with `assembly_analysis/scripts/metrics/parse_assembler_time_v.py`, run with `python3` inside the assembler's own image (CONSTITUTION II.1), and copies the raw files to `{dataset}.raw/` | **Yes** |
 
 - The scratch directory (assembly, intermediates, time files, GoldRush's
   decompressed FASTQ) is deleted by Snakemake as soon as `<tool>_record`
@@ -93,16 +116,53 @@ fastq/{sample}.{ont,pb}.30x.fastq.gz
 Verkko needs both the ONT and the PacBio HiFi 30x FASTQ for every sample and
 stops with an error if one is missing.
 
-Outputs, one small TSV per dataset plus its logs:
+Outputs, one small TSV per dataset, the raw files it was computed from, and
+the logs:
 
 ```text
 assemblers_ram_time/{flye,goldrush,verkko}/{dataset}.ram_time.tsv
+assemblers_ram_time/{flye,goldrush,verkko}/{dataset}.raw/   # time -v file(s) + resource_samples.tsv
 assemblers_ram_time/{flye,goldrush,verkko}/{dataset}.{run,record}.log
 ```
 
+`{dataset}.raw/` is a few KB. It holds the files the table is computed from,
+so every number in `{dataset}.ram_time.tsv` can be checked later by hand.
+
 Columns: `assembler`, `sample`, `technology`, `threads`,
-`wall_clock_seconds`, `wall_clock_hours`, `peak_rss_gb`,
-`n_stages_summed` (1 for Flye/Verkko, >1 for GoldRush), `source_time_files`.
+`wall_clock_seconds`, `wall_clock_hours`, `peak_rss_gb`, `cpu_hours`,
+`cpu_efficiency`, `exit_status`, `container_peak_mem_gb`,
+`peak_scratch_disk_gb`, `n_mem_samples`, `n_stages_summed` (1 for
+Flye/Verkko, >1 for GoldRush), `source_time_files`.
+
+- `peak_rss_gb`: peak RAM of the largest single process (`time -v`), max
+  over GoldRush stages.
+
+- `cpu_hours`: user + system CPU time, summed over GoldRush stages. Unlike
+  wall-clock time it barely depends on the thread count, so it stays
+  comparable with the 32-thread production runs.
+- `cpu_efficiency`: CPU time / (wall-clock time x `threads`). 1.0 means all
+  threads were busy for the whole run; long single-threaded stages lower it.
+- `exit_status`: always 0. If any time file reports a non-zero exit status,
+  the record step fails and no row is written, so a failed run is never
+  reported.
+- `container_peak_mem_gb`: highest sampled memory of the whole container.
+- `peak_scratch_disk_gb`: largest sampled size of the scratch directory
+  (intermediates, and for GoldRush the decompressed FASTQ).
+- `n_mem_samples`: number of 30 s memory samples behind
+  `container_peak_mem_gb` (about 120 per hour of run time).
+
+Which peak RAM to report:
+
+| Tool | Use | Why |
+|---|---|---|
+| Flye | `peak_rss_gb` | Essentially one multi-threaded process; `time -v` sees every byte and misses no spike |
+| GoldRush | `peak_rss_gb` | Stages run one after another; the max over stages is the peak |
+| Verkko | `container_peak_mem_gb` | Runs many jobs in parallel; `peak_rss_gb` sees only the largest one and undercounts |
+
+For Flye and GoldRush the two values should be close; a large gap is worth
+a look in `{dataset}.raw/resource_samples.tsv`. Sampled values can miss
+spikes shorter than 30 s (memory) or 5 min (disk), so they are slightly
+below the true peak.
 
 ## Where to run
 
@@ -121,6 +181,7 @@ Check before running:
 cd /path/to/lrs_benchmarking    # replace with the real path on this host
 ls -lh fastq/*.30x.fastq.gz      # inputs are visible
 docker info >/dev/null && echo "Docker daemon reachable"
+docker stats --no-stream >/dev/null && echo "docker stats works (needed by the sampler)"
 ```
 
 ### Verify which FASTQs each workflow will use
@@ -192,6 +253,17 @@ snakemake --snakefile assemblers/whole_genome_asm/ram_time/pb.assembly.goldrush.
 
 ```bash
 snakemake --snakefile assemblers/whole_genome_asm/ram_time/hybrid.assembly.verkko.ram_time.smk --cores 64 --resources mem_mb=200000 --rerun-incomplete --printshellcmds --show-failed-logs
+```
+
+### If a run is interrupted
+
+After an interruption (e.g. Ctrl-C), check that its container is gone
+before re-running; a leftover one makes the next run fail with "name is
+already in use":
+
+```bash
+docker ps -a --filter name=ramtime- --format '{{.Names}} {{.Status}}'
+docker rm -f ramtime-<tool>-<dataset>    # only if listed and not wanted
 ```
 
 ## Combining the results

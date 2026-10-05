@@ -19,7 +19,7 @@ Generated from version-control candidates. Directories remain compact; use this 
 - [`pb.scaffolding.ntlink.smk`](pb.scaffolding.ntlink.smk)
 
 - **assessment/** — 3 files; [`guide`](assessment/README.md)
-- **ram_time/** — 6 files; [`guide`](ram_time/README.md)
+- **ram_time/** — 7 files; [`guide`](ram_time/README.md)
 
 <!-- AUTO_REPOSITORY_TREE_END -->
 
