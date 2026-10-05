@@ -52,15 +52,19 @@ many processes at once, so every run also starts
 
 - Every **30 s** it reads the memory of the **whole container** (all
   processes together, page cache excluded) with `docker stats`.
-- Every **5 min** it measures the size of the scratch directory with `du`,
-  run *inside* the assembler container through `docker exec` (CONSTITUTION
-  II.1), plus once more after the assembler finishes.
+- Every **5 min** it measures the size of the scratch directory with
+  `du -sb`, run *inside* the assembler container through `docker exec`
+  (CONSTITUTION II.1), plus once more after the assembler finishes. `du`
+  runs in the background, so a slow scan of a large scratch directory never
+  pauses the memory sampling.
 - It waits for the named container (`ramtime-<tool>-<dataset>`) to start and
-  stops when it exits; the run rule also stops it if anything fails.
+  stops once `docker stats` has failed **three times in a row** (about
+  1.5 min), so a single Docker hiccup does not end the sampling early. The
+  run rule also stops it when the assembler finishes or anything fails.
 
-Before the assembly starts, the run step also checks that `du` is in the
-image and that `docker stats` works on the host, and fails within seconds
-otherwise. After the run it fails if the sampler recorded no samples.
+Before the assembly starts, the run step also checks that the image's `du`
+supports `-sb` (it runs `du -sb /tmp` inside the container) and that
+`docker stats` works on the host, and fails within seconds otherwise. After the run it fails if the sampler recorded no samples.
 
 The same checks and the sampler apply to all three tools. Only what is
 timed differs (one `time -v` file for Flye/Verkko, one per stage for
