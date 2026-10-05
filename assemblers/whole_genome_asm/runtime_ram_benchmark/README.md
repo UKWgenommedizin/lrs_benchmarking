@@ -1,7 +1,8 @@
 # Assembler Performance Benchmark (Wall-Clock Time / Peak RAM)
 
-Companion to [`README.md`](README.md). The production workflows in this
-directory (`ont.assembly.flye2.smk`, `pb.assembly.flye2.smk`,
+Companion to [`../README.md`](../README.md). This folder holds only the
+**measurement-only** workflows; they never produce assemblies used in the
+report. The production workflows in the parent directory (`ont.assembly.flye2.smk`, `pb.assembly.flye2.smk`,
 `ont.assembly.goldrush.smk`, `pb.assembly.goldrush.smk`,
 `hybrid.assembly.verkko.smk`) were never instrumented to record wall-clock
 time or peak RAM for the actual 30x whole-genome runs -- there is no
@@ -20,10 +21,12 @@ pb.assembly.goldrush.benchmark.smk
 hybrid.assembly.verkko.benchmark.smk
 ```
 
-Each is a **benchmark-only variant** of its production counterpart: same
-Docker image/version, same `threads: 32`, same memory ceiling, same
-`goldrush run` / `flye` / `verkko` parameters -- nothing about how the
-assembler is invoked has changed, only what is measured and kept. See
+Each is a **runtime / peak-RAM measurement-only variant** of its
+production counterpart: same Docker image/version, same memory ceiling,
+same `goldrush run` / `flye` / `verkko` parameters. They run at **64
+threads** (`benchmark_threads`, configurable), not the production 32, so
+these numbers describe a 64-thread run. The only result kept is the
+time/RAM table; the regenerated assembly is always deleted. See
 each file's own header comment for the reasoning specific to it.
 
 ## Why not just re-run the production workflows with `benchmark:` added?
@@ -49,22 +52,49 @@ containerized process. Instead:
   of each stage's peak RSS (memory is not cumulative across sequential
   stages the way time is).
 
-## Why the regenerated assembly is deleted
+## Rules: run -> record (scratch deleted automatically)
 
-QUAST metrics for these assemblies already exist
-(`assembly_quality/quast/{assembler}/{dataset}/report.tsv`, aggregated
-into `assembly_analysis/tables/30x/final/assembly_benchmark_30x.tsv`) --
-the only reason to re-run the assemblers at all is to capture the
-time/RAM that was missed the first time. Keeping a second copy of every
-whole-genome FASTA (tens of GB per sample) just to measure how long it
-took to produce would not be a good use of disk. Snakemake requires a
-rule's declared `output:` to still exist when the rule finishes, so a
-rule cannot delete its own declared output -- instead, the assembly is
-written to a disposable scratch path (a `params:`, not a declared
-`output:`) and `rm -rf`'d at the end of the same rule's shell block,
-after being validated the same way the production rule validates it
-(non-empty, starts with `>`). **This never touches `assemblies/`**, which
-is what the report actually depends on.
+Each workflow has two rules per dataset:
+
+| Rule | What it does | Kept? |
+|---|---|---|
+| `<tool>_run` | Runs the assembler under `/usr/bin/time -v` (GoldRush: `track_time=1`) inside a scratch directory declared as `temp(directory(...))` | No |
+| `<tool>_record` | Parses the time file(s) into `{dataset}.perf.tsv` (parser runs with `python3` inside the assembler's own image, CONSTITUTION II.1) | **Yes** |
+
+Because the scratch directory is `temp()`, Snakemake deletes it
+(assembly, intermediates, raw time files, GoldRush's decompressed FASTQ)
+as soon as `<tool>_record` succeeds, and also removes it if the run
+fails. A later `snakemake` call does not regenerate it once `.perf.tsv`
+exists. If `<tool>_record` fails, the scratch directory is kept so the
+time files can be re-parsed without re-running the assembly. Do not pass
+`--notemp`, which disables this deletion. QUAST metrics for these
+assemblies already exist, so nothing in the scratch tree is needed after
+the measurement. **This never touches `assemblies/`.**
+
+`<tool>_run` refuses to start if Snakemake granted fewer threads than
+`benchmark_threads` (e.g. `--cores 64` with the default of 64), so a
+measurement is never silently taken at a different thread count.
+
+## Configuration (no hard-coded paths)
+
+All locations and the thread count come from `--config` (or a
+`--configfile`); relative paths are resolved against the repository root.
+Both directories must stay **inside** the repository root
+(CONSTITUTION I.1) -- the workflow refuses to start otherwise:
+
+| Key | Default | Purpose |
+|---|---|---|
+| `benchmark_threads` | `64` | Threads given to the assembler and to `docker --cpus` |
+| `benchmark_dir` | `assemblers_benchmark` | Where `.perf.tsv` and the per-rule logs are written |
+| `benchmark_scratch_dir` | `assemblers_benchmark/scratch` | Temporary assembly workspace, deleted after each run |
+
+Example:
+
+```bash
+snakemake --snakefile assemblers/whole_genome_asm/runtime_ram_benchmark/ont.assembly.flye2.benchmark.smk \
+    --cores 64 --resources mem_gb=240 \
+    --config benchmark_scratch_dir=assemblers_benchmark/scratch_run2
+```
 
 ## Input / output convention
 
@@ -75,10 +105,12 @@ production workflows:
 fastq/
 ```
 
-Outputs are one small TSV per dataset, never the assembly itself:
+Outputs are one small TSV per dataset (plus its rule logs), never the
+assembly itself:
 
 ```text
-assemblers_benchmark/{assembler}/{dataset}.perf.tsv
+{benchmark_dir}/{assembler}/{dataset}.perf.tsv
+{benchmark_dir}/{assembler}/{dataset}.{run,record}.log
 ```
 
 Columns: `assembler`, `sample`, `technology`, `threads`,
@@ -94,18 +126,17 @@ assemblers_benchmark/goldrush/HG002.pb.30x.perf.tsv
 assemblers_benchmark/verkko/HG002.perf.tsv
 ```
 
-`assemblers_benchmark/` is a disposable scratch tree, sibling to
-`assemblies/`, never mixed into it. It is safe to delete entirely once
-the `.perf.tsv` files have been copied out or combined (see below).
+`assemblers_benchmark/` is kept separate from `assemblies/` and never
+mixed into it. Only the `.perf.tsv` files carry results.
 
 ## Run from the repository root
 
-Like the production workflows, these files include shared root-level
-headers and use repository-root-relative paths (`CWD = os.getcwd()`), so
+Like the production workflows, these files use repository-root-relative
+paths (`CWD = os.getcwd()`), so
 they must be launched with the repository root as the working directory.
 
 **Adjust the path below to wherever this repository actually lives on
-the execution host** -- per `assessment/README.md`, that is not
+the execution host** -- per `../assessment/README.md`, that is not
 necessarily the same path as on this machine. The production workflows
 have been run from at least these locations:
 
@@ -138,19 +169,19 @@ Docker: nicolasardila1/lrs-flye2:2.9.6
 Dry-run ONT:
 
 ```bash
-snakemake --snakefile assemblers/whole_genome_asm/ont.assembly.flye2.benchmark.smk --cores 32 --resources mem_gb=240 --dry-run --printshellcmds
+snakemake --snakefile assemblers/whole_genome_asm/runtime_ram_benchmark/ont.assembly.flye2.benchmark.smk --cores 64 --resources mem_gb=240 --dry-run --printshellcmds
 ```
 
 Run ONT:
 
 ```bash
-snakemake --snakefile assemblers/whole_genome_asm/ont.assembly.flye2.benchmark.smk --cores 32 --resources mem_gb=240 --rerun-incomplete --printshellcmds --show-failed-logs
+snakemake --snakefile assemblers/whole_genome_asm/runtime_ram_benchmark/ont.assembly.flye2.benchmark.smk --cores 64 --resources mem_gb=240 --rerun-incomplete --printshellcmds --show-failed-logs
 ```
 
 Dry-run / run PacBio HiFi by replacing the Snakefile with:
 
 ```text
-assemblers/whole_genome_asm/pb.assembly.flye2.benchmark.smk
+assemblers/whole_genome_asm/runtime_ram_benchmark/pb.assembly.flye2.benchmark.smk
 ```
 
 ## GoldRush (ONT / PacBio HiFi)
@@ -165,19 +196,19 @@ Docker: nicolasardila1/lrs-goldrush:1.2.2-ntlinkfix
 Dry-run ONT:
 
 ```bash
-snakemake --snakefile assemblers/whole_genome_asm/ont.assembly.goldrush.benchmark.smk --cores 32 --resources mem_mb=64000 --dry-run --printshellcmds
+snakemake --snakefile assemblers/whole_genome_asm/runtime_ram_benchmark/ont.assembly.goldrush.benchmark.smk --cores 64 --resources mem_mb=64000 --dry-run --printshellcmds
 ```
 
 Run ONT:
 
 ```bash
-snakemake --snakefile assemblers/whole_genome_asm/ont.assembly.goldrush.benchmark.smk --cores 32 --resources mem_mb=64000 --rerun-incomplete --printshellcmds --show-failed-logs
+snakemake --snakefile assemblers/whole_genome_asm/runtime_ram_benchmark/ont.assembly.goldrush.benchmark.smk --cores 64 --resources mem_mb=64000 --rerun-incomplete --printshellcmds --show-failed-logs
 ```
 
 Dry-run / run PacBio HiFi by replacing the Snakefile with:
 
 ```text
-assemblers/whole_genome_asm/pb.assembly.goldrush.benchmark.smk
+assemblers/whole_genome_asm/runtime_ram_benchmark/pb.assembly.goldrush.benchmark.smk
 ```
 
 If a run fails partway (as one already has -- see the ntLink pairing
@@ -198,13 +229,13 @@ Docker: nicolasardila1/lrs-verkko2:2.3.2
 Dry-run:
 
 ```bash
-snakemake --snakefile assemblers/whole_genome_asm/hybrid.assembly.verkko.benchmark.smk --configfile assemblers/config/server.yaml --cores 32 --resources mem_mb=200000 --dry-run --printshellcmds
+snakemake --snakefile assemblers/whole_genome_asm/runtime_ram_benchmark/hybrid.assembly.verkko.benchmark.smk --configfile assemblers/config/server.yaml --cores 64 --resources mem_mb=200000 --dry-run --printshellcmds
 ```
 
 Run:
 
 ```bash
-snakemake --snakefile assemblers/whole_genome_asm/hybrid.assembly.verkko.benchmark.smk --configfile assemblers/config/server.yaml --cores 32 --resources mem_mb=200000 --rerun-incomplete --printshellcmds --show-failed-logs
+snakemake --snakefile assemblers/whole_genome_asm/runtime_ram_benchmark/hybrid.assembly.verkko.benchmark.smk --configfile assemblers/config/server.yaml --cores 64 --resources mem_mb=200000 --rerun-incomplete --printshellcmds --show-failed-logs
 ```
 
 Verkko requires matching ONT and PacBio HiFi 30x FASTQs for each sample,
@@ -235,9 +266,10 @@ For every modified workflow, from the repository root:
 
 ```bash
 git diff --check
-snakemake --snakefile assemblers/whole_genome_asm/path/to/workflow.benchmark.smk --dry-run --printshellcmds
+snakemake --snakefile assemblers/whole_genome_asm/runtime_ram_benchmark/<workflow>.benchmark.smk --dry-run --printshellcmds
 ```
 
-Do not move these workflow files as part of a documentation-only
-cleanup, for the same reason noted in `README.md`: their relative
-include paths make location a functional part of the implementation.
+These workflows resolve every path from the repository root
+(`CWD = os.getcwd()`) and have no relative `include:`, so they live in this
+separate `runtime_ram_benchmark/` folder to keep them apart from the
+production assembly workflows. Always launch them from the repository root.

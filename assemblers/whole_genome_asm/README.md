@@ -9,22 +9,17 @@ These are the production whole-genome assembly workflows for Flye, GoldRush, Ver
 <!-- AUTO_REPOSITORY_TREE_START -->
 Generated from version-control candidates. Directories remain compact; use this module's curated sections for canonical files.
 
-- [`BENCHMARK_README.md`](BENCHMARK_README.md)
 - [`README.md`](README.md)
-- [`hybrid.assembly.verkko.benchmark.smk`](hybrid.assembly.verkko.benchmark.smk)
 - [`hybrid.assembly.verkko.smk`](hybrid.assembly.verkko.smk)
-- [`ont.assembly.flye2.benchmark.smk`](ont.assembly.flye2.benchmark.smk)
 - [`ont.assembly.flye2.smk`](ont.assembly.flye2.smk)
-- [`ont.assembly.goldrush.benchmark.smk`](ont.assembly.goldrush.benchmark.smk)
 - [`ont.assembly.goldrush.smk`](ont.assembly.goldrush.smk)
 - [`ont.scaffolding.ntlink.smk`](ont.scaffolding.ntlink.smk)
-- [`pb.assembly.flye2.benchmark.smk`](pb.assembly.flye2.benchmark.smk)
 - [`pb.assembly.flye2.smk`](pb.assembly.flye2.smk)
-- [`pb.assembly.goldrush.benchmark.smk`](pb.assembly.goldrush.benchmark.smk)
 - [`pb.assembly.goldrush.smk`](pb.assembly.goldrush.smk)
 - [`pb.scaffolding.ntlink.smk`](pb.scaffolding.ntlink.smk)
 
 - **assessment/** — 3 files; [`guide`](assessment/README.md)
+- **runtime_ram_benchmark/** — 6 files; [`guide`](runtime_ram_benchmark/README.md)
 
 <!-- AUTO_REPOSITORY_TREE_END -->
 
@@ -149,6 +144,14 @@ Technology-specific workflows:
 assemblers/whole_genome_asm/ont.scaffolding.ntlink.smk
 assemblers/whole_genome_asm/pb.scaffolding.ntlink.smk
 ```
+
+## Runtime / peak-RAM measurement (separate)
+
+The workflows in [`runtime_ram_benchmark/`](runtime_ram_benchmark/README.md)
+(`*.benchmark.smk`) re-run Flye, GoldRush and Verkko **only to record
+wall-clock time and peak RAM**. They discard the regenerated assembly and
+never write to `assemblies/`; use the workflows in this directory for the
+actual assemblies.
 
 ## Quality assessment
 

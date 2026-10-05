@@ -3,7 +3,7 @@
 table (wall-clock time, peak RAM) for the assembler-benchmark re-run.
 
 Used by the five *.benchmark.smk rule variants
-(assemblers/whole_genome_asm/{ont,pb}.assembly.{flye2,goldrush}.benchmark.smk,
+(assemblers/whole_genome_asm/runtime_ram_benchmark/{ont,pb}.assembly.{flye2,goldrush}.benchmark.smk,
 hybrid.assembly.verkko.benchmark.smk). Snakemake's own ``benchmark:``
 directive is deliberately not used for this: it samples the host-side
 process tree, but every assembler here runs inside ``docker run`` --
