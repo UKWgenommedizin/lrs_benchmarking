@@ -40,7 +40,7 @@ print("QUAST Docker image: " + DOCKER_QUAST)
 
 # GRCh38 in the Schilling path
 DEFAULT_REFERENCE = (
-    "/data/genmedbfx/schilling_m/repos/lrs_benchmarking/ref/"
+    "/data/genmedbfx/yu_j/"
     "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_"
     "MAP2K3_KMT2C_KCNJ18.fasta"
 )
