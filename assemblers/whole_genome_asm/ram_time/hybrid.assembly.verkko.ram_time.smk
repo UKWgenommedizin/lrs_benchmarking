@@ -1,0 +1,302 @@
+# ************************************************************************************************
+# Verkko hybrid whole-genome assembly -- RUNTIME / PEAK-RAM MEASUREMENT ONLY
+#
+# Re-runs Verkko with the same Docker image, memory ceiling and parameters
+# as hybrid.assembly.verkko.smk, but at RAM_TIME_THREADS (default 64), only
+# to record wall-clock time and peak RAM. Nothing else is kept.
+#
+# Rules (per sample):
+#   verkko_run      -> runs Verkko under /usr/bin/time -v inside the container,
+#                      writing everything to a temp() scratch directory
+#   verkko_record   -> parses the time file into {sample}.ram_time.tsv
+#                      (plus {sample}.raw/ with the raw time and resource-sample files)
+#
+# The scratch directory is a temp() output, so Snakemake deletes it automatically
+# as soon as the record rule succeeds (and also removes it if the run fails).
+# Every rule writes its own log ({run,record}.log) per CONSTITUTION VI.3/VI.4.
+#
+# See ont.assembly.flye2.ram_time.smk for why /usr/bin/time -v runs inside
+# the container instead of using Snakemake's `benchmark:` directive.
+#
+# Configurable (--config key=value), no paths hard-coded in the rules;
+# both directories must stay inside the repository root (CONSTITUTION I.1):
+#   ram_time_threads      (default 64)
+#   ram_time_dir          (default assemblers_ram_time)          -- ram_time TSVs + logs
+#   ram_time_scratch_dir  (default assemblers_ram_time/scratch)  -- deleted automatically after each run
+# Relative paths are resolved against the repository root (the working directory).
+# ************************************************************************************************
+
+import os
+
+CWD = os.getcwd()
+print("Current working directory: " + CWD)
+
+try:
+    DATASET_FILTER = config["dataset_filter"]
+except (KeyError, NameError):
+    DATASET_FILTER = None
+
+#################
+# RAM / time measurement settings
+
+RAM_TIME_THREADS = int(config.get("ram_time_threads", 64))
+RAM_TIME_DIR = os.path.join(CWD, config.get("ram_time_dir", "assemblers_ram_time"), "verkko")
+SCRATCH_DIR = os.path.join(CWD, config.get("ram_time_scratch_dir", "assemblers_ram_time/scratch"), "verkko")
+
+for _path in (RAM_TIME_DIR, SCRATCH_DIR):
+    if os.path.commonpath([CWD, os.path.realpath(_path)]) != os.path.realpath(CWD):
+        raise ValueError("Constitution I.1: ram_time paths must be inside the repository root: " + _path)
+
+print("RAM/time threads: " + str(RAM_TIME_THREADS))
+print("RAM/time results: " + RAM_TIME_DIR)
+print("RAM/time scratch: " + SCRATCH_DIR)
+
+#################
+# Verkko version (identical to hybrid.assembly.verkko.smk)
+VERKKO_VERSION = "2.3.2"
+DOCKER_VERKKO = "nicolasardila1/lrs-verkko2:" + VERKKO_VERSION
+
+# Background sampler for whole-container memory and scratch disk use
+# (see sample_container_resources.sh and the README).
+SAMPLER = os.path.join(workflow.basedir, "sample_container_resources.sh")
+if not os.path.isfile(SAMPLER):
+    raise FileNotFoundError("Resource sampler not found: " + SAMPLER)
+
+print("Verkko version: " + VERKKO_VERSION)
+
+#####################
+# Discover samples and create wildcards (identical to hybrid.assembly.verkko.smk)
+
+ONT_SAMPLES, = glob_wildcards(CWD + r"/fastq/{sample,[A-Za-z0-9_-]+}.ont.30x.fastq.gz")
+
+PB_SAMPLES, = glob_wildcards(CWD + r"/fastq/{sample,[A-Za-z0-9_-]+}.pb.30x.fastq.gz")
+
+TEST_SAMPLE_MARKERS = ("SMOKE", "LOCALTEST")
+
+def is_production_sample(sample):
+    upper = sample.upper()
+    return not any(marker in upper for marker in TEST_SAMPLE_MARKERS)
+
+ONT_SAMPLE_SET = {sample for sample in ONT_SAMPLES if is_production_sample(sample)}
+PB_SAMPLE_SET = {sample for sample in PB_SAMPLES if is_production_sample(sample)}
+
+SAMPLES = sorted(ONT_SAMPLE_SET & PB_SAMPLE_SET)
+
+######################
+# Input samples and unpaired control checkpoint
+MISSING_PB = sorted(ONT_SAMPLE_SET - PB_SAMPLE_SET)
+MISSING_ONT = sorted(PB_SAMPLE_SET - ONT_SAMPLE_SET)
+
+if MISSING_PB:
+    raise ValueError("Missing PacBio HiFi input for samples: " + ", ".join(MISSING_PB))
+
+if MISSING_ONT:
+    raise ValueError("Missing ONT input for samples: " + ", ".join(MISSING_ONT))
+
+if not SAMPLES:
+    raise ValueError("No paired Verkko WGS inputs were found. " "Expected files such as "
+    f"{CWD}/fastq/HG002.pb.30x.fastq.gz and " f"{CWD}/fastq/HG002.ont.30x.fastq.gz")
+
+##############
+# Targets
+
+OUTPUT = []
+
+OUTPUT += expand(RAM_TIME_DIR + "/{sample}.ram_time.tsv", sample=SAMPLES)
+
+rule all:
+    input:
+        OUTPUT
+
+print("Discover samples and create wildcards")
+print(OUTPUT)
+
+
+################
+# Prevent local test sample from being requested explicitly
+
+wildcard_constraints:
+    sample = r"[A-Za-z0-9_-]+"
+
+
+################
+# Verkko resource requirements (identical to hybrid.assembly.verkko.smk)
+
+def get_verkko_memory(wildcards):
+    return 72000
+
+################
+# Rules
+
+rule verkko_run:
+    input:
+        hifi = CWD + "/fastq/{sample}.pb.30x.fastq.gz",
+        ont  = CWD + "/fastq/{sample}.ont.30x.fastq.gz"
+
+    output:
+        scratch = temp(directory(SCRATCH_DIR + "/{sample}"))
+
+    params:
+        local_memory_gb = 64
+
+    log:
+        RAM_TIME_DIR + "/{sample}.run.log"
+
+    message:
+        "executing {rule} with output {output} and input {input}"
+
+    threads: RAM_TIME_THREADS
+
+    resources:
+        mem_mb = get_verkko_memory
+
+    shell:
+        """
+        mkdir -p "$(dirname "{log}")"
+
+        (
+            set -euo pipefail
+
+            echo "[$(date -Is)] START verkko_run {wildcards.sample}"
+            echo "Sample: {wildcards.sample}"
+            echo "Read technologies: PacBio HiFi + ONT"
+            echo "HiFi input: {input.hifi}"
+            echo "ONT input: {input.ont}"
+            echo "Threads: {threads}"
+            echo "Memory: {resources.mem_mb} MB"
+            echo "Scratch: {output.scratch}"
+
+            [[ {threads} -eq {RAM_TIME_THREADS} ]] || {{
+                echo "ERROR: Snakemake granted {threads} threads, expected {RAM_TIME_THREADS}."
+                echo "Run with --cores {RAM_TIME_THREADS} (or more) so the measurement is comparable."
+                exit 104;
+            }}
+
+            mkdir -p "{output.scratch}"
+
+            echo "Checking /usr/bin/time -v is available inside {DOCKER_VERKKO} ..."
+            docker run --rm --entrypoint sh "{DOCKER_VERKKO}" \
+                -c 'command -v /usr/bin/time && command -v python3 && du -sb /tmp >/dev/null' || {{
+                echo "ERROR: /usr/bin/time, python3 or a du supporting -sb (needed by the record rule and the sampler) is not available inside {DOCKER_VERKKO}"
+                exit 103;
+            }}
+
+            docker stats --no-stream >/dev/null || {{
+                echo "ERROR: docker stats does not work on this host; the resource sampler needs it"
+                exit 105;
+            }}
+
+            # Sample whole-container memory and scratch disk use while the assembler runs.
+            CONTAINER="ramtime-verkko-{wildcards.sample}"
+            bash "{SAMPLER}" "$CONTAINER" "{output.scratch}" "{output.scratch}/resource_samples.tsv" &
+            SAMPLER_PID=$!
+            trap 'kill $SAMPLER_PID 2>/dev/null || true' EXIT
+            echo "Resource sampler started (pid $SAMPLER_PID, container $CONTAINER)"
+
+            docker run --rm \
+                --name "$CONTAINER" \
+                --hostname verkko-ram-time-{wildcards.sample} \
+                --cpus {threads} \
+                -m {resources.mem_mb}m \
+                --tmpfs /tmp:size=50g,exec \
+                -u $UID:$(id -g) \
+                -e HOME=/tmp \
+                -e TMPDIR=/tmp \
+                --workdir {CWD} \
+                -v {CWD}:{CWD} \
+                --entrypoint /usr/bin/time \
+                {DOCKER_VERKKO} \
+                -v -o "{output.scratch}/time_v.txt" \
+                verkko \
+                    -d "{output.scratch}/work" \
+                    --hifi "{input.hifi}" \
+                    --nano "{input.ont}" \
+                    --local \
+                    --local-cpus {threads} \
+                    --local-memory {params.local_memory_gb}
+
+            kill $SAMPLER_PID 2>/dev/null || true
+            wait $SAMPLER_PID 2>/dev/null || true
+            trap - EXIT
+
+            # Final scratch size, after the last sample.
+            FINAL_DISK=$(docker run --rm -u $UID:$(id -g) -v {CWD}:{CWD} --entrypoint du {DOCKER_VERKKO} -sb "{output.scratch}" | cut -f1)
+            printf '%s\\tNA\\t%s\\n' "$(date +%s)" "$FINAL_DISK" >> "{output.scratch}/resource_samples.tsv"
+
+            [[ $(wc -l < "{output.scratch}/resource_samples.tsv") -gt 2 ]] || {{
+                echo "ERROR: resource sampler recorded no samples ({output.scratch}/resource_samples.tsv)"
+                exit 106;
+            }}
+
+            [[ -s "{output.scratch}/work/assembly.fasta" ]] && grep -q '^>' "{output.scratch}/work/assembly.fasta" || {{
+                echo "ERROR: Verkko assembly.fasta is missing, empty or not FASTA -- run did not complete"
+                exit 101;
+            }}
+
+            [[ -s "{output.scratch}/time_v.txt" ]] || {{
+                echo "ERROR: /usr/bin/time output is missing or empty"
+                exit 102;
+            }}
+
+            echo "[$(date -Is)] END verkko_run {wildcards.sample}"
+
+        ) > "{log}" 2>&1
+        """
+
+rule verkko_record:
+    input:
+        scratch = SCRATCH_DIR + "/{sample}"
+
+    output:
+        ram_time = RAM_TIME_DIR + "/{sample}.ram_time.tsv",
+        raw = directory(RAM_TIME_DIR + "/{sample}.raw")
+
+    log:
+        RAM_TIME_DIR + "/{sample}.record.log"
+
+    message:
+        "executing {rule} with output {output} and input {input}"
+
+    shell:
+        """
+        (
+            set -eo pipefail
+
+            echo "[$(date -Is)] START verkko_record {wildcards.sample}"
+            echo "Container hostname: verkko-record-{wildcards.sample}"
+
+            # Parser is stdlib-only Python, run inside the assembler's own pinned image.
+            docker run --rm \
+                --tmpfs /tmp:size=50g,exec \
+                --hostname verkko-record-{wildcards.sample} \
+                -u $UID:$(id -g) \
+                -v {CWD}:{CWD} \
+                --entrypoint python3 \
+                {DOCKER_VERKKO} \
+                "{CWD}/assembly_analysis/scripts/metrics/parse_assembler_time_v.py" \
+                --assembler verkko \
+                --sample "{wildcards.sample}" \
+                --technology hybrid \
+                --threads {RAM_TIME_THREADS} \
+                --time-file "{input.scratch}/time_v.txt" \
+                --resource-samples "{input.scratch}/resource_samples.tsv" \
+                --output "{output.ram_time}"
+
+            [[ $(wc -l < "{output.ram_time}") -eq 2 ]] || {{
+                echo "ERROR: {output.ram_time} must contain exactly one header and one data row"
+                exit 101;
+            }}
+
+            # Keep the raw time file(s) and resource samples so every number can be re-checked.
+            mkdir -p "{output.raw}"
+            cp "{input.scratch}/time_v.txt" "{input.scratch}/resource_samples.tsv" "{output.raw}/"
+
+            [[ -s "{output.raw}/resource_samples.tsv" ]] || {{
+                echo "ERROR: raw files were not copied to {output.raw}"
+                exit 102;
+            }}
+
+            echo "[$(date -Is)] END verkko_record {wildcards.sample}"
+
+        ) > "{log}" 2>&1
+        """
