@@ -1,9 +1,9 @@
 # ************************************************************************************************
-# GoldRush PacBio HiFi whole-genome assembly -- RUNTIME / PEAK-RAM MEASUREMENT ONLY
+# GoldRush ONT whole-genome assembly -- RUNTIME / PEAK-RAM MEASUREMENT ONLY
 #
 # Re-runs GoldRush with the same Docker image, memory ceiling and
-# `goldrush run` parameters as pb.assembly.goldrush.smk, but at
-# BENCHMARK_THREADS (default 64), only to record wall-clock time and peak
+# `goldrush run` parameters as ont.assembly.goldrush.smk, but at
+# RAM_TIME_THREADS (default 64), only to record wall-clock time and peak
 # RAM. Nothing else is kept.
 #
 # GoldRush self-instruments every internal Makefile stage via
@@ -13,7 +13,7 @@
 #
 # Rules (per dataset):
 #   goldrush_run      -> runs GoldRush in a temp() scratch directory
-#   goldrush_record   -> parses the stage *.time files into {dataset}.perf.tsv
+#   goldrush_record   -> parses the stage *.time files into {dataset}.ram_time.tsv
 #                        (the only result this workflow keeps)
 #
 # The scratch directory is a temp() output, so Snakemake deletes it automatically
@@ -23,9 +23,9 @@
 #
 # Configurable (--config key=value), no paths hard-coded in the rules;
 # both directories must stay inside the repository root (CONSTITUTION I.1):
-#   benchmark_threads      (default 64)
-#   benchmark_dir          (default assemblers_benchmark)          -- perf TSVs + logs
-#   benchmark_scratch_dir  (default assemblers_benchmark/scratch)  -- deleted automatically after each run
+#   ram_time_threads      (default 64)
+#   ram_time_dir          (default assemblers_ram_time)          -- ram_time TSVs + logs
+#   ram_time_scratch_dir  (default assemblers_ram_time/scratch)  -- deleted automatically after each run
 # Relative paths are resolved against the repository root (the working directory).
 # ************************************************************************************************
 
@@ -40,36 +40,36 @@ except (KeyError, NameError):
     DATASET_FILTER = None
 
 #################
-# Benchmark settings
+# RAM / time measurement settings
 
-BENCHMARK_THREADS = int(config.get("benchmark_threads", 64))
-BENCHMARK_DIR = os.path.join(CWD, config.get("benchmark_dir", "assemblers_benchmark"), "goldrush")
-SCRATCH_DIR = os.path.join(CWD, config.get("benchmark_scratch_dir", "assemblers_benchmark/scratch"), "goldrush")
+RAM_TIME_THREADS = int(config.get("ram_time_threads", 64))
+RAM_TIME_DIR = os.path.join(CWD, config.get("ram_time_dir", "assemblers_ram_time"), "goldrush")
+SCRATCH_DIR = os.path.join(CWD, config.get("ram_time_scratch_dir", "assemblers_ram_time/scratch"), "goldrush")
 
-for _path in (BENCHMARK_DIR, SCRATCH_DIR):
+for _path in (RAM_TIME_DIR, SCRATCH_DIR):
     if os.path.commonpath([CWD, os.path.realpath(_path)]) != os.path.realpath(CWD):
-        raise ValueError("Constitution I.1: benchmark paths must be inside the repository root: " + _path)
+        raise ValueError("Constitution I.1: ram_time paths must be inside the repository root: " + _path)
 
-print("Benchmark threads: " + str(BENCHMARK_THREADS))
-print("Benchmark results: " + BENCHMARK_DIR)
-print("Benchmark scratch: " + SCRATCH_DIR)
+print("RAM/time threads: " + str(RAM_TIME_THREADS))
+print("RAM/time results: " + RAM_TIME_DIR)
+print("RAM/time scratch: " + SCRATCH_DIR)
 
 #################
-# GoldRush version (identical to pb.assembly.goldrush.smk)
+# GoldRush version (identical to ont.assembly.goldrush.smk)
 GOLDRUSH_VERSION = "1.2.2-ntlinkfix"
 DOCKER_GOLDRUSH = "nicolasardila1/lrs-goldrush:" + GOLDRUSH_VERSION
 
 print("GoldRush version: " + GOLDRUSH_VERSION)
 
 #####################
-# Discover datasets and create wildcards (identical filter to pb.assembly.goldrush.smk)
+# Discover datasets and create wildcards (identical filter to ont.assembly.goldrush.smk)
 
 DATASETS_FASTQ, = glob_wildcards(CWD + r"/fastq/{dataset,[A-Za-z0-9._-]+}.fastq.gz")
 
 DATASETS = [
     dataset
     for dataset in DATASETS_FASTQ
-    if ".pb." in dataset.lower()
+    if ".ont." in dataset.lower()
     and ".1k" not in dataset.lower()
     and ".chr21." not in dataset.lower()
     and ".localtest." not in dataset.lower()
@@ -80,7 +80,7 @@ DATASETS = [
 
 OUTPUT = []
 
-OUTPUT += expand(BENCHMARK_DIR + "/{dataset}.perf.tsv", dataset=DATASETS)
+OUTPUT += expand(RAM_TIME_DIR + "/{dataset}.ram_time.tsv", dataset=DATASETS)
 
 rule all:
     input:
@@ -94,11 +94,11 @@ print(OUTPUT)
 # Prevent local test datasets from being requested explicitly
 
 wildcard_constraints:
-    dataset = r"(?=.*\.pb\.)(?!.*\.1k(?:\.|$))(?!.*\.chr21\.)(?!.*\.localtest\.)[A-Za-z0-9._-]+"
+    dataset = r"(?=.*\.ont\.)(?!.*\.1k(?:\.|$))(?!.*\.chr21\.)(?!.*\.localtest\.)[A-Za-z0-9._-]+"
 
 
 ################
-# GoldRush resource requirements (identical to pb.assembly.goldrush.smk)
+# GoldRush resource requirements (identical to ont.assembly.goldrush.smk)
 
 def get_goldrush_memory(wildcards):
     return 64000
@@ -116,16 +116,16 @@ rule goldrush_run:
     params:
         genome_size = "3e9",
         prefix = "{dataset}_goldrush",
-        min_length = 10000,
+        min_length = 5000,
         shm_size = "8g"
 
     log:
-        BENCHMARK_DIR + "/{dataset}.run.log"
+        RAM_TIME_DIR + "/{dataset}.run.log"
 
     message:
         "executing {rule} with output {output} and input {input}"
 
-    threads: BENCHMARK_THREADS
+    threads: RAM_TIME_THREADS
 
     resources:
         mem_mb = get_goldrush_memory
@@ -139,16 +139,16 @@ rule goldrush_run:
 
             echo "[$(date -Is)] START goldrush_run {wildcards.dataset}"
             echo "Dataset: {wildcards.dataset}"
-            echo "Read technology: PB"
+            echo "Read technology: ONT"
             echo "Genome size: {params.genome_size}"
             echo "Threads: {threads}"
             echo "Memory: {resources.mem_mb} MB"
             echo "Shared memory: {params.shm_size}"
             echo "Scratch: {output.scratch}"
 
-            [[ {threads} -eq {BENCHMARK_THREADS} ]] || {{
-                echo "ERROR: Snakemake granted {threads} threads, expected {BENCHMARK_THREADS}."
-                echo "Run with --cores {BENCHMARK_THREADS} (or more) so the measurement is comparable."
+            [[ {threads} -eq {RAM_TIME_THREADS} ]] || {{
+                echo "ERROR: Snakemake granted {threads} threads, expected {RAM_TIME_THREADS}."
+                echo "Run with --cores {RAM_TIME_THREADS} (or more) so the measurement is comparable."
                 exit 104;
             }}
 
@@ -179,7 +179,7 @@ rule goldrush_run:
 
             docker run --rm \
                 --tmpfs /tmp:size=50g,exec \
-                --hostname goldrush-benchmark-{wildcards.dataset} \
+                --hostname goldrush-ram-time-{wildcards.dataset} \
                 --workdir "{output.scratch}" \
                 -u $UID:$(id -g) \
                 --cpus {threads} \
@@ -220,10 +220,10 @@ rule goldrush_record:
         scratch = SCRATCH_DIR + "/{dataset}"
 
     output:
-        perf = BENCHMARK_DIR + "/{dataset}.perf.tsv"
+        ram_time = RAM_TIME_DIR + "/{dataset}.ram_time.tsv"
 
     log:
-        BENCHMARK_DIR + "/{dataset}.record.log"
+        RAM_TIME_DIR + "/{dataset}.record.log"
 
     message:
         "executing {rule} with output {output} and input {input}"
@@ -257,13 +257,13 @@ rule goldrush_record:
                 "{CWD}/assembly_analysis/scripts/metrics/parse_assembler_time_v.py" \
                 --assembler goldrush \
                 --sample "{wildcards.dataset}" \
-                --technology pb \
-                --threads {BENCHMARK_THREADS} \
+                --technology ont \
+                --threads {RAM_TIME_THREADS} \
                 --time-file "${{TIME_FILES[@]}}" \
-                --output "{output.perf}"
+                --output "{output.ram_time}"
 
-            [[ $(wc -l < "{output.perf}") -eq 2 ]] || {{
-                echo "ERROR: {output.perf} must contain exactly one header and one data row"
+            [[ $(wc -l < "{output.ram_time}") -eq 2 ]] || {{
+                echo "ERROR: {output.ram_time} must contain exactly one header and one data row"
                 exit 101;
             }}
 

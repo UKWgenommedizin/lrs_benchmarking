@@ -19,7 +19,7 @@ Generated from version-control candidates. Directories remain compact; use this 
 - [`pb.scaffolding.ntlink.smk`](pb.scaffolding.ntlink.smk)
 
 - **assessment/** — 3 files; [`guide`](assessment/README.md)
-- **runtime_ram_benchmark/** — 6 files; [`guide`](runtime_ram_benchmark/README.md)
+- **ram_time/** — 6 files; [`guide`](ram_time/README.md)
 
 <!-- AUTO_REPOSITORY_TREE_END -->
 
@@ -147,8 +147,8 @@ assemblers/whole_genome_asm/pb.scaffolding.ntlink.smk
 
 ## Runtime / peak-RAM measurement (separate)
 
-The workflows in [`runtime_ram_benchmark/`](runtime_ram_benchmark/README.md)
-(`*.benchmark.smk`) re-run Flye, GoldRush and Verkko **only to record
+The workflows in [`ram_time/`](ram_time/README.md)
+(`*.ram_time.smk`) re-run Flye, GoldRush and Verkko **only to record
 wall-clock time and peak RAM**. They discard the regenerated assembly and
 never write to `assemblies/`; use the workflows in this directory for the
 actual assemblies.

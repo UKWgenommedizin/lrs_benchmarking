@@ -2,13 +2,13 @@
 # Flye ONT whole-genome assembly -- RUNTIME / PEAK-RAM MEASUREMENT ONLY
 #
 # Re-runs Flye with the same Docker image and parameters as
-# ont.assembly.flye2.smk, but at BENCHMARK_THREADS (default 64), only to
+# ont.assembly.flye2.smk, but at RAM_TIME_THREADS (default 64), only to
 # record wall-clock time and peak RAM. Nothing else is kept.
 #
 # Rules (per dataset):
 #   flye_run      -> runs Flye under /usr/bin/time -v inside the container,
 #                    writing everything to a temp() scratch directory
-#   flye_record   -> parses the time file into {dataset}.perf.tsv
+#   flye_record   -> parses the time file into {dataset}.ram_time.tsv
 #                    (the only result this workflow keeps)
 #
 # The scratch directory is a temp() output, so Snakemake deletes it automatically
@@ -21,9 +21,9 @@
 #
 # Configurable (--config key=value), no paths hard-coded in the rules;
 # both directories must stay inside the repository root (CONSTITUTION I.1):
-#   benchmark_threads      (default 64)
-#   benchmark_dir          (default assemblers_benchmark)          -- perf TSVs + logs
-#   benchmark_scratch_dir  (default assemblers_benchmark/scratch)  -- deleted automatically after each run
+#   ram_time_threads      (default 64)
+#   ram_time_dir          (default assemblers_ram_time)          -- ram_time TSVs + logs
+#   ram_time_scratch_dir  (default assemblers_ram_time/scratch)  -- deleted automatically after each run
 # Relative paths are resolved against the repository root (the working directory).
 # ************************************************************************************************
 
@@ -38,19 +38,19 @@ except (KeyError, NameError):
     DATASET_FILTER = None
 
 #################
-# Benchmark settings
+# RAM / time measurement settings
 
-BENCHMARK_THREADS = int(config.get("benchmark_threads", 64))
-BENCHMARK_DIR = os.path.join(CWD, config.get("benchmark_dir", "assemblers_benchmark"), "flye")
-SCRATCH_DIR = os.path.join(CWD, config.get("benchmark_scratch_dir", "assemblers_benchmark/scratch"), "flye")
+RAM_TIME_THREADS = int(config.get("ram_time_threads", 64))
+RAM_TIME_DIR = os.path.join(CWD, config.get("ram_time_dir", "assemblers_ram_time"), "flye")
+SCRATCH_DIR = os.path.join(CWD, config.get("ram_time_scratch_dir", "assemblers_ram_time/scratch"), "flye")
 
-for _path in (BENCHMARK_DIR, SCRATCH_DIR):
+for _path in (RAM_TIME_DIR, SCRATCH_DIR):
     if os.path.commonpath([CWD, os.path.realpath(_path)]) != os.path.realpath(CWD):
-        raise ValueError("Constitution I.1: benchmark paths must be inside the repository root: " + _path)
+        raise ValueError("Constitution I.1: ram_time paths must be inside the repository root: " + _path)
 
-print("Benchmark threads: " + str(BENCHMARK_THREADS))
-print("Benchmark results: " + BENCHMARK_DIR)
-print("Benchmark scratch: " + SCRATCH_DIR)
+print("RAM/time threads: " + str(RAM_TIME_THREADS))
+print("RAM/time results: " + RAM_TIME_DIR)
+print("RAM/time scratch: " + SCRATCH_DIR)
 
 #################
 # Flye version (identical to ont.assembly.flye2.smk)
@@ -76,7 +76,7 @@ DATASETS = [
 
 OUTPUT = []
 
-OUTPUT += expand(BENCHMARK_DIR + "/{dataset}.perf.tsv", dataset=DATASETS)
+OUTPUT += expand(RAM_TIME_DIR + "/{dataset}.ram_time.tsv", dataset=DATASETS)
 
 rule all:
     input:
@@ -110,12 +110,12 @@ rule flye_run:
         scratch = temp(directory(SCRATCH_DIR + "/{dataset}"))
 
     log:
-        BENCHMARK_DIR + "/{dataset}.run.log"
+        RAM_TIME_DIR + "/{dataset}.run.log"
 
     message:
         "executing {rule} with output {output} and input {input}"
 
-    threads: BENCHMARK_THREADS
+    threads: RAM_TIME_THREADS
 
     resources:
         mem_gb = get_flye_memory
@@ -135,9 +135,9 @@ rule flye_run:
             echo "Memory: {resources.mem_gb} GB"
             echo "Scratch: {output.scratch}"
 
-            [[ {threads} -eq {BENCHMARK_THREADS} ]] || {{
-                echo "ERROR: Snakemake granted {threads} threads, expected {BENCHMARK_THREADS}."
-                echo "Run with --cores {BENCHMARK_THREADS} (or more) so the measurement is comparable."
+            [[ {threads} -eq {RAM_TIME_THREADS} ]] || {{
+                echo "ERROR: Snakemake granted {threads} threads, expected {RAM_TIME_THREADS}."
+                echo "Run with --cores {RAM_TIME_THREADS} (or more) so the measurement is comparable."
                 exit 104;
             }}
 
@@ -152,7 +152,7 @@ rule flye_run:
 
             docker run --rm \
                 --tmpfs /tmp:size=50g,exec \
-                --hostname flye-benchmark-{wildcards.dataset} \
+                --hostname flye-ram-time-{wildcards.dataset} \
                 --workdir /tmp \
                 -u $UID:$(id -g) \
                 --cpus {threads} \
@@ -187,10 +187,10 @@ rule flye_record:
         scratch = SCRATCH_DIR + "/{dataset}"
 
     output:
-        perf = BENCHMARK_DIR + "/{dataset}.perf.tsv"
+        ram_time = RAM_TIME_DIR + "/{dataset}.ram_time.tsv"
 
     log:
-        BENCHMARK_DIR + "/{dataset}.record.log"
+        RAM_TIME_DIR + "/{dataset}.record.log"
 
     message:
         "executing {rule} with output {output} and input {input}"
@@ -215,12 +215,12 @@ rule flye_record:
                 --assembler flye \
                 --sample "{wildcards.dataset}" \
                 --technology ont \
-                --threads {BENCHMARK_THREADS} \
+                --threads {RAM_TIME_THREADS} \
                 --time-file "{input.scratch}/time_v.txt" \
-                --output "{output.perf}"
+                --output "{output.ram_time}"
 
-            [[ $(wc -l < "{output.perf}") -eq 2 ]] || {{
-                echo "ERROR: {output.perf} must contain exactly one header and one data row"
+            [[ $(wc -l < "{output.ram_time}") -eq 2 ]] || {{
+                echo "ERROR: {output.ram_time} must contain exactly one header and one data row"
                 exit 101;
             }}
 

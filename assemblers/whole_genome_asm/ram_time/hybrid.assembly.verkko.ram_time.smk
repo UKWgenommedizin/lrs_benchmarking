@@ -2,27 +2,27 @@
 # Verkko hybrid whole-genome assembly -- RUNTIME / PEAK-RAM MEASUREMENT ONLY
 #
 # Re-runs Verkko with the same Docker image, memory ceiling and parameters
-# as hybrid.assembly.verkko.smk, but at BENCHMARK_THREADS (default 64), only
+# as hybrid.assembly.verkko.smk, but at RAM_TIME_THREADS (default 64), only
 # to record wall-clock time and peak RAM. Nothing else is kept.
 #
 # Rules (per sample):
 #   verkko_run      -> runs Verkko under /usr/bin/time -v inside the container,
 #                      writing everything to a temp() scratch directory
-#   verkko_record   -> parses the time file into {sample}.perf.tsv
+#   verkko_record   -> parses the time file into {sample}.ram_time.tsv
 #                      (the only result this workflow keeps)
 #
 # The scratch directory is a temp() output, so Snakemake deletes it automatically
 # as soon as the record rule succeeds (and also removes it if the run fails).
 # Every rule writes its own log ({run,record}.log) per CONSTITUTION VI.3/VI.4.
 #
-# See ont.assembly.flye2.benchmark.smk for why /usr/bin/time -v runs inside
+# See ont.assembly.flye2.ram_time.smk for why /usr/bin/time -v runs inside
 # the container instead of using Snakemake's `benchmark:` directive.
 #
 # Configurable (--config key=value), no paths hard-coded in the rules;
 # both directories must stay inside the repository root (CONSTITUTION I.1):
-#   benchmark_threads      (default 64)
-#   benchmark_dir          (default assemblers_benchmark)          -- perf TSVs + logs
-#   benchmark_scratch_dir  (default assemblers_benchmark/scratch)  -- deleted automatically after each run
+#   ram_time_threads      (default 64)
+#   ram_time_dir          (default assemblers_ram_time)          -- ram_time TSVs + logs
+#   ram_time_scratch_dir  (default assemblers_ram_time/scratch)  -- deleted automatically after each run
 # Relative paths are resolved against the repository root (the working directory).
 # ************************************************************************************************
 
@@ -37,19 +37,19 @@ except (KeyError, NameError):
     DATASET_FILTER = None
 
 #################
-# Benchmark settings
+# RAM / time measurement settings
 
-BENCHMARK_THREADS = int(config.get("benchmark_threads", 64))
-BENCHMARK_DIR = os.path.join(CWD, config.get("benchmark_dir", "assemblers_benchmark"), "verkko")
-SCRATCH_DIR = os.path.join(CWD, config.get("benchmark_scratch_dir", "assemblers_benchmark/scratch"), "verkko")
+RAM_TIME_THREADS = int(config.get("ram_time_threads", 64))
+RAM_TIME_DIR = os.path.join(CWD, config.get("ram_time_dir", "assemblers_ram_time"), "verkko")
+SCRATCH_DIR = os.path.join(CWD, config.get("ram_time_scratch_dir", "assemblers_ram_time/scratch"), "verkko")
 
-for _path in (BENCHMARK_DIR, SCRATCH_DIR):
+for _path in (RAM_TIME_DIR, SCRATCH_DIR):
     if os.path.commonpath([CWD, os.path.realpath(_path)]) != os.path.realpath(CWD):
-        raise ValueError("Constitution I.1: benchmark paths must be inside the repository root: " + _path)
+        raise ValueError("Constitution I.1: ram_time paths must be inside the repository root: " + _path)
 
-print("Benchmark threads: " + str(BENCHMARK_THREADS))
-print("Benchmark results: " + BENCHMARK_DIR)
-print("Benchmark scratch: " + SCRATCH_DIR)
+print("RAM/time threads: " + str(RAM_TIME_THREADS))
+print("RAM/time results: " + RAM_TIME_DIR)
+print("RAM/time scratch: " + SCRATCH_DIR)
 
 #################
 # Verkko version (identical to hybrid.assembly.verkko.smk)
@@ -96,7 +96,7 @@ if not SAMPLES:
 
 OUTPUT = []
 
-OUTPUT += expand(BENCHMARK_DIR + "/{sample}.perf.tsv", sample=SAMPLES)
+OUTPUT += expand(RAM_TIME_DIR + "/{sample}.ram_time.tsv", sample=SAMPLES)
 
 rule all:
     input:
@@ -134,12 +134,12 @@ rule verkko_run:
         local_memory_gb = 64
 
     log:
-        BENCHMARK_DIR + "/{sample}.run.log"
+        RAM_TIME_DIR + "/{sample}.run.log"
 
     message:
         "executing {rule} with output {output} and input {input}"
 
-    threads: BENCHMARK_THREADS
+    threads: RAM_TIME_THREADS
 
     resources:
         mem_mb = get_verkko_memory
@@ -160,9 +160,9 @@ rule verkko_run:
             echo "Memory: {resources.mem_mb} MB"
             echo "Scratch: {output.scratch}"
 
-            [[ {threads} -eq {BENCHMARK_THREADS} ]] || {{
-                echo "ERROR: Snakemake granted {threads} threads, expected {BENCHMARK_THREADS}."
-                echo "Run with --cores {BENCHMARK_THREADS} (or more) so the measurement is comparable."
+            [[ {threads} -eq {RAM_TIME_THREADS} ]] || {{
+                echo "ERROR: Snakemake granted {threads} threads, expected {RAM_TIME_THREADS}."
+                echo "Run with --cores {RAM_TIME_THREADS} (or more) so the measurement is comparable."
                 exit 104;
             }}
 
@@ -176,7 +176,7 @@ rule verkko_run:
             }}
 
             docker run --rm \
-                --hostname verkko-benchmark-{wildcards.sample} \
+                --hostname verkko-ram-time-{wildcards.sample} \
                 --cpus {threads} \
                 -m {resources.mem_mb}m \
                 --tmpfs /tmp:size=50g,exec \
@@ -216,10 +216,10 @@ rule verkko_record:
         scratch = SCRATCH_DIR + "/{sample}"
 
     output:
-        perf = BENCHMARK_DIR + "/{sample}.perf.tsv"
+        ram_time = RAM_TIME_DIR + "/{sample}.ram_time.tsv"
 
     log:
-        BENCHMARK_DIR + "/{sample}.record.log"
+        RAM_TIME_DIR + "/{sample}.record.log"
 
     message:
         "executing {rule} with output {output} and input {input}"
@@ -244,12 +244,12 @@ rule verkko_record:
                 --assembler verkko \
                 --sample "{wildcards.sample}" \
                 --technology hybrid \
-                --threads {BENCHMARK_THREADS} \
+                --threads {RAM_TIME_THREADS} \
                 --time-file "{input.scratch}/time_v.txt" \
-                --output "{output.perf}"
+                --output "{output.ram_time}"
 
-            [[ $(wc -l < "{output.perf}") -eq 2 ]] || {{
-                echo "ERROR: {output.perf} must contain exactly one header and one data row"
+            [[ $(wc -l < "{output.ram_time}") -eq 2 ]] || {{
+                echo "ERROR: {output.ram_time} must contain exactly one header and one data row"
                 exit 101;
             }}
 
