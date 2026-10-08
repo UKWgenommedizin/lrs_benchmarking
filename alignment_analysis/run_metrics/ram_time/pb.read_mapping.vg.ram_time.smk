@@ -64,8 +64,7 @@ DOCKER_VG = "schimar/lrs-vg:v1.73.0"
 LOCAL_REFERENCE = os.path.join(
     CWD,
     "reference",
-    "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta",
-)
+    "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta",)
 
 RAW_REFERENCE = config.get("reference", LOCAL_REFERENCE)
 REF = os.path.expanduser(RAW_REFERENCE)
@@ -73,7 +72,7 @@ if not os.path.isabs(REF):
     REF = os.path.join(CWD, REF)
 REF = os.path.abspath(REF)
 
-VG_INDEX_DIR = CWD + "/vg_index"
+VG_INDEX_DIR = "/data/genmedbfx/schilling_m/repos/lrs_benchmarking/vg_index/"
 VG_GBZ       = VG_INDEX_DIR + "/hg38.giraffe.gbz"
 VG_DIST      = VG_INDEX_DIR + "/hg38.dist"
 VG_MIN       = VG_INDEX_DIR + "/hg38.longread.withzip.min"
