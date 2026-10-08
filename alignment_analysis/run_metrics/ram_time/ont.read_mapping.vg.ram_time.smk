@@ -73,7 +73,7 @@ if not os.path.isabs(REF):
     REF = os.path.join(CWD, REF)
 REF = os.path.abspath(REF)
 
-VG_INDEX_DIR = "/data/genmedbfx/schilling_m/repos/lrs_benchmarking/vg_index/"
+VG_INDEX_DIR = CWD + "/vg_index"
 VG_GBZ       = VG_INDEX_DIR + "/hg38.giraffe.gbz"
 VG_DIST      = VG_INDEX_DIR + "/hg38.dist"
 VG_MIN       = VG_INDEX_DIR + "/hg38.longread.withzip.min"
