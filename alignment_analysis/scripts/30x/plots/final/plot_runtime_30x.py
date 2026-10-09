@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Plot observed wall-clock runtime (hours) for the 30x benchmark aligners.
 
-Grouped horizontal bars per sample per aligner, from a zero baseline.
+Grouped bar chart (one bar per HG002/HG003/HG004 sample within each
+aligner) from a true zero baseline, styled like the other half-width
+30x panels (e.g. 01_alignment_error_rate_30x).
 """
 
 from __future__ import annotations
@@ -25,13 +27,19 @@ import matplotlib.pyplot as plt
 
 from utils.plot_style import (
     ALIGNER_ORDER,
-    FULL_WIDTH_IN,
+    HALF_WIDTH_IN,
+    PANEL_LABEL_SIZE_PT,
+    PANEL_TICK_SIZE,
+    PANEL_TITLE_SIZE,
+    PANEL_VALUE_SIZE,
     SAMPLE_COLORS,
     SAMPLE_ORDER,
     TECHNOLOGY_ORDER,
     TECHNOLOGY_TITLES,
     apply_style,
-    panel_letter,
+    clean_spines,
+    panel_legend,
+    rotated_xticks,
     sample_legend_handles,
     save_figure,
 )
@@ -44,8 +52,8 @@ OUTPUT_DATA = TABLE_DIR / "derived" / "plot_data" / "wallclock_runtime_30x_plott
 OUTPUT_PNG = FIGURE_DIR / "05_runtime_30x.png"
 OUTPUT_PDF = OUTPUT_PNG.with_suffix(".pdf")
 
-BAR_HEIGHT = 0.18
-SAMPLE_OFFSETS = {"HG002": 0.21, "HG003": 0.0, "HG004": -0.21}
+BAR_WIDTH = 0.26
+SAMPLE_OFFSETS = {"HG002": -0.27, "HG003": 0.0, "HG004": 0.27}
 
 
 def load_data() -> pd.DataFrame:
@@ -100,8 +108,8 @@ def load_data() -> pd.DataFrame:
     return data
 
 
-def add_panel(axis: plt.Axes, subset: pd.DataFrame, x_max: float, show_labels: bool) -> None:
-    y_positions = np.arange(len(ALIGNER_ORDER), dtype=float)
+def add_panel(axis: plt.Axes, subset: pd.DataFrame, y_max: float) -> None:
+    x_positions = np.arange(len(ALIGNER_ORDER), dtype=float)
 
     for sample in SAMPLE_ORDER:
         sample_data = (
@@ -109,28 +117,28 @@ def add_panel(axis: plt.Axes, subset: pd.DataFrame, x_max: float, show_labels: b
         )
         values = sample_data["wallclock_runtime_hours"].to_numpy(dtype=float)
         valid = np.isfinite(values)
-        y = y_positions[valid] + SAMPLE_OFFSETS[sample]
-
-        axis.barh(
-            y, values[valid],
-            height=BAR_HEIGHT,
-            color=SAMPLE_COLORS[sample], edgecolor="white", linewidth=0.6,
+        axis.bar(
+            x_positions[valid] + SAMPLE_OFFSETS[sample], values[valid],
+            width=BAR_WIDTH,
+            color=SAMPLE_COLORS[sample], edgecolor="white", linewidth=0.3,
             zorder=3,
         )
 
-    axis.set_yticks(y_positions, ALIGNER_ORDER)
-    axis.invert_yaxis()
-    axis.set_ylim(len(ALIGNER_ORDER) - 0.5, -0.5)
-    axis.set_xlim(0, x_max)
-    axis.grid(axis="x", color="#E5E5E5", linewidth=0.45, zorder=0)
-    axis.set_axisbelow(True)
-    for spine_name, spine in axis.spines.items():
-        spine.set_visible(spine_name in ("left", "bottom"))
-    axis.spines["left"].set_linewidth(0.7)
-    axis.spines["bottom"].set_linewidth(0.7)
-    axis.tick_params(axis="both", labelsize=12)
-    if not show_labels:
-        axis.tick_params(axis="y", left=False, labelleft=False)
+    # runtimes are only comparable alongside the CPU allocation, so note it above each group
+    for x, aligner in zip(x_positions, ALIGNER_ORDER):
+        aligner_data = subset[subset["aligner"] == aligner]
+        threads = "/".join(str(t) for t in sorted(aligner_data["threads"].unique()))
+        axis.text(
+            x, aligner_data["wallclock_runtime_hours"].max() + y_max * 0.02, f"{threads} thr.",
+            ha="center", va="bottom", fontsize=PANEL_VALUE_SIZE, color="#555555",
+        )
+
+    axis.set_ylim(0, y_max)
+    axis.set_xlim(-0.5, len(ALIGNER_ORDER) - 0.5)
+    rotated_xticks(axis, x_positions, ALIGNER_ORDER, fontsize=PANEL_TICK_SIZE, tick_length=2)
+    axis.tick_params(axis="y", labelsize=PANEL_TICK_SIZE, length=2, pad=1.5)
+    clean_spines(axis)
+    axis.set_facecolor("white")
 
 
 def main() -> int:
@@ -153,28 +161,20 @@ def main() -> int:
 
     apply_style()
 
-    figure, axes = plt.subplots(nrows=1, ncols=2, sharex=True, sharey=True, figsize=(FULL_WIDTH_IN, 3.0))
-    x_max = float(plot_data["wallclock_runtime_hours"].max()) * 1.15
+    figure, axes = plt.subplots(nrows=1, ncols=2, sharey=True, figsize=(HALF_WIDTH_IN, 1.75))
+    y_max = float(plot_data["wallclock_runtime_hours"].max()) * 1.15
 
-    for panel_index, technology in enumerate(TECHNOLOGY_ORDER):
-        axis = axes[panel_index]
+    for axis, technology in zip(axes, TECHNOLOGY_ORDER):
         subset = plot_data[plot_data["read_technology"] == technology]
-        add_panel(axis, subset, x_max, show_labels=technology == "ONT")
-        axis.set_title(TECHNOLOGY_TITLES[technology], pad=6)
-        panel_letter(axis, "a" if technology == "ONT" else "b", x=-0.05, fontsize=12)
+        add_panel(axis, subset, y_max)
+        axis.set_title(TECHNOLOGY_TITLES[technology], pad=2, fontsize=PANEL_TITLE_SIZE)
 
-    figure.supxlabel("Wall-clock runtime (hours)", x=0.55,y=0.02, fontsize=12)
-    figure.legend(
-        handles=sample_legend_handles(),
-        frameon=False,
-        ncols=3,
-        loc="upper center",
-        bbox_to_anchor=(0.5, 1.08),
-        columnspacing=1.3,
-        handletextpad=0.4,
-    )
+    axes[0].set_ylabel("Wall-clock runtime (h)", fontsize=PANEL_LABEL_SIZE_PT, labelpad=2)
+
+    panel_legend(figure, sample_legend_handles(), y=0.93)
+
     figure.patch.set_facecolor("white")
-    figure.subplots_adjust(left=0.17, right=0.97, top=0.86, bottom=0.15, wspace=0.15)
+    figure.subplots_adjust(left=0.12, right=0.99, bottom=0.25, top=0.82, wspace=0.08)
 
     save_figure(figure, OUTPUT_PNG, OUTPUT_PDF)
 

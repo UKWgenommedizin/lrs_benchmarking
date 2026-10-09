@@ -1,0 +1,9 @@
+technology	aligner	threads	runtime_hours	thread_hours
+ONT	minimap2	64	2.47 $\pm$ 0.09	158.2 $\pm$ 5.5
+	pbmm2	64	1.61 $\pm$ 0.13	103.1 $\pm$ 8.0
+	VACmap	16	13.74 $\pm$ 0.29	219.9 $\pm$ 4.6
+	VG Giraffe	16	4.24 $\pm$ 0.71	67.8 $\pm$ 11.4
+PacBio HiFi	minimap2	64	1.55 $\pm$ 0.38	99.5 $\pm$ 24.2
+	pbmm2	64	1.45 $\pm$ 0.08	92.8 $\pm$ 4.9
+	VACmap	16	9.21 $\pm$ 0.29	147.4 $\pm$ 4.7
+	VG Giraffe	16	3.59 $\pm$ 0.22	57.5 $\pm$ 3.5

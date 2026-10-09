@@ -1,0 +1,22 @@
+sample	assembler	technology	unit	contig_N50_bp	contig_count	genome_fraction_pct	misassemblies	mismatches_per_100kbp	indels_per_100kbp	contiguity_status	reference_status
+HG002	Flye	ONT	assembly	30226142	2057	96.827	4888	144.66	31.86	valid: QUAST contig stats, no N gaps within QUAST rounding	valid
+HG003	Flye	ONT	assembly	33606050	1977	96.877	4650	143.40	31.33	valid: QUAST contig stats, no N gaps within QUAST rounding	valid
+HG004	Flye	ONT	assembly	31585363	2026	96.308	4104	140.90	31.37	valid: QUAST contig stats, no N gaps within QUAST rounding	valid
+HG002	Flye	HiFi	assembly	NA	NA	98.394	NA	192.78	31.47	NA: representation unresolved (3.95 Gb, dup 1.325)	misassemblies NA (count inflated by excess sequence); other metrics valid per aligned base
+HG003	Flye	HiFi	assembly	NA	NA	98.425	NA	190.92	31.36	NA: representation unresolved (3.97 Gb, dup 1.332)	as HG002 Flye HiFi
+HG004	Flye	HiFi	assembly	NA	NA	97.758	NA	189.56	31.47	NA: representation unresolved (3.97 Gb, dup 1.342)	as HG002 Flye HiFi
+HG002	GoldRush	ONT	assembly	NA	NA	75.813	5081	154.86	52.17	NA: gap-split contig stats not yet computed (scaffold N50 402288 kept in audit table)	valid
+HG003	GoldRush	ONT	assembly	NA	NA	79.422	4131	149.87	49.45	NA: gap-split contig stats not yet computed (scaffold N50 605061 kept in audit table)	valid
+HG004	GoldRush	ONT	assembly	NA	NA	65.802	3729	154.73	51.14	NA: gap-split contig stats not yet computed (scaffold N50 325749 kept in audit table)	valid
+HG002	GoldRush	HiFi	assembly	NA	NA	67.940	2681	123.40	33.92	NA: gap-split contig stats not yet computed (scaffold N50 144932 kept in audit table)	valid
+HG003	GoldRush	HiFi	assembly	NA	NA	66.819	3498	122.56	34.02	NA: gap-split contig stats not yet computed (scaffold N50 137715 kept in audit table)	valid
+HG004	GoldRush	HiFi	assembly	NA	NA	69.245	3005	122.40	35.03	NA: gap-split contig stats not yet computed (scaffold N50 157735 kept in audit table)	valid
+HG002	Verkko	ONT+HiFi	haplotype1	NA	NA	NA	NA	NA	NA	NA: no haplotype-1 FASTA (unphased run)	NA: no per-haplotype QUAST run
+HG002	Verkko	ONT+HiFi	haplotype2	NA	NA	NA	NA	NA	NA	NA: no haplotype-2 FASTA (unphased run)	NA: no per-haplotype QUAST run
+HG002	Verkko	ONT+HiFi	combined_diploid	NA	NA	98.810	NA	178.86	32.33	NA: pooled diploid N50/count not comparable to haploid	combined diploid vs haploid GRCh38; misassemblies NA (count over ~2x sequence); rates shown with dagger caveat
+HG003	Verkko	ONT+HiFi	haplotype1	NA	NA	NA	NA	NA	NA	NA: no haplotype-1 FASTA (unphased run)	NA: no per-haplotype QUAST run
+HG003	Verkko	ONT+HiFi	haplotype2	NA	NA	NA	NA	NA	NA	NA: no haplotype-2 FASTA (unphased run)	NA: no per-haplotype QUAST run
+HG003	Verkko	ONT+HiFi	combined_diploid	NA	NA	98.809	NA	180.39	32.26	NA: pooled diploid N50/count not comparable to haploid	as HG002 Verkko
+HG004	Verkko	ONT+HiFi	haplotype1	NA	NA	NA	NA	NA	NA	NA: no haplotype-1 FASTA (unphased run)	NA: no per-haplotype QUAST run
+HG004	Verkko	ONT+HiFi	haplotype2	NA	NA	NA	NA	NA	NA	NA: no haplotype-2 FASTA (unphased run)	NA: no per-haplotype QUAST run
+HG004	Verkko	ONT+HiFi	combined_diploid	NA	NA	98.057	NA	169.55	31.97	NA: pooled diploid N50/count not comparable to haploid	as HG002 Verkko

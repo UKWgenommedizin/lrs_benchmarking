@@ -1,0 +1,103 @@
+panel	strategy	configuration	sample	metric	value
+a	Alignment-based	minimap2 (ONT)	HG002	error_percent	3.2273
+a	Alignment-based	minimap2 (ONT)	HG002	input_normalized_cigar_yield_percent	99.4508
+b	Alignment-based	minimap2 (ONT)	HG002	thread_hours	159.941
+b	Alignment-based	minimap2 (ONT)	HG002	peak_ram_gb	37.653
+a	Alignment-based	pbmm2 (ONT)	HG002	error_percent	2.9165
+a	Alignment-based	pbmm2 (ONT)	HG002	input_normalized_cigar_yield_percent	98.8008
+b	Alignment-based	pbmm2 (ONT)	HG002	thread_hours	110.933
+b	Alignment-based	pbmm2 (ONT)	HG002	peak_ram_gb	67.138
+a	Alignment-based	VACmap (ONT)	HG002	error_percent	1.7942
+a	Alignment-based	VACmap (ONT)	HG002	input_normalized_cigar_yield_percent	97.9937
+a	Alignment-based	VG Giraffe (ONT)	HG002	error_percent	2.3102
+a	Alignment-based	VG Giraffe (ONT)	HG002	input_normalized_cigar_yield_percent	92.0282
+a	Alignment-based	minimap2 (HiFi)	HG002	error_percent	1.3916
+a	Alignment-based	minimap2 (HiFi)	HG002	input_normalized_cigar_yield_percent	99.7266
+b	Alignment-based	minimap2 (HiFi)	HG002	thread_hours	71.6344
+b	Alignment-based	minimap2 (HiFi)	HG002	peak_ram_gb	41.785
+a	Alignment-based	pbmm2 (HiFi)	HG002	error_percent	1.2187
+a	Alignment-based	pbmm2 (HiFi)	HG002	input_normalized_cigar_yield_percent	99.4923
+b	Alignment-based	pbmm2 (HiFi)	HG002	thread_hours	91.7333
+b	Alignment-based	pbmm2 (HiFi)	HG002	peak_ram_gb	65.782
+a	Alignment-based	VACmap (HiFi)	HG002	error_percent	0.6935
+a	Alignment-based	VACmap (HiFi)	HG002	input_normalized_cigar_yield_percent	99.3518
+a	Alignment-based	VG Giraffe (HiFi)	HG002	error_percent	1.0706
+a	Alignment-based	VG Giraffe (HiFi)	HG002	input_normalized_cigar_yield_percent	98.9996
+a	Alignment-based	minimap2 (ONT)	HG003	error_percent	2.8079
+a	Alignment-based	minimap2 (ONT)	HG003	input_normalized_cigar_yield_percent	99.3568
+b	Alignment-based	minimap2 (ONT)	HG003	thread_hours	162.483
+b	Alignment-based	minimap2 (ONT)	HG003	peak_ram_gb	36.486
+a	Alignment-based	pbmm2 (ONT)	HG003	error_percent	2.489
+a	Alignment-based	pbmm2 (ONT)	HG003	input_normalized_cigar_yield_percent	98.6793
+b	Alignment-based	pbmm2 (ONT)	HG003	thread_hours	103.467
+b	Alignment-based	pbmm2 (ONT)	HG003	peak_ram_gb	62.66
+a	Alignment-based	VACmap (ONT)	HG003	error_percent	1.4817
+a	Alignment-based	VACmap (ONT)	HG003	input_normalized_cigar_yield_percent	98.093
+a	Alignment-based	VG Giraffe (ONT)	HG003	error_percent	2.0183
+a	Alignment-based	VG Giraffe (ONT)	HG003	input_normalized_cigar_yield_percent	92.6918
+a	Alignment-based	minimap2 (HiFi)	HG003	error_percent	1.3434
+a	Alignment-based	minimap2 (HiFi)	HG003	input_normalized_cigar_yield_percent	99.7637
+b	Alignment-based	minimap2 (HiFi)	HG003	thread_hours	114.784
+b	Alignment-based	minimap2 (HiFi)	HG003	peak_ram_gb	36.334
+a	Alignment-based	pbmm2 (HiFi)	HG003	error_percent	1.1799
+a	Alignment-based	pbmm2 (HiFi)	HG003	input_normalized_cigar_yield_percent	99.5217
+b	Alignment-based	pbmm2 (HiFi)	HG003	thread_hours	98.1333
+b	Alignment-based	pbmm2 (HiFi)	HG003	peak_ram_gb	59.809
+a	Alignment-based	VACmap (HiFi)	HG003	error_percent	0.6953
+a	Alignment-based	VACmap (HiFi)	HG003	input_normalized_cigar_yield_percent	99.4007
+a	Alignment-based	VG Giraffe (HiFi)	HG003	error_percent	1.058
+a	Alignment-based	VG Giraffe (HiFi)	HG003	input_normalized_cigar_yield_percent	99.0278
+a	Alignment-based	minimap2 (ONT)	HG004	error_percent	2.8233
+a	Alignment-based	minimap2 (ONT)	HG004	input_normalized_cigar_yield_percent	99.3324
+b	Alignment-based	minimap2 (ONT)	HG004	thread_hours	152.029
+b	Alignment-based	minimap2 (ONT)	HG004	peak_ram_gb	38.123
+a	Alignment-based	pbmm2 (ONT)	HG004	error_percent	2.5197
+a	Alignment-based	pbmm2 (ONT)	HG004	input_normalized_cigar_yield_percent	98.7467
+b	Alignment-based	pbmm2 (ONT)	HG004	thread_hours	94.9333
+b	Alignment-based	pbmm2 (ONT)	HG004	peak_ram_gb	63.992
+a	Alignment-based	VACmap (ONT)	HG004	error_percent	1.4792
+a	Alignment-based	VACmap (ONT)	HG004	input_normalized_cigar_yield_percent	98.0981
+a	Alignment-based	VG Giraffe (ONT)	HG004	error_percent	2.0399
+a	Alignment-based	VG Giraffe (ONT)	HG004	input_normalized_cigar_yield_percent	93.4709
+a	Alignment-based	minimap2 (HiFi)	HG004	error_percent	1.2756
+a	Alignment-based	minimap2 (HiFi)	HG004	input_normalized_cigar_yield_percent	99.7865
+b	Alignment-based	minimap2 (HiFi)	HG004	thread_hours	112.072
+b	Alignment-based	minimap2 (HiFi)	HG004	peak_ram_gb	36.517
+a	Alignment-based	pbmm2 (HiFi)	HG004	error_percent	1.1335
+a	Alignment-based	pbmm2 (HiFi)	HG004	input_normalized_cigar_yield_percent	99.5661
+b	Alignment-based	pbmm2 (HiFi)	HG004	thread_hours	88.5333
+b	Alignment-based	pbmm2 (HiFi)	HG004	peak_ram_gb	60.409
+a	Alignment-based	VACmap (HiFi)	HG004	error_percent	0.6392
+a	Alignment-based	VACmap (HiFi)	HG004	input_normalized_cigar_yield_percent	99.52
+a	Alignment-based	VG Giraffe (HiFi)	HG004	error_percent	1.0058
+a	Alignment-based	VG Giraffe (HiFi)	HG004	input_normalized_cigar_yield_percent	99.0832
+c	Assembly-based	Flye (ONT)	HG002	misassemblies	4888
+c	Assembly-based	Flye (ONT)	HG002	nga50_mb	25.6448
+c	Assembly-based	Flye (HiFi)	HG002	misassemblies	10496
+c	Assembly-based	Flye (HiFi)	HG002	nga50_mb	0.734795
+c	Assembly-based	Flye (ONT)	HG003	misassemblies	4650
+c	Assembly-based	Flye (ONT)	HG003	nga50_mb	27.3261
+c	Assembly-based	Flye (HiFi)	HG003	misassemblies	11087
+c	Assembly-based	Flye (HiFi)	HG003	nga50_mb	0.652406
+c	Assembly-based	Flye (ONT)	HG004	misassemblies	4104
+c	Assembly-based	Flye (ONT)	HG004	nga50_mb	26.45
+c	Assembly-based	Flye (HiFi)	HG004	misassemblies	10463
+c	Assembly-based	Flye (HiFi)	HG004	nga50_mb	0.631902
+c	Assembly-based	GoldRush (ONT)	HG002	misassemblies	5081
+c	Assembly-based	GoldRush (ONT)	HG002	nga50_mb	0.215394
+c	Assembly-based	GoldRush (HiFi)	HG002	misassemblies	2681
+c	Assembly-based	GoldRush (HiFi)	HG002	nga50_mb	0.071325
+c	Assembly-based	GoldRush (ONT)	HG003	misassemblies	4131
+c	Assembly-based	GoldRush (ONT)	HG003	nga50_mb	0.352711
+c	Assembly-based	GoldRush (HiFi)	HG003	misassemblies	3498
+c	Assembly-based	GoldRush (HiFi)	HG003	nga50_mb	0.065335
+c	Assembly-based	GoldRush (ONT)	HG004	misassemblies	3729
+c	Assembly-based	GoldRush (ONT)	HG004	nga50_mb	0.123424
+c	Assembly-based	GoldRush (HiFi)	HG004	misassemblies	3005
+c	Assembly-based	GoldRush (HiFi)	HG004	nga50_mb	0.081724
+c	Assembly-based	Verkko (ONT+HiFi)	HG002	misassemblies	17894
+c	Assembly-based	Verkko (ONT+HiFi)	HG002	nga50_mb	0.75224
+c	Assembly-based	Verkko (ONT+HiFi)	HG003	misassemblies	18792
+c	Assembly-based	Verkko (ONT+HiFi)	HG003	nga50_mb	0.81016
+c	Assembly-based	Verkko (ONT+HiFi)	HG004	misassemblies	16674
+c	Assembly-based	Verkko (ONT+HiFi)	HG004	nga50_mb	0.764382

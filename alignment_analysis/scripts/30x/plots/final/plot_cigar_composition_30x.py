@@ -3,6 +3,13 @@
 
 Three-segment stack (aligned non-mismatch / mismatch / CIGAR-unaligned)
 per sample per aligner, from a truncated 88-100% baseline.
+
+Every segment is a share of the verified raw input bases of that
+sample/technology (the total_length that all aligners retaining unmapped
+reads agree on), the same denominator as the mapped/unmapped panels and
+the input-normalized CIGAR yield. VACmap drops unmapped reads from its
+output, so dividing by its own total_length would overstate its yield;
+the bases of those dropped reads are counted as CIGAR-unaligned here.
 """
 
 from __future__ import annotations
@@ -28,13 +35,20 @@ from matplotlib.patches import Patch
 
 from utils.plot_style import (
     ALIGNER_ORDER,
-    FULL_WIDTH_IN,
+    HALF_WIDTH_IN,
+    PANEL_LABEL_SIZE_PT,
+    PANEL_TICK_SIZE,
+    PANEL_TITLE_SIZE,
+    PANEL_VALUE_SIZE,
     SAMPLE_COLORS,
     SAMPLE_ORDER,
     TECHNOLOGY_ORDER,
     TECHNOLOGY_TITLES,
+    rotated_xticks,
     apply_style,
-    panel_letter,
+    clean_spines,
+    panel_legend,
+    sample_legend_handles,
     save_figure,
 )
 
@@ -46,8 +60,8 @@ OUTPUT_SUMMARY = TABLE_DIR / "derived" / "plot_data" / "cigar_mapped_mismatch_un
 OUTPUT_PNG = FIGURE_DIR / "06_cigar_composition_30x.png"
 OUTPUT_PDF = OUTPUT_PNG.with_suffix(".pdf")
 
-SAMPLE_OFFSETS = {"HG002": -0.23, "HG003": 0.00, "HG004": 0.23}
-BAR_WIDTH = 0.19
+SAMPLE_OFFSETS = {"HG002": -0.27, "HG003": 0.00, "HG004": 0.27}
+BAR_WIDTH = 0.26
 
 
 def lighten_color(color, amount=0.5):
@@ -63,22 +77,47 @@ def load_data() -> pd.DataFrame:
     data = pd.read_csv(INPUT_TSV, sep="\t")
     data["aligner"] = data["aligner"].replace({"VACMap": "VACmap"})
 
-    required_columns = {"sample", "read_technology", "aligner", "total_length", "bases_mapped_cigar", "mismatches"}
+    required_columns = {
+        "sample", "read_technology", "aligner", "total_length", "bases_mapped_cigar", "mismatches", "reads_unmapped",
+    }
     missing_columns = required_columns.difference(data.columns)
     if missing_columns:
         raise ValueError(f"Missing required columns: {sorted(missing_columns)}")
 
-    for column in ["total_length", "bases_mapped_cigar", "mismatches"]:
+    for column in ["total_length", "bases_mapped_cigar", "mismatches", "reads_unmapped"]:
         data[column] = pd.to_numeric(data[column], errors="raise")
 
     if (data["total_length"] <= 0).any():
         raise ValueError("At least one total_length value is <= 0.")
 
-    data["cigar_mapped_percent"] = data["bases_mapped_cigar"] / data["total_length"] * 100.0
+    data = data.loc[
+        data["sample"].isin(SAMPLE_ORDER)
+        & data["read_technology"].isin(TECHNOLOGY_ORDER)
+        & data["aligner"].isin(ALIGNER_ORDER)
+    ].copy()
+
+    # Verified raw input per sample/technology: the total_length that all
+    # aligners retaining unmapped reads (reads_unmapped > 0) agree on.
+    retaining = data.loc[data["reads_unmapped"] > 0]
+    raw_input = retaining.groupby(["sample", "read_technology"])["total_length"].agg(["nunique", "first"])
+    if (raw_input["nunique"] != 1).any():
+        raise ValueError(
+            "Aligners retaining unmapped reads disagree on total_length:\n"
+            + raw_input.loc[raw_input["nunique"] != 1].to_string()
+        )
+    data = data.merge(
+        raw_input["first"].rename("raw_input_bases").reset_index(), on=["sample", "read_technology"], how="left",
+    )
+    if data["raw_input_bases"].isna().any():
+        raise ValueError("No aligner retains unmapped reads for at least one sample/technology.")
+    if (data["bases_mapped_cigar"] > data["raw_input_bases"]).any():
+        raise ValueError("bases_mapped_cigar exceeds the verified raw input for at least one row.")
+
+    data["cigar_mapped_percent"] = data["bases_mapped_cigar"] / data["raw_input_bases"] * 100.0
     data["cigar_unaligned_percent"] = 100.0 - data["cigar_mapped_percent"]
-    data["mismatch_total_percent"] = data["mismatches"] / data["total_length"] * 100.0
+    data["mismatch_total_percent"] = data["mismatches"] / data["raw_input_bases"] * 100.0
     data["aligned_non_mismatch_percent"] = (
-        (data["bases_mapped_cigar"] - data["mismatches"]) / data["total_length"] * 100.0
+        (data["bases_mapped_cigar"] - data["mismatches"]) / data["raw_input_bases"] * 100.0
     )
 
     plot_data = data.loc[
@@ -86,7 +125,7 @@ def load_data() -> pd.DataFrame:
         & data["read_technology"].isin(TECHNOLOGY_ORDER)
         & data["aligner"].isin(ALIGNER_ORDER),
         [
-            "sample", "read_technology", "aligner", "total_length", "bases_mapped_cigar",
+            "sample", "read_technology", "aligner", "total_length", "raw_input_bases", "bases_mapped_cigar",
             "mismatches", "cigar_mapped_percent", "cigar_unaligned_percent",
             "mismatch_total_percent", "aligned_non_mismatch_percent",
         ],
@@ -114,7 +153,7 @@ def main() -> int:
 
     apply_style()
 
-    figure, axes = plt.subplots(nrows=2, ncols=1, sharex=True, sharey=True, figsize=(FULL_WIDTH_IN, 6.4))
+    figure, axes = plt.subplots(nrows=2, ncols=1, sharex=True, sharey=True, figsize=(HALF_WIDTH_IN, 6.3))
     x_positions = np.arange(len(ALIGNER_ORDER))
 
     for panel_index, technology in enumerate(TECHNOLOGY_ORDER):
@@ -135,14 +174,14 @@ def main() -> int:
             mismatch_color = lighten_color(base_color, amount=0.35)
             unaligned_color = lighten_color(base_color, amount=0.72)
 
-            axis.bar(positions, aligned_values, width=BAR_WIDTH, color=base_color, edgecolor="white", linewidth=0.5, zorder=3)
+            axis.bar(positions, aligned_values, width=BAR_WIDTH, color=base_color, edgecolor="white", linewidth=0.3, zorder=3)
             mismatch_bars = axis.bar(
                 positions, mismatch_values, width=BAR_WIDTH, bottom=aligned_values,
-                color=mismatch_color, edgecolor="white", linewidth=0.5, zorder=3,
+                color=mismatch_color, edgecolor="white", linewidth=0.3, zorder=3,
             )
             axis.bar(
                 positions, unaligned_values, width=BAR_WIDTH, bottom=aligned_values + mismatch_values,
-                color=unaligned_color, edgecolor="white", linewidth=0.5, zorder=3,
+                color=unaligned_color, edgecolor="white", linewidth=0.3, zorder=3,
             )
 
             for mismatch_bar, mismatch_value in zip(mismatch_bars, mismatch_values):
@@ -153,55 +192,41 @@ def main() -> int:
                 if mismatch_value >= 0.5:
                     axis.text(
                         x_center, y_center, f"{mismatch_value:.2f}",
-                        ha="center", va="center", fontsize=7.5, color="black", zorder=7,
+                        ha="center", va="center", fontsize=PANEL_VALUE_SIZE, color="black", zorder=7,
                     )
 
             for position, mapped_value in zip(positions, cigar_mapped_values):
                 if np.isnan(mapped_value):
                     continue
+                # Default rotation_mode centers the rotated label's box over
+                # its own bar instead of letting it lean onto the next one.
                 axis.text(
-                    position, 100.3, f"{mapped_value:.2f}",
-                    ha="center", va="bottom", fontsize=7.5, color=base_color,
+                    position, 100.2, f"{mapped_value:.2f}",
+                    ha="center", va="bottom", fontsize=PANEL_VALUE_SIZE, color=base_color,
                     rotation=45, clip_on=False, zorder=8,
                 )
 
-        axis.set_title(TECHNOLOGY_TITLES[technology], pad=12, y=1.10)
-        panel_letter(axis, "a" if technology == "ONT" else "b", fontsize=12)
-        axis.set_xticks(x_positions, ALIGNER_ORDER, fontsize=12, rotation=45)
-        axis.set_xlim(-0.6, len(ALIGNER_ORDER) - 0.4)
+        axis.set_title(TECHNOLOGY_TITLES[technology], pad=20, fontsize=PANEL_TITLE_SIZE)
+        rotated_xticks(axis, x_positions, ALIGNER_ORDER, fontsize=PANEL_TICK_SIZE, tick_length=2)
+        axis.set_xlim(-0.5, len(ALIGNER_ORDER) - 0.5)
         axis.set_ylim(88, 100)
         axis.set_yticks([88, 90, 92, 94, 96, 98, 100])
-        axis.tick_params(axis="y", labelsize=12)
-        axis.grid(axis="y", color="#E5E5E5", linewidth=0.45, zorder=0)
-        axis.set_axisbelow(True)
-        for spine_name, spine in axis.spines.items():
-            spine.set_visible(spine_name in ("left", "bottom"))
-        axis.spines["left"].set_linewidth(0.7)
-        axis.spines["bottom"].set_linewidth(0.7)
+        axis.tick_params(axis="y", labelsize=PANEL_TICK_SIZE, length=2, pad=1.5)
+        clean_spines(axis)
         axis.set_facecolor("white")
 
-    figure.supylabel("CIGAR-aligned and\nunaligned bases (%)", fontsize=12, x=-0.02, y=0.47)
+    figure.supylabel("CIGAR-aligned and unaligned bases (%)", fontsize=PANEL_LABEL_SIZE_PT, x=0.01)
 
-    sample_legend_handles = [
-        Patch(facecolor=SAMPLE_COLORS[sample], edgecolor="white", label=sample) for sample in SAMPLE_ORDER
-    ]
-    figure.legend(
-        handles=sample_legend_handles, frameon=False, ncols=3, loc="upper center",
-        bbox_to_anchor=(0.5, 1.00), columnspacing=1.3, handletextpad=0.4, fontsize=12,
-    )
-
+    panel_legend(figure, sample_legend_handles(), y=0.975)
     component_legend_handles = [
-        Patch(facecolor="#555555", edgecolor="white", label="Aligned, non-mismatch"),
-        Patch(facecolor="#999999", edgecolor="white", label="Mismatch bases"),
-        Patch(facecolor="#DDDDDD", edgecolor="white", label="CIGAR-unaligned bases"),
+        Patch(facecolor="#555555", edgecolor="none", label="Aligned, non-mismatch"),
+        Patch(facecolor="#999999", edgecolor="none", label="Mismatch"),
+        Patch(facecolor="#DDDDDD", edgecolor="none", label="CIGAR-unaligned"),
     ]
-    figure.legend(
-        handles=component_legend_handles, frameon=False, ncols=3, loc="upper center",
-        bbox_to_anchor=(0.5, 0.975), columnspacing=1.3, handletextpad=0.4, fontsize=12,
-    )
+    panel_legend(figure, component_legend_handles, y=0.953)
 
     figure.patch.set_facecolor("white")
-    figure.subplots_adjust(left=0.13, right=0.98, bottom=0.11, top=0.84, hspace=0.33)
+    figure.subplots_adjust(left=0.12, right=0.99, bottom=0.067, top=0.885, hspace=0.28)
 
     save_figure(figure, OUTPUT_PNG, OUTPUT_PDF)
 

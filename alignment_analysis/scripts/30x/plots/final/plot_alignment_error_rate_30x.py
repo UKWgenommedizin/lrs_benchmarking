@@ -30,14 +30,18 @@ except ModuleNotFoundError as error:
 
 from utils.plot_style import (
     ALIGNER_ORDER,
-    FULL_WIDTH_IN,
+    HALF_WIDTH_IN,
+    PANEL_LABEL_SIZE_PT,
+    PANEL_TICK_SIZE,
+    PANEL_TITLE_SIZE,
     SAMPLE_COLORS,
     SAMPLE_ORDER,
     TECHNOLOGY_ORDER,
     TECHNOLOGY_TITLES,
+    rotated_xticks,
     apply_style,
     clean_spines,
-    panel_letter,
+    panel_legend,
     sample_legend_handles,
     save_figure,
     subtle_grid,
@@ -66,8 +70,8 @@ CONFIGURATION_TO_ALIGNER = {
     "vg-pb": "VG Giraffe",
 }
 
-SAMPLE_OFFSETS = {"HG002": -0.23, "HG003": 0.0, "HG004": 0.23}
-BAR_WIDTH = 0.19
+SAMPLE_OFFSETS = {"HG002": -0.27, "HG003": 0.0, "HG004": 0.27}
+BAR_WIDTH = 0.26
 
 
 def load_plot_data() -> pd.DataFrame:
@@ -119,10 +123,10 @@ def main() -> int:
     apply_style()
 
     maximum_error = plot_data[METRIC].max()
-    y_max = maximum_error * 1.15
+    y_max = maximum_error * 1.08
 
     figure, axes = plt.subplots(
-        nrows=1, ncols=2, sharey=True, figsize=(FULL_WIDTH_IN, 3.3))
+        nrows=1, ncols=2, sharey=True, figsize=(HALF_WIDTH_IN, 1.75))
     aligner_positions = list(range(len(ALIGNER_ORDER)))
 
     for panel_index, technology in enumerate(TECHNOLOGY_ORDER):
@@ -138,60 +142,29 @@ def main() -> int:
             for sample in SAMPLE_ORDER:
                 value = values.loc[sample]
                 x_position = aligner_index + SAMPLE_OFFSETS[sample]
-                bars = axis.bar(
+                axis.bar(
                     x_position,
                     value,
                     width=BAR_WIDTH,
                     color=SAMPLE_COLORS[sample],
                     edgecolor="white",
-                    linewidth=0.5,
+                    linewidth=0.3,
                     zorder=3,)
-                axis.annotate(
-                    f"{value:.2f}",
-                    xy=(bars[0].get_x() + bars[0].get_width() / 2, value),
-                    xytext=(0, 2),
-                    textcoords="offset points",
-                    ha="left",
-                    va="bottom",
-                    fontsize=7.5,
-                    rotation=45,
-                    zorder=4,)
 
-        axis.set_title(TECHNOLOGY_TITLES[technology], pad=6)
-        panel = "a" if technology == "ONT" else "b"
-        axis.text(
-            -0.05,           # X position
-            1.02,            # Y position
-            panel,
-            transform=axis.transAxes,
-            fontsize=12,
-            fontweight="bold",
-            ha="left",
-            va="bottom",
-            )
+        axis.set_title(TECHNOLOGY_TITLES[technology], pad=2, fontsize=PANEL_TITLE_SIZE)
         axis.set_ylim(0, y_max)
-        axis.set_xlim(-0.5, len(ALIGNER_ORDER) - 0)
-        axis.set_xticks(aligner_positions, ALIGNER_ORDER, fontsize=12, rotation=45)
-        axis.tick_params(axis="y", labelsize=12)
-        subtle_grid(axis, "y")
+        axis.set_xlim(-0.5, len(ALIGNER_ORDER) - 0.5)
+        rotated_xticks(axis, aligner_positions, ALIGNER_ORDER, fontsize=PANEL_TICK_SIZE, tick_length=2)
+        axis.tick_params(axis="y", labelsize=PANEL_TICK_SIZE, length=2, pad=1.5)
         clean_spines(axis)
         axis.set_facecolor("white")
 
-    axes[0].set_ylabel("Alignment error rate (%)", fontsize=12)
+    axes[0].set_ylabel("Alignment error rate (%)", fontsize=PANEL_LABEL_SIZE_PT, labelpad=2)
 
-    figure.legend(
-        handles=sample_legend_handles(),
-        frameon=False,
-        ncols=3,
-        loc="upper center",
-        bbox_to_anchor=(0.5, 1.06),
-        columnspacing=1.3,
-        handletextpad=0.4,
-        fontsize=12,
-    )
+    panel_legend(figure, sample_legend_handles(), y=0.93)
 
     figure.patch.set_facecolor("white")
-    figure.subplots_adjust(left=0.09, right=0.98, bottom=0.12, top=0.85, wspace=0.10)
+    figure.subplots_adjust(left=0.12, right=0.99, bottom=0.25, top=0.82, wspace=0.08)
 
     save_figure(figure, OUTPUT_PNG, OUTPUT_PDF)
 

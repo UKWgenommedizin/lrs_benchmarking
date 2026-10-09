@@ -71,13 +71,13 @@ quay.io/biocontainers/quast:5.3.0--py313pl5321h5ca1c30_2
 The workflow expects the GRCh38 reference:
 
 ```text
-/data/genmedbfx/schilling_m/repos/lrs_benchmarking/ref/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta
+/data/genmedbfx/yu_j/lrs_benchmarking/ref/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta
 ```
 
 Before execution, verify the reference path and the assembly to be assessed:
 
 ```bash
-ls -lh /data/genmedbfx/schilling_m/repos/lrs_benchmarking/ref/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.*
+ls -lh /data/genmedbfx/yu_j/lrs_benchmarking/ref/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta.*
 ls -lh assemblies/{assembler}/{dataset}/assembly.fasta
 ```
 
@@ -88,23 +88,22 @@ The current production layout is:
 
 Flye assemblies:
 ```text
-  /data/genmedbfx/yu_j/lrs_benchmarking/assemblies/flye/
+  /data/genmedbfx/yu_j/lrs_benchmarking/assemblies/flye
 ```
 
 GoldRush assemblies:
 ```text
-  /home/stoiber_l/smbshare/lrs_benchmarking/assemblies/goldrush/
+  /home/stoiber_l/smbshare/lrs_benchmarking/goldrush
 ```
 
 Verkko assemblies:
 ```text
-  /home/stoiber_l/smbshare/lrs_benchmarking/assemblies/verkko/
+  /home/stoiber_l/smbshare/lrs_benchmarking/verkko
 ```
 
 Genome reference:
 ```text
-  /data/genmedbfx/schilling_m/repos/lrs_benchmarking/ref/
-  GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta
+  /data/genmedbfx/yu_j/lrs_benchmarking/ref/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta
 ```
 
 QUAST workflow and output repository:
@@ -144,11 +143,11 @@ can be checked with:
 ```bash
 find /data/genmedbfx/yu_j/lrs_benchmarking/assemblies/flye -type f -name 'assembly.fasta' -print
 
-find /home/stoiber_l/smbshare/lrs_benchmarking/assemblies/goldrush -type f -name 'assembly.fasta' -print
+find /home/stoiber_l/smbshare/lrs_benchmarking/goldrush -type f -name 'assembly.fasta' -print
 
-find /home/stoiber_l/smbshare/lrs_benchmarking/assemblies/verkko -type f -name 'assembly.fasta' -print
+find /home/stoiber_l/smbshare/lrs_benchmarking/verkko -type f -name 'assembly.fasta' -print
 
-ls -lh /data/genmedbfx/schilling_m/repos/lrs_benchmarking/ref/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta
+ls -lh /data/genmedbfx/yu_j/lrs_benchmarking/ref/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta
 ```
 
 
@@ -162,7 +161,7 @@ cd /data/genmedbfx/yu_j/lrs_benchmarking
 
 run:
 ```bash
-snakemake --snakefile assemblers/whole_genome_asm/assessment/assembly_quality_quast.smk --cores 16 --resources mem_gb=128 --config reference=/data/genmedbfx/schilling_m/repos/lrs_benc
+snakemake --snakefile assemblers/whole_genome_asm/assessment/assembly_quality_quast.smk --cores 16 --resources mem_gb=128 --config reference=/data/genmedbfx/yu_j/lrs_benchmarking/ref/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta
 ```
 
 A `MissingInputException` for the reference means that the configured FASTA path is not accessible from the Snakemake execution environment.
@@ -175,7 +174,7 @@ Docker exit code `125` together with missing repository files inside the QUAST c
 The '--dry-run' command is removed to proceed with the real run based on the reference path in genmedbfx. Any other user changes such as user should be adjust in the directory path.
 
 ```bash
-snakemake --snakefile assemblers/whole_genome_asm/assessment/assembly_quality_quast.smk --cores 16 --resources mem_gb=128 --config reference=/data/genmedbfx/schilling_m/repos/lrs_benchmarking/ref/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta --printshellcmds
+snakemake --snakefile assemblers/whole_genome_asm/assessment/assembly_quality_quast.smk --cores 16 --resources mem_gb=128 --config reference=/data/genmedbfx/yu_j/lrs_benchmarking/ref/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta --printshellcmds
 ```
 
 ## BUSCO

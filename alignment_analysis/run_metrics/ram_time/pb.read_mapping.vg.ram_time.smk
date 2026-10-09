@@ -1,8 +1,8 @@
 # ************************************************************************************************
 # VG Giraffe PacBio HiFi read mapping -- RUNTIME / PEAK-RAM MEASUREMENT ONLY
 #
-# Re-runs the vg_map_sort rule of pb.read_mapping.vg.smk with the same Docker
-# image, indexes, memory ceilings and parameters, only to record wall-clock
+# Re-runs the vg_map_sort rule of pb.read_mapping.vg.smk with the same
+# VG/samtools build, indexes, memory ceilings and parameters, only to record wall-clock
 # time, peak RAM, CPU time and peak scratch disk. The CRAM is not kept.
 #
 # Rules (per dataset):
@@ -24,10 +24,11 @@
 # container's real memory use.
 #
 # Configurable (--config key=value), no paths hard-coded in the rules;
-# both directories must stay inside the repository root (CONSTITUTION I.1):
+# the two ram_time_* directories must stay inside the repository root (CONSTITUTION I.1):
 #   ram_time_threads      (default 64, production used 16; same as the assembler ram_time runs)
 #   ram_time_dir          (default aligners_ram_time)          -- ram_time TSVs + logs
 #   ram_time_scratch_dir  (default aligners_ram_time/scratch)  -- deleted automatically after each run
+#   vg_index_dir          (default vg_index)                   -- pre-built indexes, may be outside the repo (read-only input)
 # Relative paths are resolved against the repository root (the working directory).
 # ************************************************************************************************
 
@@ -57,14 +58,17 @@ print("RAM/time results: " + RAM_TIME_DIR)
 print("RAM/time scratch: " + SCRATCH_DIR)
 
 #################
-# Docker image, reference and indexes (identical to pb.read_mapping.vg.smk)
+# Docker image, reference and indexes
+# The image is schimar/lrs-vg:v1.73.0 (used by pb.read_mapping.vg.smk)
+# plus /usr/bin/time, python3 and GNU du; see containers/vg/Dockerfile.
 
-DOCKER_VG = "schimar/lrs-vg:v1.73.0"
+DOCKER_VG = "nicolasardila1/lrs-vg:v1.73.0"
 
 LOCAL_REFERENCE = os.path.join(
     CWD,
     "reference",
-    "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta",)
+    "GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta",
+)
 
 RAW_REFERENCE = config.get("reference", LOCAL_REFERENCE)
 REF = os.path.expanduser(RAW_REFERENCE)
@@ -72,7 +76,15 @@ if not os.path.isabs(REF):
     REF = os.path.join(CWD, REF)
 REF = os.path.abspath(REF)
 
-VG_INDEX_DIR = "/data/genmedbfx/schilling_m/repos/lrs_benchmarking/vg_index/"
+# Pre-built long-read indexes (not rebuilt here). Default is vg_index/ in the
+# repository; override with --config vg_index_dir=/path when they live elsewhere
+# (e.g. the shared production copy).
+# The directory is mounted read-only into the map container.
+VG_INDEX_DIR = os.path.expanduser(config.get("vg_index_dir", "vg_index"))
+if not os.path.isabs(VG_INDEX_DIR):
+    VG_INDEX_DIR = os.path.join(CWD, VG_INDEX_DIR)
+VG_INDEX_DIR = os.path.abspath(VG_INDEX_DIR)
+print("VG index dir: " + VG_INDEX_DIR)
 VG_GBZ       = VG_INDEX_DIR + "/hg38.giraffe.gbz"
 VG_DIST      = VG_INDEX_DIR + "/hg38.dist"
 VG_MIN       = VG_INDEX_DIR + "/hg38.longread.withzip.min"
@@ -208,6 +220,7 @@ rule vg_run:
                 -m 160g \
                 -v {CWD}:{CWD} \
                 -v {input.ref}:{input.ref}:ro \
+                -v {VG_INDEX_DIR}:{VG_INDEX_DIR}:ro \
                 --entrypoint /usr/bin/time \
                 {DOCKER_VG} \
                 -v -o "{output.scratch}/map_time_v.txt" \

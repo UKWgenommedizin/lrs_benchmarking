@@ -1,0 +1,7 @@
+sample	read_technology	total_bases	Q20_percent	Q30_percent	mean_base_quality	stats_file
+HG002	ONT	94189961259	91.5243820272437	86.47269737592917	42.3609443035072	samtools_stats_30x_Christian/vacmap_vg_stats/HG002.ont.30x.hg38.vg-ont.cram.stats
+HG003	ONT	94906798668	93.70407989010096	89.66740894158256	43.71753594411315	samtools_stats_30x_Christian/vacmap_vg_stats/HG003.ont.30x.hg38.vg-ont.cram.stats
+HG004	ONT	93459874103	93.44722745907976	89.3062372628649	43.58993407211566	samtools_stats_30x_Christian/vacmap_vg_stats/HG004.ont.30x.hg38.vg-ont.cram.stats
+HG002	PacBio	94336001094	97.37005953694404	93.62110186756397	38.38214130729454	alignment_analysis/statistics_cram_files/HG002.pb.30x.hg38.mm2-pb.cram.stats
+HG003	PacBio	93293694245	97.39351100985014	93.65703095917743	38.39218137233279	alignment_analysis/statistics_cram_files/HG003.pb.30x.hg38.mm2-pb.cram.stats
+HG004	PacBio	93684058210	97.18258768734864	93.19806025298784	38.28283763043873	alignment_analysis/statistics_cram_files/HG004.pb.30x.hg38.mm2-pb.cram.stats

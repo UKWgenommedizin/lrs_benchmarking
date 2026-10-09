@@ -38,6 +38,11 @@ cut -f1-5,18-19 final/alignment_benchmark_30x.tsv \
 
 - `source/alignment_summary_30x_Samtools_Christian.tsv` — core samtools
   alignment statistics used by many plotting scripts.
+- `source/report_*_30x.tsv` — the tables printed in the F2 thesis report
+  (input data, thread-hours, alignment summary, CIGAR-yield/error correlation
+  diagnostics) plus `report_per_run_values_30x.tsv` with the unrounded per-run
+  values behind them. Rebuild with
+  `python3 alignment_analysis/scripts/30x/pipeline/build_report_tables_30x.py`.
 - `source/mm2.run_metrics.tsv` — raw minimap2 runtime records.
 - `source/alignment_summary_30x_combined_metrics_without_ram.tsv` — input to
   the runtime/RAM merge script.
@@ -60,9 +65,12 @@ cut -f1-5,18-19 final/alignment_benchmark_30x.tsv \
 - Runtime values are populated for all 24 combinations. The
   `runtime_configuration` and `wallclock_runtime_source_log` columns preserve
   the provenance of each value and are exported with the runtime plot data.
-- Indel event counts are available for 17 of 24 configurations. Six ONT
-  minimap2/pbmm2 configurations lack matching full stats files, and the HG004
-  ONT VG stats file contains no `ID` records.
+- Indel event counts are available for all 24 configurations. The full
+  ONT minimap2/pbmm2 stats files are kept outside the repository and are
+  passed as a second `--stats-dir` to `quality_check_aligners_indels.py`.
+  The HG004 ONT VG stats file in `statistics_cram_files/` was replaced by the
+  complete copy from `samtools_stats_30x_Christian/vacmap_vg_stats/`; the
+  earlier copy had been truncated at 216 MiB, before its `ID` records.
 
 After regenerating the canonical runtime table, restore its recovered indel
 event columns with:

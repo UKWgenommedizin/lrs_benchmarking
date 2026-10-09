@@ -36,7 +36,7 @@ OUTPUT_PNG = (
 
 
 def main() -> int:
-    data = render_panel("indels_per_100kbp", OUTPUT_PNG)
+    data = render_panel("indels_per_100kbp", OUTPUT_PNG, show_strategy=True)
     print(f"\nRows: {len(data)}")
     print(f"PNG: {OUTPUT_PNG}")
     print(f"PDF: {OUTPUT_PNG.with_suffix('.pdf')}")

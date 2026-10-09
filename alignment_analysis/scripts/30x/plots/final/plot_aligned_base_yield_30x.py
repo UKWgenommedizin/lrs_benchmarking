@@ -275,7 +275,9 @@ def create_figure(plot_data: pd.DataFrame, uses_fastq_bases: bool) -> None:
                 ALIGNER_ORDER,
                 rotation=45,
                 ha="right",
+                va="center",
                 rotation_mode="anchor")
+            axis.tick_params(axis="x", pad=3)
             axis.grid(
                 axis="y",
                 color="#D9D9D9",

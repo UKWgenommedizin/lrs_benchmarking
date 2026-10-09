@@ -75,12 +75,27 @@ RAW_COLUMNS = [
     "deleted_bases",
 ]
 
+# No ONT minimap2/pbmm2 full stats exist locally. As a clearly-labelled
+# proxy, those ONT slots show the PacBio HiFi reads aligned with the ONT
+# preset (statistics_cram_files/HG00X.pb.30x.hg38.{mm2,pbmm2}-ont.cram.stats,
+# stored as *_ontpreset_crosscheck on the PacBio rows). These are NOT ONT
+# reads: their read-length/quality histograms are identical to the PacBio
+# files. They are drawn hatched and flagged in the exported plot data.
+PROXY_ALIGNERS = ["minimap2", "pbmm2"]
+PROXY_SUFFIX = "_ontpreset_crosscheck"
+PROXY_LABEL = "PacBio reads, ONT preset (proxy, not ONT data)"
+
 
 def load_data() -> pd.DataFrame:
     if not INPUT_TSV.is_file():
         raise FileNotFoundError(f"Benchmark table not found: {INPUT_TSV}")
 
     data = pd.read_csv(INPUT_TSV, sep="\t")
+    raw = data.copy()
+    raw["aligner"] = raw["aligner"].replace({"VACMap": "VACmap"})
+    raw["read_technology"] = raw["read_technology"].replace(
+        {"PacBio HiFi": "PacBio", "PB": "PacBio"}
+    )
     required = {
         "sample",
         "read_technology",
@@ -116,10 +131,11 @@ def load_data() -> pd.DataFrame:
     # Unlike the other final plots, indel-event counts are only available
     # where the source samtools stats carried full "ID" histogram records
     # (see alignment_benchmark_30x_indel_recovery_report.tsv). minimap2 and
-    # pbmm2 on ONT, and VG Giraffe/HG004 on ONT, currently have neither a
-    # full-stats file nor the original CRAM to recompute from, so those
-    # combinations stay NaN and are skipped in the figure rather than
-    # raised as an error.
+    # VG Giraffe/HG004 on ONT currently has neither a complete full-stats
+    # file nor the original CRAM to recompute from. Any ONT minimap2/pbmm2
+    # slot without measured data falls back to the labelled PacBio
+    # ONT-preset proxy; anything still NaN is skipped in the figure (shown
+    # as "n/a") rather than raised as an error.
     expected = pd.MultiIndex.from_product(
         [SAMPLES, TECHNOLOGIES, ALIGNERS], names=keys
     )
@@ -129,6 +145,40 @@ def load_data() -> pd.DataFrame:
         raise ValueError(f"Missing benchmark rows entirely: {list(missing_combinations)}")
 
     data = data.set_index(keys).reindex(expected).reset_index()
+    data["value_source"] = np.where(
+        data[[metric for metric, _ in METRICS]].notna().all(axis=1),
+        "measured",
+        "unavailable",
+    )
+
+    proxy_columns = [
+        column
+        for column in [metric for metric, _ in METRICS] + RAW_COLUMNS
+        if column + PROXY_SUFFIX in raw.columns
+    ]
+    for aligner in PROXY_ALIGNERS:
+        for sample in SAMPLES:
+            target = (
+                (data["sample"] == sample)
+                & (data["read_technology"] == "ONT")
+                & (data["aligner"] == aligner)
+            )
+            if data.loc[target, [m for m, _ in METRICS]].notna().all(axis=None):
+                continue
+            source = raw[
+                (raw["sample"] == sample)
+                & (raw["read_technology"] == "PacBio")
+                & (raw["aligner"] == aligner)
+            ]
+            if len(source) != 1:
+                continue
+            values = pd.to_numeric(
+                source.iloc[0][[c + PROXY_SUFFIX for c in proxy_columns]]
+            )
+            if values.isna().any():
+                continue
+            data.loc[target, proxy_columns] = values.to_numpy()
+            data.loc[target, "value_source"] = "proxy_pacbio_reads_ont_preset"
 
     incomplete = data[data[[metric for metric, _ in METRICS]].isna().any(axis=1)]
     if len(incomplete):
@@ -157,26 +207,32 @@ def add_bars(axis, subset: pd.DataFrame, metric: str, y_max: float) -> None:
         )
         values = sample_data[metric].to_numpy(dtype=float)
         available = ~np.isnan(values)
-        bars = axis.bar(
-            x[available] + offset,
-            values[available],
-            width=width,
-            color=SAMPLE_COLORS[sample],
-            edgecolor="white",
-            linewidth=0.7,
-            zorder=3,
-        )
+        proxy = (sample_data["value_source"] == "proxy_pacbio_reads_ont_preset").to_numpy()
 
-        for bar, value in zip(bars, values[available]):
-            axis.text(
-                bar.get_x() + bar.get_width() / 2,
-                value + y_max * 0.018,
-                f"{value:.0f}",
-                ha="center",
-                va="bottom",
-                fontsize=7.5,
-                color="#222222",
+        for is_proxy in (False, True):
+            mask = available & (proxy == is_proxy)
+            bars = axis.bar(
+                x[mask] + offset,
+                values[mask],
+                width=width,
+                color=SAMPLE_COLORS[sample],
+                alpha=0.35 if is_proxy else 1.0,
+                hatch="////" if is_proxy else None,
+                edgecolor=SAMPLE_COLORS[sample] if is_proxy else "white",
+                linewidth=0.7,
+                zorder=3,
             )
+            for bar, value in zip(bars, values[mask]):
+                axis.text(
+                    bar.get_x() + bar.get_width() / 2,
+                    value + y_max * 0.018,
+                    f"{value:.0f}*" if is_proxy else f"{value:.0f}",
+                    ha="center",
+                    va="bottom",
+                    fontsize=7.5,
+                    color="#777777" if is_proxy else "#222222",
+                    style="italic" if is_proxy else "normal",
+                )
 
         # Mark aligners with no recoverable indel data so an empty gap in
         # the bars is not mistaken for a measured value of zero.
@@ -194,8 +250,12 @@ def add_bars(axis, subset: pd.DataFrame, metric: str, y_max: float) -> None:
                 )
 
     axis.set_xticks(x, ALIGNERS)
+    # Fix the x-range explicitly: in the ONT panels the leading aligners have
+    # no bars, so autoscaling would pin minimap2's tick to the axis edge and
+    # push its "n/a" markers outside the plot area.
+    axis.set_xlim(-0.5, len(ALIGNERS) - 0.5)
     axis.set_ylim(0, y_max)
-    axis.grid(axis="y", color="#D9D9D9", linewidth=0.7, alpha=0.75, zorder=0)
+    #axis.grid(axis="y", color="#D9D9D9", linewidth=0.7, alpha=0.75, zorder=0)
     axis.spines["top"].set_visible(False)
     axis.spines["right"].set_visible(False)
     axis.tick_params(axis="x", labelrotation=0)
@@ -209,6 +269,7 @@ def main() -> int:
         "aligner",
         *RAW_COLUMNS,
         *(metric for metric, _ in METRICS),
+        "value_source",
     ]
     plot_data = data[output_columns].sort_values(
         ["read_technology", "aligner", "sample"]
@@ -264,17 +325,42 @@ def main() -> int:
             if row_index == 0:
                 title = "PacBio HiFi" if technology == "PacBio" else technology
                 axis.set_title(title, pad=10)
+            if technology == "ONT" and (
+                subset["value_source"] == "proxy_pacbio_reads_ont_preset"
+            ).any():
+                axis.text(
+                    0.5 / len(ALIGNERS) * 2,
+                    0.97,
+                    "* hatched = PacBio reads, ONT preset\n(proxy, not ONT data)",
+                    transform=axis.transAxes,
+                    ha="center",
+                    va="top",
+                    fontsize=7.5,
+                    color="#B00000",
+                    style="italic",
+                )
             if column_index == 0:
                 axis.set_ylabel(y_label)
 
+    uses_proxy = (plot_data["value_source"] == "proxy_pacbio_reads_ont_preset").any()
     legend_handles = [
         Patch(facecolor=SAMPLE_COLORS[sample], edgecolor="white", label=sample)
         for sample in SAMPLES
     ]
+    if uses_proxy:
+        legend_handles.append(
+            Patch(
+                facecolor="#BBBBBB",
+                alpha=0.5,
+                hatch="////",
+                edgecolor="#666666",
+                label=PROXY_LABEL,
+            )
+        )
     figure.legend(
         handles=legend_handles,
         title="GIAB sample",
-        ncol=3,
+        ncol=len(legend_handles),
         loc="upper center",
         bbox_to_anchor=(0.5, 0.995),
         frameon=False,
@@ -285,11 +371,21 @@ def main() -> int:
         fontweight="bold",
         y=0.925,
     )
+    caption = "Events per 100 kb of CIGAR-mapped bases, from samtools stats \"ID\" records"
+    if (plot_data["value_source"] == "unavailable").any():
+        caption += (
+            "; \"n/a\" marks combinations with no recoverable full-stats data in the current dataset"
+        )
+    caption += "."
+    if uses_proxy:
+        caption += (
+            "\n* ONT minimap2/pbmm2 hatched bars are a proxy: PacBio HiFi reads aligned with the ONT preset "
+            "(real ONT full stats not available); they do not represent ONT read indel rates."
+        )
     figure.text(
         0.5,
         0.012,
-        "Events per 100 kb of CIGAR-mapped bases, from samtools stats \"ID\" records; "
-        "\"n/a\" marks combinations with no recoverable full-stats data in the current dataset.",
+        caption,
         ha="center",
         va="bottom",
         fontsize=9,

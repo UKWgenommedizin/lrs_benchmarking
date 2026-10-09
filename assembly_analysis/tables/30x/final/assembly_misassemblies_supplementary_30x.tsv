@@ -1,0 +1,16 @@
+sample	assembler	input	extensive_misassemblies	local_misassemblies	combined_misassemblies	source_file
+HG002	Flye	ONT	4888	6312	11200	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+HG003	Flye	ONT	4650	6436	11086	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+HG004	Flye	ONT	4104	5928	10032	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+HG002	Flye	HiFi	10496	14893	25389	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+HG003	Flye	HiFi	11087	14990	26077	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+HG004	Flye	HiFi	10463	14697	25160	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+HG002	GoldRush	ONT	5081	2351	7432	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+HG003	GoldRush	ONT	4131	2236	6367	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+HG004	GoldRush	ONT	3729	2045	5774	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+HG002	GoldRush	HiFi	2681	1777	4458	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+HG003	GoldRush	HiFi	3498	1741	5239	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+HG004	GoldRush	HiFi	3005	1815	4820	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+HG002	Verkko	ONT+HiFi	17894	19405	37299	assembly_quality/quast/verkko/HG002/report.tsv
+HG003	Verkko	ONT+HiFi	18792	20662	39454	assembly_quality/quast/verkko/HG003/report.tsv
+HG004	Verkko	ONT+HiFi	16674	18869	35543	assembly_quality/quast/verkko/HG004/report.tsv

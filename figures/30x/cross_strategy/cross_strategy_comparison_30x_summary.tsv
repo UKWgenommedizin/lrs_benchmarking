@@ -1,0 +1,40 @@
+panel	strategy	configuration	metric	unit	mean	sd	n	min	max
+a	Alignment-based	minimap2 (ONT)	NM edit distance per 100 kbp	per 100 kbp	2952.81	237.823	3	2807.87	3227.28
+a	Alignment-based	pbmm2 (ONT)	NM edit distance per 100 kbp	per 100 kbp	2641.73	238.446	3	2489.02	2916.5
+a	Alignment-based	VACmap (ONT)	NM edit distance per 100 kbp	per 100 kbp	1585.03	181.171	3	1479.2	1794.23
+a	Alignment-based	VG Giraffe (ONT)	NM edit distance per 100 kbp	per 100 kbp	2122.82	162.617	3	2018.34	2310.18
+a	Alignment-based	minimap2 (HiFi)	NM edit distance per 100 kbp	per 100 kbp	1336.87	58.321	3	1275.56	1391.65
+a	Alignment-based	pbmm2 (HiFi)	NM edit distance per 100 kbp	per 100 kbp	1177.36	42.6353	3	1133.51	1218.67
+a	Alignment-based	VACmap (HiFi)	NM edit distance per 100 kbp	per 100 kbp	676.013	31.8997	3	639.192	695.3
+a	Alignment-based	VG Giraffe (HiFi)	NM edit distance per 100 kbp	per 100 kbp	1044.79	34.3911	3	1005.76	1070.65
+a	Assembly-based	Flye (ONT)	QUAST mismatches per 100 kbp	per 100 kbp	142.987	1.91377	3	140.9	144.66
+a	Assembly-based	GoldRush (ONT)	QUAST mismatches per 100 kbp	per 100 kbp	153.153	2.84419	3	149.87	154.86
+a	Assembly-based	Flye (HiFi)	QUAST mismatches per 100 kbp	per 100 kbp	191.087	1.61646	3	189.56	192.78
+a	Assembly-based	GoldRush (HiFi)	QUAST mismatches per 100 kbp	per 100 kbp	122.787	0.537153	3	122.4	123.4
+a	Assembly-based	Verkko (ONT+HiFi)	QUAST mismatches per 100 kbp	per 100 kbp	176.267	5.86689	3	169.55	180.39
+b	Alignment-based	minimap2 (ONT)	CIGAR indel events per 100 kbp	per 100 kbp	487.114	81.7381	3	428.854	580.551
+b	Alignment-based	pbmm2 (ONT)	CIGAR indel events per 100 kbp	per 100 kbp	433.659	75.3256	3	380.555	519.868
+b	Alignment-based	VACmap (ONT)	CIGAR indel events per 100 kbp	per 100 kbp	416.375	69.7352	3	366.685	496.095
+b	Alignment-based	VG Giraffe (ONT)	CIGAR indel events per 100 kbp	per 100 kbp	381.442	60.9546	3	334.493	450.329
+b	Alignment-based	minimap2 (HiFi)	CIGAR indel events per 100 kbp	per 100 kbp	152.347	5.56252	3	148.887	158.763
+b	Alignment-based	pbmm2 (HiFi)	CIGAR indel events per 100 kbp	per 100 kbp	152.652	5.43511	3	149.307	158.924
+b	Alignment-based	VACmap (HiFi)	CIGAR indel events per 100 kbp	per 100 kbp	152.822	5.40289	3	149.155	159.026
+b	Alignment-based	VG Giraffe (HiFi)	CIGAR indel events per 100 kbp	per 100 kbp	162.32	4.95848	3	159.405	168.045
+b	Assembly-based	Flye (ONT)	QUAST indel events per 100 kbp	per 100 kbp	31.52	0.295127	3	31.33	31.86
+b	Assembly-based	GoldRush (ONT)	QUAST indel events per 100 kbp	per 100 kbp	50.92	1.37328	3	49.45	52.17
+b	Assembly-based	Flye (HiFi)	QUAST indel events per 100 kbp	per 100 kbp	31.4333	0.0635085	3	31.36	31.47
+b	Assembly-based	GoldRush (HiFi)	QUAST indel events per 100 kbp	per 100 kbp	34.3233	0.61403	3	33.92	35.03
+b	Assembly-based	Verkko (ONT+HiFi)	QUAST indel events per 100 kbp	per 100 kbp	32.1867	0.190875	3	31.97	32.33
+c	Alignment-based	minimap2 (ONT)	CIGAR-aligned yield	%	99.38	0.062494	3	99.3324	99.4508
+c	Alignment-based	pbmm2 (ONT)	CIGAR-aligned yield	%	98.7423	0.060887	3	98.6793	98.8008
+c	Alignment-based	VACmap (ONT)	CIGAR-aligned yield	%	98.0616	0.0588608	3	97.9937	98.0981
+c	Alignment-based	VG Giraffe (ONT)	CIGAR-aligned yield	%	92.7303	0.722147	3	92.0282	93.4709
+c	Alignment-based	minimap2 (HiFi)	CIGAR-aligned yield	%	99.7589	0.0302407	3	99.7266	99.7865
+c	Alignment-based	pbmm2 (HiFi)	CIGAR-aligned yield	%	99.5267	0.0371279	3	99.4923	99.5661
+c	Alignment-based	VACmap (HiFi)	CIGAR-aligned yield	%	99.4242	0.0865194	3	99.3518	99.52
+c	Alignment-based	VG Giraffe (HiFi)	CIGAR-aligned yield	%	99.0369	0.0425388	3	98.9996	99.0832
+c	Assembly-based	Flye (ONT)	Genome fraction	%	96.6707	0.315072	3	96.308	96.877
+c	Assembly-based	GoldRush (ONT)	Genome fraction	%	73.679	7.05631	3	65.802	79.422
+c	Assembly-based	Flye (HiFi)	Genome fraction	%	98.1923	0.376463	3	97.758	98.425
+c	Assembly-based	GoldRush (HiFi)	Genome fraction	%	68.0013	1.21416	3	66.819	69.245
+c	Assembly-based	Verkko (ONT+HiFi)	Genome fraction	%	98.5587	0.434456	3	98.057	98.81
