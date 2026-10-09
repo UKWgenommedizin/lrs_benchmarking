@@ -38,13 +38,19 @@ from matplotlib.patches import Patch
 
 from utils.plot_style import (
     ALIGNER_ORDER,
-    FULL_WIDTH_IN,
+    HALF_WIDTH_IN,
+    PANEL_LABEL_SIZE_PT,
+    PANEL_TICK_SIZE,
+    PANEL_TITLE_SIZE,
     SAMPLE_COLORS,
     SAMPLE_ORDER,
     TECHNOLOGY_ORDER,
     TECHNOLOGY_TITLES,
+    rotated_xticks,
     apply_style,
-    panel_letter,
+    clean_spines,
+    panel_legend,
+    sample_legend_handles,
     save_figure,
 )
 
@@ -56,8 +62,8 @@ OUTPUT_SUMMARY = TABLE_DIR / "derived" / "plot_data" / "mapped_unmapped_bases_pe
 OUTPUT_PNG = FIGURE_DIR / "12_mapped_unmapped_bases_30x.png"
 OUTPUT_PDF = OUTPUT_PNG.with_suffix(".pdf")
 
-SAMPLE_OFFSETS = {"HG002": -0.22, "HG003": 0.00, "HG004": 0.22}
-BAR_WIDTH = 0.19
+SAMPLE_OFFSETS = {"HG002": -0.27, "HG003": 0.00, "HG004": 0.27}
+BAR_WIDTH = 0.26
 
 
 def lighten_color(color, amount=0.55):
@@ -133,7 +139,7 @@ def main() -> int:
     apply_style()
 
     x_positions = np.arange(len(ALIGNER_ORDER))
-    figure, axes = plt.subplots(nrows=1, ncols=2, sharey=True, figsize=(FULL_WIDTH_IN, 4.1))
+    figure, axes = plt.subplots(nrows=1, ncols=2, sharey=True, figsize=(HALF_WIDTH_IN, 1.9))
 
     for panel_index, technology in enumerate(TECHNOLOGY_ORDER):
         axis = axes[panel_index]
@@ -149,55 +155,34 @@ def main() -> int:
             base_color = SAMPLE_COLORS[sample]
             light_color = lighten_color(base_color, amount=0.55)
 
-            axis.bar(positions, mapped_values, width=BAR_WIDTH, color=base_color, edgecolor="white", linewidth=0.6, zorder=3)
+            axis.bar(positions, mapped_values, width=BAR_WIDTH, color=base_color, edgecolor="white", linewidth=0.3, zorder=3)
             axis.bar(
                 positions, unmapped_values, width=BAR_WIDTH, bottom=mapped_values,
-                color=light_color, edgecolor="white", linewidth=0.6, zorder=3,
+                color=light_color, edgecolor="white", linewidth=0.3, zorder=3,
             )
 
-        axis.set_title(TECHNOLOGY_TITLES[technology], pad=12)
-        panel_letter(axis, "a" if technology == "ONT" else "b", x=-0.05, y=1.02, fontsize=12)
-        axis.set_xticks(x_positions, ALIGNER_ORDER, fontsize=12, rotation=45)
-        axis.set_xlim(-0.6, len(ALIGNER_ORDER) - 0.4)
-        axis.set_ylim(90, 100.35)
+        axis.set_title(TECHNOLOGY_TITLES[technology], pad=2, fontsize=PANEL_TITLE_SIZE)
+        axis.set_xlim(-0.5, len(ALIGNER_ORDER) - 0.5)
+        axis.set_ylim(90, 100)
         axis.set_yticks([90, 92, 94, 96, 98, 100])
-        axis.tick_params(axis="y", labelsize=12)
-        axis.grid(axis="y", color="#E5E5E5", linewidth=0.45, zorder=0)
-        axis.set_axisbelow(True)
-        for spine_name, spine in axis.spines.items():
-            spine.set_visible(spine_name in ("left", "bottom"))
-        axis.spines["left"].set_linewidth(0.7)
-        axis.spines["bottom"].set_linewidth(0.7)
+        rotated_xticks(axis, x_positions, ALIGNER_ORDER, fontsize=PANEL_TICK_SIZE, tick_length=2)
+        axis.tick_params(axis="y", labelsize=PANEL_TICK_SIZE, length=2, pad=1.5)
+        clean_spines(axis)
         axis.set_facecolor("white")
 
-    axes[0].set_ylabel("Mapped and unmapped bases (%)", fontsize=13)
+    axes[0].set_ylabel("Mapped and unmapped bases (%)", fontsize=PANEL_LABEL_SIZE_PT, labelpad=2)
 
-    sample_legend_handles = [
-        Patch(facecolor=SAMPLE_COLORS[sample], edgecolor="white", label=sample) for sample in SAMPLE_ORDER
-    ]
-    figure.legend(
-        handles=sample_legend_handles, frameon=False, ncols=3, loc="upper center",
-        bbox_to_anchor=(0.5, 1.03), columnspacing=1.3, handletextpad=0.4, fontsize=12,
-    )
-
+    # VACmap drops unmapped reads from its output; the note on this lives in
+    # the report caption rather than on the panel.
+    panel_legend(figure, sample_legend_handles(), y=0.925)
     status_legend_handles = [
-        Patch(facecolor="#666666", edgecolor="white", label="Mapped bases"),
-        Patch(facecolor="#CCCCCC", edgecolor="white", label="Unmapped bases"),
+        Patch(facecolor="#666666", edgecolor="none", label="Mapped bases"),
+        Patch(facecolor="#CCCCCC", edgecolor="none", label="Unmapped bases"),
     ]
-    figure.legend(
-        handles=status_legend_handles, frameon=False, ncols=2, loc="upper center",
-        bbox_to_anchor=(0.5, 0.965), columnspacing=1.3, handletextpad=0.4, fontsize=12.0,
-    )
+    panel_legend(figure, status_legend_handles, y=0.85)
 
     figure.patch.set_facecolor("white")
-    figure.subplots_adjust(left=0.09, right=0.98, bottom=0.10, top=0.74, wspace=0.10)
-
-    figure.text(
-        0.5, -0.12,
-        "Note: VACmap removes unmapped reads from its output. Unmapped reads were added back using the\n"
-        "raw input counts, to normalize VACmap with the other aligners.",
-        ha="center", va="top", fontsize=9, color="#444444", style="italic",
-    )
+    figure.subplots_adjust(left=0.12, right=0.99, bottom=0.23, top=0.76, wspace=0.08)
 
     save_figure(figure, OUTPUT_PNG, OUTPUT_PDF)
 

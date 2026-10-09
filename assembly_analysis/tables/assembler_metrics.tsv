@@ -1,0 +1,826 @@
+assembler	dataset	sample	technology	depth	representation	metric	value	source_file
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	# contigs (>= 0 bp)	2061	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	# contigs (>= 1000 bp)	2028	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	# contigs (>= 5000 bp)	1932	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	# contigs (>= 10000 bp)	1833	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	# contigs (>= 25000 bp)	1556	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	# contigs (>= 50000 bp)	1143	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	Total length (>= 0 bp)	2951008021	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	Total length (>= 1000 bp)	2950986101	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	Total length (>= 5000 bp)	2950719211	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	Total length (>= 10000 bp)	2949994090	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	Total length (>= 25000 bp)	2945254088	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	Total length (>= 50000 bp)	2930065094	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	# contigs	2057	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	Largest contig	108420733	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	Total length	2951006445	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	Reference length	3100885153	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	GC (%)	40.80	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	Reference GC (%)	40.87	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	N50	30226142	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	NG50	29015618	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	N90	2872371	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	NG90	670610	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	auN	37164411.2	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	auNG	35368100.3	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	L50	29	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	LG50	31	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	L90	126	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	LG90	224	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	# misassemblies	4888	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	# misassembled contigs	714	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	Misassembled contigs length	1388816310	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	# local misassemblies	6312	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	# scaffold gap ext. mis.	0	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	# scaffold gap loc. mis.	0	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	# possible TEs	698	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	# unaligned mis. contigs	131	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	# unaligned contigs	338 + 831 part	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	Unaligned length	67039938	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	Genome fraction (%)	96.827	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	Duplication ratio	1.014	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	# N's per 100 kbp	0.00	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	# mismatches per 100 kbp	144.66	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	# indels per 100 kbp	31.86	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	Largest alignment	108408752	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	Total aligned length	2882009330	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	NA50	26041300	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	NGA50	25644753	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	NA90	2105835	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	NGA90	278234	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	auNA	32613866.0	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	auNGA	31037501.9	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	LA50	34	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	LGA50	37	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	LA90	154	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.ont.30x	HG002	ont	30x	collapsed	LGA90	315	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	# contigs (>= 0 bp)	27777	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	# contigs (>= 1000 bp)	27769	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	# contigs (>= 5000 bp)	27727	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	# contigs (>= 10000 bp)	27620	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	# contigs (>= 25000 bp)	22985	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	# contigs (>= 50000 bp)	13486	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	Total length (>= 0 bp)	3953702635	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	Total length (>= 1000 bp)	3953696494	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	Total length (>= 5000 bp)	3953578369	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	Total length (>= 10000 bp)	3952764192	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	Total length (>= 25000 bp)	3860127252	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	Total length (>= 50000 bp)	3523610253	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	# contigs	27777	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	Largest contig	22160581	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	Total length	3953702635	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	Reference length	3100885153	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	GC (%)	40.74	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	Reference GC (%)	40.87	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	N50	526356	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	NG50	795451	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	N90	46166	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	NG90	151836	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	auN	1308181.7	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	auNG	1667962.9	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	L50	1637	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	LG50	980	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	L90	14213	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	LG90	4667	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	# misassemblies	10496	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	# misassembled contigs	1543	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	Misassembled contigs length	356389459	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	# local misassemblies	14893	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	# scaffold gap ext. mis.	0	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	# scaffold gap loc. mis.	0	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	# possible TEs	1294	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	# unaligned mis. contigs	180	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	# unaligned contigs	346 + 1900 part	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	Unaligned length	120111502	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	Genome fraction (%)	98.394	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	Duplication ratio	1.325	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	# N's per 100 kbp	0.00	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	# mismatches per 100 kbp	192.78	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	# indels per 100 kbp	31.47	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	Largest alignment	22160332	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	Total aligned length	3825860996	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	NA50	446393	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	NGA50	734795	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	NA90	31305	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	NGA90	108618	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	auNA	1185638.1	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	auNGA	1511716.8	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	LA50	1778	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	LGA50	1039	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	LA90	19336	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG002.pb.30x	HG002	pb	30x	collapsed	LGA90	5844	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	# contigs (>= 0 bp)	1985	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	# contigs (>= 1000 bp)	1951	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	# contigs (>= 5000 bp)	1817	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	# contigs (>= 10000 bp)	1668	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	# contigs (>= 25000 bp)	1398	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	# contigs (>= 50000 bp)	1063	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	Total length (>= 0 bp)	2950912982	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	Total length (>= 1000 bp)	2950891876	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	Total length (>= 5000 bp)	2950523530	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	Total length (>= 10000 bp)	2949422354	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	Total length (>= 25000 bp)	2944974620	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	Total length (>= 50000 bp)	2932575187	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	# contigs	1977	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	Largest contig	109836500	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	Total length	2950909603	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	Reference length	3100885153	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	GC (%)	40.82	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	Reference GC (%)	40.87	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	N50	33606050	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	NG50	33412447	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	N90	3529164	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	NG90	749373	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	auN	42919069.2	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	auNG	40843271.3	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	L50	25	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	LG50	27	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	L90	108	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	LG90	198	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	# misassemblies	4650	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	# misassembled contigs	708	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	Misassembled contigs length	1516357964	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	# local misassemblies	6436	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	# scaffold gap ext. mis.	0	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	# scaffold gap loc. mis.	0	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	# possible TEs	658	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	# unaligned mis. contigs	111	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	# unaligned contigs	260 + 795 part	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	Unaligned length	65479354	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	Genome fraction (%)	96.877	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	Duplication ratio	1.014	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	# N's per 100 kbp	0.00	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	# mismatches per 100 kbp	143.40	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	# indels per 100 kbp	31.33	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	Largest alignment	109825552	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	Total aligned length	2883490018	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	NA50	29110927	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	NGA50	27326061	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	NA90	2485011	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	NGA90	311022	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	auNA	34352185.0	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	auNGA	32690727.9	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	LA50	32	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	LGA50	35	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	LA90	136	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.ont.30x	HG003	ont	30x	collapsed	LGA90	278	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	# contigs (>= 0 bp)	27727	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	# contigs (>= 1000 bp)	27721	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	# contigs (>= 5000 bp)	27687	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	# contigs (>= 10000 bp)	27607	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	# contigs (>= 25000 bp)	23365	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	# contigs (>= 50000 bp)	14384	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	Total length (>= 0 bp)	3967282588	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	Total length (>= 1000 bp)	3967278763	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	Total length (>= 5000 bp)	3967180499	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	Total length (>= 10000 bp)	3966560810	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	Total length (>= 25000 bp)	3881841106	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	Total length (>= 50000 bp)	3561379671	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	# contigs	27727	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	Largest contig	41701037	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	Total length	3967282588	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	Reference length	3100885153	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	GC (%)	40.77	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	Reference GC (%)	40.87	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	N50	442865	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	NG50	714928	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	N90	48802	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	NG90	148534	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	auN	1451209.9	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	auNG	1856682.7	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	L50	1836	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	LG50	1070	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	L90	14570	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	LG90	5126	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	# misassemblies	11087	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	# misassembled contigs	1605	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	Misassembled contigs length	355712176	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	# local misassemblies	14990	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	# scaffold gap ext. mis.	0	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	# scaffold gap loc. mis.	0	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	# possible TEs	1172	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	# unaligned mis. contigs	151	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	# unaligned contigs	318 + 2020 part	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	Unaligned length	111234344	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	Genome fraction (%)	98.425	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	Duplication ratio	1.332	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	# N's per 100 kbp	0.00	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	# mismatches per 100 kbp	190.92	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	# indels per 100 kbp	31.36	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	Largest alignment	30582376	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	Total aligned length	3848075129	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	NA50	372000	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	NGA50	652406	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	NA90	33253	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	NGA90	113343	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	auNA	1201054.4	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	auNGA	1536632.9	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	LA50	2002	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	LGA50	1131	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	LA90	19085	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG003.pb.30x	HG003	pb	30x	collapsed	LGA90	6170	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	# contigs (>= 0 bp)	2038	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	# contigs (>= 1000 bp)	1971	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	# contigs (>= 5000 bp)	1784	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	# contigs (>= 10000 bp)	1649	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	# contigs (>= 25000 bp)	1342	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	# contigs (>= 50000 bp)	1030	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	Total length (>= 0 bp)	2937116644	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	Total length (>= 1000 bp)	2937073997	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	Total length (>= 5000 bp)	2936544744	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	Total length (>= 10000 bp)	2935508569	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	Total length (>= 25000 bp)	2930268003	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	Total length (>= 50000 bp)	2918791153	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	# contigs	2026	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	Largest contig	109867773	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	Total length	2937111870	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	Reference length	3100885153	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	GC (%)	40.81	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	Reference GC (%)	40.87	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	N50	31585363	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	NG50	29661014	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	N90	3197003	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	NG90	692282	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	auN	39451235.2	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	auNG	37367617.8	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	L50	27	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	LG50	30	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	L90	118	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	LG90	218	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	# misassemblies	4104	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	# misassembled contigs	660	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	Misassembled contigs length	1321671882	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	# local misassemblies	5928	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	# scaffold gap ext. mis.	0	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	# scaffold gap loc. mis.	0	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	# possible TEs	606	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	# unaligned mis. contigs	101	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	# unaligned contigs	291 + 718 part	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	Unaligned length	71784992	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	Genome fraction (%)	96.308	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	Duplication ratio	1.013	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	# N's per 100 kbp	0.00	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	# mismatches per 100 kbp	140.90	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	# indels per 100 kbp	31.37	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	Largest alignment	109862939	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	Total aligned length	2863787397	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	NA50	26955526	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	NGA50	26449985	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	NA90	2503762	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	NGA90	171914	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	auNA	33551449.9	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	auNGA	31779429.7	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	LA50	32	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	LGA50	35	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	LA90	144	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.ont.30x	HG004	ont	30x	collapsed	LGA90	339	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	# contigs (>= 0 bp)	27957	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	# contigs (>= 1000 bp)	27943	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	# contigs (>= 5000 bp)	27900	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	# contigs (>= 10000 bp)	27816	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	# contigs (>= 25000 bp)	23928	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	# contigs (>= 50000 bp)	14555	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	Total length (>= 0 bp)	3966820401	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	Total length (>= 1000 bp)	3966811223	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	Total length (>= 5000 bp)	3966699406	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	Total length (>= 10000 bp)	3966042823	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	Total length (>= 25000 bp)	3887067146	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	Total length (>= 50000 bp)	3552810095	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	# contigs	27957	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	Largest contig	8456388	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	Total length	3966820401	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	Reference length	3100885153	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	GC (%)	40.78	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	Reference GC (%)	40.87	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	N50	433837	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	NG50	694868	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	N90	47776	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	NG90	144118	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	auN	842498.1	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	auNG	1077769.3	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	L50	1950	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	LG50	1158	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	L90	14911	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	LG90	5343	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	# misassemblies	10463	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	# misassembled contigs	1397	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	Misassembled contigs length	276585213	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	# local misassemblies	14697	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	# scaffold gap ext. mis.	0	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	# scaffold gap loc. mis.	0	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	# possible TEs	1258	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	# unaligned mis. contigs	139	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	# unaligned contigs	290 + 1766 part	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	Unaligned length	110075357	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	Genome fraction (%)	97.758	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	Duplication ratio	1.342	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	# N's per 100 kbp	0.00	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	# mismatches per 100 kbp	189.56	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	# indels per 100 kbp	31.47	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	Largest alignment	8454628	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	Total aligned length	3849399057	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	NA50	360002	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	NGA50	631902	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	NA90	33373	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	NGA90	110725	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	auNA	796738.3	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	auNGA	1019230.9	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	LA50	2113	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	LGA50	1209	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	LA90	19532	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+flye	HG004.pb.30x	HG004	pb	30x	collapsed	LGA90	6440	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	# contigs (>= 0 bp)	20994	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	# contigs (>= 1000 bp)	16401	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	# contigs (>= 5000 bp)	13572	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	# contigs (>= 10000 bp)	11594	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	# contigs (>= 25000 bp)	9038	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	# contigs (>= 50000 bp)	7650	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	Total length (>= 0 bp)	2322672105	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	Total length (>= 1000 bp)	2320402730	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	Total length (>= 5000 bp)	2313397962	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	Total length (>= 10000 bp)	2299253130	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	Total length (>= 25000 bp)	2258675805	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	Total length (>= 50000 bp)	2208651969	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	# contigs	19375	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	Largest contig	2157722	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	Total length	2322482594	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	Reference length	3100885153	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	GC (%)	40.64	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	Reference GC (%)	40.87	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	N50	402288	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	NG50	273675	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	N90	100276	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	NG90	-	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	auN	482775.2	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	auNG	361586.1	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	L50	1772	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	LG50	2949	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	L90	6030	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	LG90	-	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	# misassemblies	5081	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	# misassembled contigs	3614	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	Misassembled contigs length	939411050	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	# local misassemblies	2351	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	# scaffold gap ext. mis.	2	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	# scaffold gap loc. mis.	132	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	# possible TEs	112	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	# unaligned mis. contigs	9	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	# unaligned contigs	1849 + 1528 part	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	Unaligned length	8457362	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	Genome fraction (%)	75.813	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	Duplication ratio	1.037	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	# N's per 100 kbp	208.88	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	# mismatches per 100 kbp	154.86	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	# indels per 100 kbp	52.17	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	Largest alignment	1800807	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	Total aligned length	2307979908	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	NA50	314975	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	NGA50	215394	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	NA90	68693	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	NGA90	-	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	auNA	384508.9	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	auNGA	287987.2	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	LA50	2219	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	LGA50	3710	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	LA90	7825	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.ont.30x	HG002	ont	30x	collapsed	LGA90	-	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	# contigs (>= 0 bp)	29840	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	# contigs (>= 1000 bp)	28787	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	# contigs (>= 5000 bp)	24807	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	# contigs (>= 10000 bp)	21009	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	# contigs (>= 25000 bp)	17213	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	# contigs (>= 50000 bp)	12810	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	Total length (>= 0 bp)	2033125876	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	Total length (>= 1000 bp)	2032472401	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	Total length (>= 5000 bp)	2023191538	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	Total length (>= 10000 bp)	1996881889	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	Total length (>= 25000 bp)	1932959091	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	Total length (>= 50000 bp)	1771690719	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	# contigs	29624	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	Largest contig	1009462	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	Total length	2033063311	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	Reference length	3100885153	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	GC (%)	40.69	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	Reference GC (%)	40.87	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	N50	144932	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	NG50	77381	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	N90	41695	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	NG90	-	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	auN	176006.7	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	auNG	115397.0	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	L50	4295	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	LG50	9291	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	L90	14080	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	LG90	-	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	# misassemblies	2681	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	# misassembled contigs	2238	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	Misassembled contigs length	245188864	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	# local misassemblies	1777	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	# scaffold gap ext. mis.	5	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	# scaffold gap loc. mis.	164	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	# possible TEs	90	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	# unaligned mis. contigs	8	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	# unaligned contigs	480 + 1193 part	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	Unaligned length	4057977	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	Genome fraction (%)	67.940	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	Duplication ratio	1.016	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	# N's per 100 kbp	160.68	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	# mismatches per 100 kbp	123.40	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	# indels per 100 kbp	33.92	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	Largest alignment	1009462	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	Total aligned length	2024954207	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	NA50	136437	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	NGA50	71325	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	NA90	37043	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	NGA90	-	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	auNA	166042.5	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	auNGA	108864.0	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	LA50	4543	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	LGA50	9913	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	LA90	15173	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG002.pb.30x	HG002	pb	30x	collapsed	LGA90	-	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	# contigs (>= 0 bp)	18461	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	# contigs (>= 1000 bp)	14272	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	# contigs (>= 5000 bp)	11232	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	# contigs (>= 10000 bp)	9402	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	# contigs (>= 25000 bp)	7059	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	# contigs (>= 50000 bp)	5934	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	Total length (>= 0 bp)	2439637806	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	Total length (>= 1000 bp)	2437268990	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	Total length (>= 5000 bp)	2429771885	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	Total length (>= 10000 bp)	2416875342	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	Total length (>= 25000 bp)	2379448666	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	Total length (>= 50000 bp)	2339254803	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	# contigs	17411	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	Largest contig	4452991	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	Total length	2439465824	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	Reference length	3100885153	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	GC (%)	40.59	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	Reference GC (%)	40.87	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	N50	605061	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	NG50	442494	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	N90	135928	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	NG90	-	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	auN	761777.7	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	auNG	599290.4	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	L50	1185	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	LG50	1825	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	L90	4278	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	LG90	-	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	# misassemblies	4131	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	# misassembled contigs	2896	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	Misassembled contigs length	961908138	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	# local misassemblies	2236	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	# scaffold gap ext. mis.	1	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	# scaffold gap loc. mis.	138	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	# possible TEs	102	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	# unaligned mis. contigs	7	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	# unaligned contigs	1937 + 1318 part	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	Unaligned length	6780751	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	Genome fraction (%)	79.422	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	Duplication ratio	1.041	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	# N's per 100 kbp	211.20	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	# mismatches per 100 kbp	149.87	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	# indels per 100 kbp	49.45	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	Largest alignment	3723743	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	Total aligned length	2425815802	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	NA50	485387	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	NGA50	352711	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	NA90	95108	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	NGA90	-	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	auNA	610622.3	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	auNGA	480376.5	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	LA50	1476	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	LGA50	2268	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	LA90	5490	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.ont.30x	HG003	ont	30x	collapsed	LGA90	-	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	# contigs (>= 0 bp)	31938	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	# contigs (>= 1000 bp)	30817	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	# contigs (>= 5000 bp)	26375	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	# contigs (>= 10000 bp)	21779	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	# contigs (>= 25000 bp)	17551	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	# contigs (>= 50000 bp)	12879	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	Total length (>= 0 bp)	2013840368	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	Total length (>= 1000 bp)	2013163016	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	Total length (>= 5000 bp)	2002685153	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	Total length (>= 10000 bp)	1970798769	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	Total length (>= 25000 bp)	1900329511	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	Total length (>= 50000 bp)	1729602036	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	# contigs	31691	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	Largest contig	908476	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	Total length	2013778042	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	Reference length	3100885153	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	GC (%)	40.71	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	Reference GC (%)	40.87	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	N50	137715	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	NG50	71508	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	N90	38416	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	NG90	-	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	auN	167541.1	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	auNG	108804.6	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	L50	4478	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	LG50	9912	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	L90	14761	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	LG90	-	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	# misassemblies	3498	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	# misassembled contigs	2900	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	Misassembled contigs length	283324187	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	# local misassemblies	1741	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	# scaffold gap ext. mis.	3	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	# scaffold gap loc. mis.	189	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	# possible TEs	86	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	# unaligned mis. contigs	6	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	# unaligned contigs	487 + 1187 part	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	Unaligned length	4095252	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	Genome fraction (%)	66.819	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	Duplication ratio	1.023	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	# N's per 100 kbp	162.29	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	# mismatches per 100 kbp	122.56	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	# indels per 100 kbp	34.02	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	Largest alignment	906554	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	Total aligned length	2005671014	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	NA50	127911	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	NGA50	65335	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	NA90	33917	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	NGA90	-	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	auNA	156742.6	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	auNGA	101791.8	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	LA50	4780	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	LGA50	10680	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	LA90	16098	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG003.pb.30x	HG003	pb	30x	collapsed	LGA90	-	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	# contigs (>= 0 bp)	18885	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	# contigs (>= 1000 bp)	15449	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	# contigs (>= 5000 bp)	12983	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	# contigs (>= 10000 bp)	11454	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	# contigs (>= 25000 bp)	9226	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	# contigs (>= 50000 bp)	7739	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	Total length (>= 0 bp)	1993571456	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	Total length (>= 1000 bp)	1991521270	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	Total length (>= 5000 bp)	1985294028	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	Total length (>= 10000 bp)	1974471783	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	Total length (>= 25000 bp)	1938437155	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	Total length (>= 50000 bp)	1884196563	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	# contigs	18176	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	Largest contig	2492655	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	Total length	1993432862	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	Reference length	3100885153	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	GC (%)	40.28	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	Reference GC (%)	40.87	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	N50	325749	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	NG50	156851	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	N90	82786	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	NG90	-	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	auN	400726.7	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	auNG	257610.9	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	L50	1853	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	LG50	4289	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	L90	6367	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	LG90	-	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	# misassemblies	3729	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	# misassembled contigs	2689	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	Misassembled contigs length	734601790	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	# local misassemblies	2045	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	# scaffold gap ext. mis.	3	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	# scaffold gap loc. mis.	95	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	# possible TEs	84	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	# unaligned mis. contigs	7	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	# unaligned contigs	1764 + 1237 part	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	Unaligned length	6418341	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	Genome fraction (%)	65.802	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	Duplication ratio	1.026	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	# N's per 100 kbp	232.71	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	# mismatches per 100 kbp	154.73	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	# indels per 100 kbp	51.14	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	Largest alignment	1533933	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	Total aligned length	1981277257	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	NA50	253555	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	NGA50	123424	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	NA90	62057	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	NGA90	-	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	auNA	311323.2	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	auNGA	200137.0	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	LA50	2365	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	LGA50	5440	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	LA90	8161	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.ont.30x	HG004	ont	30x	collapsed	LGA90	-	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	# contigs (>= 0 bp)	29123	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	# contigs (>= 1000 bp)	28074	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	# contigs (>= 5000 bp)	24229	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	# contigs (>= 10000 bp)	20223	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	# contigs (>= 25000 bp)	16562	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	# contigs (>= 50000 bp)	12597	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	Total length (>= 0 bp)	2081126805	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	Total length (>= 1000 bp)	2080471810	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	Total length (>= 5000 bp)	2071384841	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	Total length (>= 10000 bp)	2043484997	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	Total length (>= 25000 bp)	1982230036	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	Total length (>= 50000 bp)	1837173196	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	# contigs	28929	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	Largest contig	1103605	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	Total length	2081072065	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	Reference length	3100885153	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	GC (%)	40.75	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	Reference GC (%)	40.87	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	N50	157735	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	NG50	88510	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	N90	44207	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	NG90	-	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	auN	189645.6	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	auNG	127275.3	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	L50	4085	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	LG50	8387	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	L90	13358	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	LG90	-	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	# misassemblies	3005	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	# misassembled contigs	2500	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	Misassembled contigs length	281078974	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	# local misassemblies	1815	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	# scaffold gap ext. mis.	3	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	# scaffold gap loc. mis.	178	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	# possible TEs	84	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	# unaligned mis. contigs	5	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	# unaligned contigs	497 + 1162 part	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	Unaligned length	3988830	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	Genome fraction (%)	69.245	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	Duplication ratio	1.020	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	# N's per 100 kbp	156.55	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	# mismatches per 100 kbp	122.40	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	# indels per 100 kbp	35.03	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	Largest alignment	1103508	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	Total aligned length	2073147772	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	NA50	147208	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	NGA50	81724	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	NA90	39232	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	NGA90	-	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	auNA	177152.3	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	auNGA	118890.8	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	LA50	4340	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	LGA50	8982	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	LA90	14479	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+goldrush	HG004.pb.30x	HG004	pb	30x	collapsed	LGA90	-	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	# contigs (>= 0 bp)	39458	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	# contigs (>= 1000 bp)	39458	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	# contigs (>= 5000 bp)	39428	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	# contigs (>= 10000 bp)	37697	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	# contigs (>= 25000 bp)	35249	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	# contigs (>= 50000 bp)	24291	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	Total length (>= 0 bp)	6110652156	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	Total length (>= 1000 bp)	6110652156	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	Total length (>= 5000 bp)	6110520961	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	Total length (>= 10000 bp)	6097983088	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	Total length (>= 25000 bp)	6052733274	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	Total length (>= 50000 bp)	5619149709	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	# contigs	39458	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	Largest contig	43599830	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	Total length	6110652156	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	Reference length	3100885153	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	GC (%)	40.83	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	Reference GC (%)	40.87	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	N50	428845	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	NG50	906579	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	N90	53888	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	NG90	484959	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	auN	1389162.9	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	auNG	2737505.8	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	L50	3483	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	LG50	989	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	L90	21988	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	LG90	2904	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	# misassemblies	17894	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	# misassembled contigs	1209	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	Misassembled contigs length	645015964	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	# local misassemblies	19405	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	# scaffold gap ext. mis.	0	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	# scaffold gap loc. mis.	0	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	# possible TEs	2348	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	# unaligned mis. contigs	123	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	# unaligned contigs	186 + 2655 part	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	Unaligned length	155779216	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	Genome fraction (%)	98.810	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	Duplication ratio	2.048	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	# N's per 100 kbp	0.00	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	# mismatches per 100 kbp	178.86	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	# indels per 100 kbp	32.33	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	Largest alignment	28934214	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	Total aligned length	5937735843	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	NA50	352244	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	NGA50	752240	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	NA90	42886	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	NGA90	406503	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	auNA	898096.5	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	auNGA	1769802.9	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	LA50	4262	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	LGA50	1278	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	LA90	28905	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG002	HG002	hybrid	unknown	haplotype_resolved	LGA90	3564	assembly_quality/quast/verkko/HG002/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	# contigs (>= 0 bp)	36605	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	# contigs (>= 1000 bp)	36605	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	# contigs (>= 5000 bp)	36592	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	# contigs (>= 10000 bp)	35236	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	# contigs (>= 25000 bp)	32229	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	# contigs (>= 50000 bp)	23517	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	Total length (>= 0 bp)	6083857631	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	Total length (>= 1000 bp)	6083857631	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	Total length (>= 5000 bp)	6083803196	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	Total length (>= 10000 bp)	6073820270	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	Total length (>= 25000 bp)	6018327869	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	Total length (>= 50000 bp)	5681154093	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	# contigs	36605	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	Largest contig	49786554	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	Total length	6083857631	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	Reference length	3100885153	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	GC (%)	40.82	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	Reference GC (%)	40.87	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	N50	460975	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	NG50	962223	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	N90	58584	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	NG90	516865	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	auN	1397124.5	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	auNG	2741122.7	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	L50	3236	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	LG50	925	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	L90	19720	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	LG90	2722	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	# misassemblies	18792	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	# misassembled contigs	1304	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	Misassembled contigs length	629789220	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	# local misassemblies	20662	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	# scaffold gap ext. mis.	0	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	# scaffold gap loc. mis.	0	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	# possible TEs	2076	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	# unaligned mis. contigs	132	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	# unaligned contigs	210 + 2571 part	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	Unaligned length	139875949	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	Genome fraction (%)	98.809	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	Duplication ratio	2.044	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	# N's per 100 kbp	0.00	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	# mismatches per 100 kbp	180.39	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	# indels per 100 kbp	32.26	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	Largest alignment	34680610	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	Total aligned length	5926572989	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	NA50	386127	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	NGA50	810160	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	NA90	45377	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	NGA90	441910	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	auNA	981527.8	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	auNGA	1925732.6	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	LA50	3877	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	LGA50	1157	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	LA90	25851	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG003	HG003	hybrid	unknown	haplotype_resolved	LGA90	3271	assembly_quality/quast/verkko/HG003/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	# contigs (>= 0 bp)	37841	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	# contigs (>= 1000 bp)	37841	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	# contigs (>= 5000 bp)	37830	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	# contigs (>= 10000 bp)	36566	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	# contigs (>= 25000 bp)	34192	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	# contigs (>= 50000 bp)	24905	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	Total length (>= 0 bp)	6143892342	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	Total length (>= 1000 bp)	6143892342	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	Total length (>= 5000 bp)	6143845797	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	Total length (>= 10000 bp)	6134670395	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	Total length (>= 25000 bp)	6090473429	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	Total length (>= 50000 bp)	5726662585	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	# contigs	37841	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	Largest contig	9787434	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	Total length	6143892342	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	Reference length	3100885153	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	GC (%)	40.83	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	Reference GC (%)	40.87	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	N50	438516	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	NG50	885059	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	N90	57631	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	NG90	502382	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	auN	715983.7	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	auNG	1418603.5	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	L50	3576	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	LG50	1091	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	L90	21237	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	LG90	2980	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	# misassemblies	16674	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	# misassembled contigs	1112	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	Misassembled contigs length	519343071	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	# local misassemblies	18869	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	# scaffold gap ext. mis.	0	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	# scaffold gap loc. mis.	0	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	# possible TEs	2014	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	# unaligned mis. contigs	80	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	# unaligned contigs	167 + 2412 part	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	Unaligned length	111103135	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	Genome fraction (%)	98.057	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	Duplication ratio	2.090	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	# N's per 100 kbp	0.00	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	# mismatches per 100 kbp	169.55	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	# indels per 100 kbp	31.97	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	Largest alignment	4228221	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	Total aligned length	6014287836	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	NA50	366391	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	NGA50	764382	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	NA90	46963	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	NGA90	428527	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	auNA	534087.6	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	auNGA	1058206.5	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	LA50	4242	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	LGA50	1341	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	LA90	26718	assembly_quality/quast/verkko/HG004/report.tsv
+verkko	HG004	HG004	hybrid	unknown	haplotype_resolved	LGA90	3532	assembly_quality/quast/verkko/HG004/report.tsv

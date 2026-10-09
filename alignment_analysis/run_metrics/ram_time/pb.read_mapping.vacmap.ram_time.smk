@@ -2,7 +2,7 @@
 # VACmap PacBio HiFi read mapping -- RUNTIME / PEAK-RAM MEASUREMENT ONLY
 #
 # Re-runs the vacmap_map_sort rule of pb.read_mapping.vacmap.smk with the same
-# Docker image, memory ceilings and parameters, only to record wall-clock
+# VACmap/samtools build, memory ceilings and parameters, only to record wall-clock
 # time, peak RAM, CPU time and peak scratch disk. The CRAM is not kept.
 #
 # Rules (per dataset):
@@ -57,9 +57,11 @@ print("RAM/time results: " + RAM_TIME_DIR)
 print("RAM/time scratch: " + SCRATCH_DIR)
 
 #################
-# Docker image and reference (identical to pb.read_mapping.vacmap.smk)
+# Docker image and reference
+# The image is schimar/lrs-vacmap:v1.2.0 (used by pb.read_mapping.vacmap.smk)
+# plus /usr/bin/time, python3 and GNU du; see containers/vacmap/Dockerfile.
 
-DOCKER_VACMAP = "schimar/lrs-vacmap:v1.2.0"
+DOCKER_VACMAP = "nicolasardila1/lrs-vacmap:v1.2.0"
 
 LOCAL_REFERENCE = os.path.join(
     CWD,

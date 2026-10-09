@@ -35,7 +35,7 @@ OUTPUT_PNG = (
 
 
 def main() -> int:
-    data = render_panel("misassemblies", OUTPUT_PNG)
+    data = render_panel("misassemblies", OUTPUT_PNG, show_strategy=True)
     print(f"\nRows: {len(data)}")
     print(f"PNG: {OUTPUT_PNG}")
     print(f"PDF: {OUTPUT_PNG.with_suffix('.pdf')}")

@@ -301,7 +301,14 @@ def plot_data_figure(plot_data: pd.DataFrame) -> None:
                 linestyle="--",
                 zorder=1)
             axis.set_ylim(y_minimum, y_maximum)
-            axis.set_xticks(x_positions, ALIGNER_ORDER, rotation=45)
+            axis.set_xticks(
+                x_positions,
+                ALIGNER_ORDER,
+                rotation=45,
+                ha="right",
+                va="center",
+                rotation_mode="anchor")
+            axis.tick_params(axis="x", pad=3)
             axis.grid(
                 axis="y",
                 color="#D9D9D9",

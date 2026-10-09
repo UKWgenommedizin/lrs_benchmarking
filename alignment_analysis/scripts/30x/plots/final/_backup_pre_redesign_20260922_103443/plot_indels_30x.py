@@ -51,8 +51,7 @@ SAMPLES = ["HG002", "HG003", "HG004"]
 SAMPLE_COLORS = {
     "HG002": "#0072B2",
     "HG003": "#D55E00",
-    "HG004": "#009E73",
-}
+    "HG004": "#009E73",}
 METRICS = [
     (
         "insertion_events_per_100kb",
@@ -61,8 +60,7 @@ METRICS = [
     (
         "deletion_events_per_100kb",
         "Deletion events\nper 100 kb mapped (CIGAR)",
-    ),
-]
+    ),]
 
 # Raw event/base counts behind the per-100kb rates above. Not plotted (the
 # normalized rate is the only fair cross-aligner comparison), but kept in
@@ -72,8 +70,7 @@ RAW_COLUMNS = [
     "insertion_events",
     "deletion_events",
     "inserted_bases",
-    "deleted_bases",
-]
+    "deleted_bases",]
 
 
 def load_data() -> pd.DataFrame:
@@ -110,8 +107,7 @@ def load_data() -> pd.DataFrame:
     if duplicates.any():
         raise ValueError(
             "Duplicate sample/technology/aligner rows:\n"
-            + data.loc[duplicates, keys].to_string(index=False)
-        )
+            + data.loc[duplicates, keys].to_string(index=False))
 
     # Unlike the other final plots, indel-event counts are only available
     # where the source samtools stats carried full "ID" histogram records
@@ -121,8 +117,7 @@ def load_data() -> pd.DataFrame:
     # combinations stay NaN and are skipped in the figure rather than
     # raised as an error.
     expected = pd.MultiIndex.from_product(
-        [SAMPLES, TECHNOLOGIES, ALIGNERS], names=keys
-    )
+        [SAMPLES, TECHNOLOGIES, ALIGNERS], names=keys)
     observed = pd.MultiIndex.from_frame(data[keys])
     missing_combinations = expected.difference(observed)
     if len(missing_combinations):
@@ -135,8 +130,7 @@ def load_data() -> pd.DataFrame:
         print("WARNING: indel event data unavailable for:", file=sys.stderr)
         print(
             incomplete[keys].to_string(index=False),
-            file=sys.stderr,
-        )
+            file=sys.stderr,)
 
     return data
 
@@ -153,8 +147,7 @@ def add_bars(axis, subset: pd.DataFrame, metric: str, y_max: float) -> None:
         sample_data = (
             subset[subset["sample"] == sample]
             .set_index("aligner")
-            .reindex(ALIGNERS)
-        )
+            .reindex(ALIGNERS))
         values = sample_data[metric].to_numpy(dtype=float)
         available = ~np.isnan(values)
         bars = axis.bar(
@@ -164,8 +157,7 @@ def add_bars(axis, subset: pd.DataFrame, metric: str, y_max: float) -> None:
             color=SAMPLE_COLORS[sample],
             edgecolor="white",
             linewidth=0.7,
-            zorder=3,
-        )
+            zorder=3,)
 
         for bar, value in zip(bars, values[available]):
             axis.text(
@@ -175,8 +167,7 @@ def add_bars(axis, subset: pd.DataFrame, metric: str, y_max: float) -> None:
                 ha="center",
                 va="bottom",
                 fontsize=7.5,
-                color="#222222",
-            )
+                color="#222222",)
 
         # Mark aligners with no recoverable indel data so an empty gap in
         # the bars is not mistaken for a measured value of zero.
@@ -190,12 +181,11 @@ def add_bars(axis, subset: pd.DataFrame, metric: str, y_max: float) -> None:
                     va="bottom",
                     fontsize=7,
                     color="#999999",
-                    rotation=90,
-                )
+                    rotation=90,)
 
     axis.set_xticks(x, ALIGNERS)
     axis.set_ylim(0, y_max)
-    axis.grid(axis="y", color="#D9D9D9", linewidth=0.7, alpha=0.75, zorder=0)
+    #axis.grid(axis="y", color="#D9D9D9", linewidth=0.7, alpha=0.75, zorder=0)
     axis.spines["top"].set_visible(False)
     axis.spines["right"].set_visible(False)
     axis.tick_params(axis="x", labelrotation=0)
@@ -208,11 +198,9 @@ def main() -> int:
         "read_technology",
         "aligner",
         *RAW_COLUMNS,
-        *(metric for metric, _ in METRICS),
-    ]
+        *(metric for metric, _ in METRICS),]
     plot_data = data[output_columns].sort_values(
-        ["read_technology", "aligner", "sample"]
-    )
+        ["read_technology", "aligner", "sample"])
 
     FIGURE_DIR.mkdir(parents=True, exist_ok=True)
     OUTPUT_DATA.parent.mkdir(parents=True, exist_ok=True)
@@ -228,9 +216,7 @@ def main() -> int:
             "ytick.labelsize": 9,
             "legend.fontsize": 10,
             "pdf.fonttype": 42,
-            "ps.fonttype": 42,
-        }
-    )
+            "ps.fonttype": 42,})
 
     figure, axes = plt.subplots(
         2,
@@ -238,8 +224,7 @@ def main() -> int:
         figsize=(13.2, 8.4),
         sharex="col",
         sharey="row",
-        constrained_layout=False,
-    )
+        constrained_layout=False,)
 
     row_limits = []
     for metric, _ in METRICS:
@@ -277,14 +262,12 @@ def main() -> int:
         ncol=3,
         loc="upper center",
         bbox_to_anchor=(0.5, 0.995),
-        frameon=False,
-    )
+        frameon=False,)
     figure.suptitle(
         "CIGAR-derived insertion and deletion events",
         fontsize=15,
         fontweight="bold",
-        y=0.925,
-    )
+        y=0.925,)
     figure.text(
         0.5,
         0.012,
@@ -294,8 +277,7 @@ def main() -> int:
         va="bottom",
         fontsize=9,
         color="#444444",
-        style="italic",
-    )
+        style="italic",)
     figure.subplots_adjust(left=0.09, right=0.985, top=0.85, bottom=0.12, hspace=0.34, wspace=0.13)
 
     figure.savefig(OUTPUT_PNG, dpi=300, bbox_inches="tight", facecolor="white")

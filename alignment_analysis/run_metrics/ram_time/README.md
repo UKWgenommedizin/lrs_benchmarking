@@ -40,15 +40,18 @@ They give wall-clock time only. There is **no peak RAM, CPU time or disk
 use** for VG Giraffe and VACmap, and the timestamps cannot provide them.
 
 Each `*.ram_time.smk` re-runs the `vg_map_sort` / `vacmap_map_sort` rule of
-its production counterpart with the **same Docker image, version, memory
-ceilings and aligner parameters**:
+its production counterpart with the **same aligner and samtools build,
+memory ceilings and aligner parameters**. The images are the production
+images (`schimar/lrs-vg:v1.73.0`, `schimar/lrs-vacmap:v1.2.0`) rebuilt under
+`nicolasardila1` with `/usr/bin/time`, `python3` and GNU `du` added where
+missing; see [`containers/`](../../../containers/README.md):
 
 | Workflow | Image | Mapping step | Mapping memory limit | Threads (production -> here) |
 |---|---|---|---|---|
-| VG ONT | `schimar/lrs-vg:v1.73.0` | `vg giraffe -b r10 -o BAM` | 160 GB | 16 -> 64 |
-| VG PacBio HiFi | `schimar/lrs-vg:v1.73.0` | `vg giraffe -b hifi --output-format SAM` | 160 GB | 16 -> 64 |
-| VACmap ONT | `schimar/lrs-vacmap:v1.2.0` | `vacmap -mode H` | 48 GB | 16 -> 64 |
-| VACmap PacBio HiFi | `schimar/lrs-vacmap:v1.2.0` | `vacmap -mode L` | 48 GB | 16 -> 64 |
+| VG ONT | `nicolasardila1/lrs-vg:v1.73.0` | `vg giraffe -b r10 -o BAM` | 160 GB | 16 -> 64 |
+| VG PacBio HiFi | `nicolasardila1/lrs-vg:v1.73.0` | `vg giraffe -b hifi --output-format SAM` | 160 GB | 16 -> 64 |
+| VACmap ONT | `nicolasardila1/lrs-vacmap:v1.2.0` | `vacmap -mode H` | 48 GB | 16 -> 64 |
+| VACmap PacBio HiFi | `nicolasardila1/lrs-vacmap:v1.2.0` | `vacmap -mode L` | 48 GB | 16 -> 64 |
 
 Sort (`samtools sort -@ 4`, 4 CPUs, 16 GB) and index (`samtools index`,
 4 CPUs, 8 GB) are also identical to production. The only difference is the
@@ -127,14 +130,16 @@ its peak is still in `peak_rss_gb`.
 - Nothing is ever written to `cram/`. `idxstats` and `stats` are not re-run:
   they are QC on the CRAM, not part of the mapping cost.
 - VG indexes are **not** rebuilt or timed. The four files in `vg_index/`
-  (`hg38.giraffe.gbz`, `hg38.dist`, `hg38.longread.withzip.min`,
-  `hg38.longread.zipcodes`) must already exist, otherwise Snakemake stops
-  with a missing-input error. Use the production `build_vg_index` rule
-  first if needed.
+  (or `vg_index_dir`: `hg38.giraffe.gbz`, `hg38.dist`,
+  `hg38.longread.withzip.min`, `hg38.longread.zipcodes`) must already
+  exist, otherwise Snakemake stops with a missing-input error. Use the
+  production `build_vg_index` rule first if needed. The index directory is
+  mounted read-only into the map container, so it may live outside the
+  repository (e.g. a shared copy on the server).
 
 ## Configuration
 
-No paths are hard-coded. Everything is resolved relative to the directory
+No paths are hard-coded. Relative paths are resolved against the directory
 you launch Snakemake from (the repository root). Optional `--config` keys:
 
 | Key | Default | Purpose |
@@ -143,15 +148,20 @@ you launch Snakemake from (the repository root). Optional `--config` keys:
 | `ram_time_dir` | `aligners_ram_time` | Where `.ram_time.tsv` files and rule logs are written |
 | `ram_time_scratch_dir` | `aligners_ram_time/scratch` | Temporary mapping workspace, deleted after each run |
 | `reference` | `reference/GRCh38_GIABv3_..._KCNJ18.fasta` | Same key and default as production |
+| `vg_index_dir` | `vg_index` | VG only: directory with the four pre-built Giraffe indexes; may be an absolute path outside the repository (read-only input) |
 | `dataset_filter` | none | Only datasets whose name contains this string, as in production |
 
-Both directories must stay **inside** the repository root
+The two `ram_time_*` directories must stay **inside** the repository root
 (CONSTITUTION I.1); the workflow refuses to start otherwise.
 
 Example, one sample only:
 
 ```bash
 snakemake --snakefile alignment_analysis/run_metrics/ram_time/ont.read_mapping.vg.ram_time.smk --cores 64 --config dataset_filter=HG002
+
+# indexes in a shared location
+snakemake --snakefile alignment_analysis/run_metrics/ram_time/ont.read_mapping.vg.ram_time.smk --cores 64 \
+    --config vg_index_dir=/data/genmedbfx/schilling_m/repos/lrs_benchmarking/vg_index
 ```
 
 ## Inputs and outputs
@@ -163,7 +173,7 @@ assembler workflows (`.1k`, `.chr21.`, `localtest`, `smoke`):
 ```text
 fastq/{sample}.{ont,pb}.30x.fastq.gz
 reference/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta
-vg_index/hg38.*                     # VG only
+vg_index/hg38.*                     # VG only (or vg_index_dir)
 ```
 
 Outputs: one small TSV per dataset, the raw files it was computed from, and
@@ -234,11 +244,18 @@ docker info >/dev/null && echo "Docker daemon reachable"
 docker stats --no-stream >/dev/null && echo "docker stats works (needed by the sampler)"
 ```
 
+If the images are not on Docker Hub yet (or need rebuilding), build and push
+them first (`docker login -u nicolasardila1` before):
+
+```bash
+bash containers/build_and_push_aligner_images.sh
+```
+
 Check that both images contain what the run step needs. This is the same
 check the workflow does, run by hand:
 
 ```bash
-for img in schimar/lrs-vg:v1.73.0 schimar/lrs-vacmap:v1.2.0; do docker run --rm --entrypoint sh "$img" -c 'command -v /usr/bin/time && command -v python3 && du -sb /tmp >/dev/null' && echo "$img OK" || echo "$img MISSING a tool"; done
+for img in nicolasardila1/lrs-vg:v1.73.0 nicolasardila1/lrs-vacmap:v1.2.0; do docker run --rm --entrypoint sh "$img" -c 'command -v /usr/bin/time && command -v python3 && du -sb /tmp >/dev/null' && echo "$img OK" || echo "$img MISSING a tool"; done
 ```
 
 ### Verify which FASTQs each workflow will use
@@ -275,7 +292,7 @@ repository root, or `fastq/` is missing.
 
 Always do a dry run first (add `--dry-run`), then the real run.
 
-### VG Giraffe 1.73.0 (`schimar/lrs-vg:v1.73.0`)
+### VG Giraffe 1.73.0 (`nicolasardila1/lrs-vg:v1.73.0`)
 
 ```bash
 # ONT
@@ -285,7 +302,7 @@ snakemake --snakefile alignment_analysis/run_metrics/ram_time/ont.read_mapping.v
 snakemake --snakefile alignment_analysis/run_metrics/ram_time/pb.read_mapping.vg.ram_time.smk --cores 64 --resources mem_mb=163840 --rerun-incomplete --printshellcmds --show-failed-logs
 ```
 
-### VACmap 1.2.0 image (`schimar/lrs-vacmap:v1.2.0`)
+### VACmap 1.2.0 image (`nicolasardila1/lrs-vacmap:v1.2.0`)
 
 ```bash
 # ONT

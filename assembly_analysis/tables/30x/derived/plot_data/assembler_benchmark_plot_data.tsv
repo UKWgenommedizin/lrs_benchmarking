@@ -1,0 +1,16 @@
+sample	assembler	technology	assembly_strategy	n50	n50_mb	contigs	nga50	nga50_mb	genome_fraction_pct	misassemblies	mismatches_per_100kbp	indels_per_100kbp	source_file
+HG002	flye	ont	single-technology	30226142	30.226142	2057	25644753	25.644753	96.827	4888	144.66	31.86	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+HG003	flye	ont	single-technology	33606050	33.60605	1977	27326061	27.326061	96.877	4650	143.4	31.33	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+HG004	flye	ont	single-technology	31585363	31.585363	2026	26449985	26.449985	96.308	4104	140.9	31.37	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+HG002	flye	pb	single-technology	526356	0.526356	27777	734795	0.734795	98.394	10496	192.78	31.47	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+HG003	flye	pb	single-technology	442865	0.442865	27727	652406	0.652406	98.425	11087	190.92	31.36	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+HG004	flye	pb	single-technology	433837	0.433837	27957	631902	0.631902	97.758	10463	189.56	31.47	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+HG002	goldrush	ont	single-technology	402288	0.402288	19375	215394	0.215394	75.813	5081	154.86	52.17	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+HG003	goldrush	ont	single-technology	605061	0.605061	17411	352711	0.352711	79.422	4131	149.87	49.45	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+HG004	goldrush	ont	single-technology	325749	0.325749	18176	123424	0.123424	65.802	3729	154.73	51.14	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+HG002	goldrush	pb	single-technology	144932	0.144932	29624	71325	0.071325	67.94	2681	123.4	33.92	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+HG003	goldrush	pb	single-technology	137715	0.137715	31691	65335	0.065335	66.819	3498	122.56	34.02	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+HG004	goldrush	pb	single-technology	157735	0.157735	28929	81724	0.081724	69.245	3005	122.4	35.03	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+HG002	verkko	hybrid	hybrid	428845	0.428845	39458	752240	0.75224	98.81	17894	178.86	32.33	assembly_quality/quast/verkko/HG002/report.tsv
+HG003	verkko	hybrid	hybrid	460975	0.460975	36605	810160	0.81016	98.809	18792	180.39	32.26	assembly_quality/quast/verkko/HG003/report.tsv
+HG004	verkko	hybrid	hybrid	438516	0.438516	37841	764382	0.764382	98.057	16674	169.55	31.97	assembly_quality/quast/verkko/HG004/report.tsv

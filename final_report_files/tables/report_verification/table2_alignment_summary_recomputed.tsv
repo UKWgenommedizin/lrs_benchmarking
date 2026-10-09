@@ -1,0 +1,9 @@
+technology	aligner	threads	substituted_runs	error_percent	mapped_reads_percent	mapped_bases_percent	cigar_yield_percent	mq0_reads_percent	runtime_hours	peak_ram_gb
+ONT	minimap2	not in logs	-	2.95 ± 0.24	96.07 ± 2.12	99.80 ± 0.09	99.38 ± 0.06	0.75 ± 0.28	2.47 ± 0.09	37.4 ± 0.8
+ONT	pbmm2	64	-	2.64 ± 0.24	95.77 ± 2.21	99.72 ± 0.11	98.74 ± 0.06	0.67 ± 0.25	1.61 ± 0.13	64.6 ± 2.3
+ONT	VACmap	16	-	1.59 ± 0.18	94.66 ± 2.34	99.30 ± 0.09	98.06 ± 0.06	1.79 ± 0.17	13.74 ± 0.29	n.m.
+ONT	VG Giraffe	not in logs	-	2.12 ± 0.16	93.73 ± 0.86	95.31 ± 0.29	92.73 ± 0.72	1.28 ± 0.65	4.24 ± 0.71	n.m.
+PacBio HiFi	minimap2	not in logs	HG003:mm2-ont,HG004:mm2-ont	1.34 ± 0.06	99.77 ± 0.02	99.84 ± 0.02	99.76 ± 0.03	0.14 ± 0.01	1.55 ± 0.38	38.2 ± 3.1
+PacBio HiFi	pbmm2	64	HG002:pbmm2-ont	1.18 ± 0.04	99.96 ± 0.00	99.98 ± 0.00	99.53 ± 0.04	0.15 ± 0.01	1.45 ± 0.08	62.0 ± 3.3
+PacBio HiFi	VACmap	16	-	0.68 ± 0.03	99.54 ± 0.06	99.63 ± 0.06	99.42 ± 0.09	1.18 ± 0.15	9.21 ± 0.29	n.m.
+PacBio HiFi	VG Giraffe	not in logs	-	1.04 ± 0.03	99.71 ± 0.03	99.76 ± 0.02	99.04 ± 0.04	0.41 ± 0.08	3.59 ± 0.22	n.m.

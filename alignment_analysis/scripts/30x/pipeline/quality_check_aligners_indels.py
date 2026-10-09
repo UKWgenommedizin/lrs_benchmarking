@@ -292,14 +292,14 @@ def parse_full_stats(path: Path) -> Dict[str, Optional[float]]:
 
 def discover_full_stats(
     project: Path,
-    stats_dir: Optional[Path] = None,
+    stats_dirs: Optional[List[Path]] = None,
 ) -> Dict[Tuple[str, str, str, str], Path]:
     """
     Index full stats files once. SN-only extracts are explicitly excluded.
     """
     roots = (
-        [stats_dir]
-        if stats_dir is not None
+        stats_dirs
+        if stats_dirs
         else [
             project / "cram",
             project / "alignment_analysis" / "tables",
@@ -626,11 +626,13 @@ def parse_args():
     p.add_argument(
         "--stats-dir",
         type=Path,
+        nargs="+",
         default=None,
         help=(
-            "Directory containing full .cram.stats files (searched "
-            "recursively). Defaults to "
-            "PROJECT/alignment_analysis/statistics_cram_files when present."
+            "One or more directories containing full .cram.stats files "
+            "(searched recursively; earlier directories win on duplicates). "
+            "Defaults to PROJECT/alignment_analysis/statistics_cram_files "
+            "when present."
         ),
     )
 
@@ -686,12 +688,12 @@ def main() -> int:
     )
     output = args.out.expanduser().resolve()
     if args.stats_dir is not None:
-        stats_dir = args.stats_dir.expanduser().resolve()
+        stats_dirs = [path.expanduser().resolve() for path in args.stats_dir]
     else:
         conventional_stats_dir = (
             project / "alignment_analysis" / "statistics_cram_files"
         )
-        stats_dir = conventional_stats_dir if conventional_stats_dir.is_dir() else None
+        stats_dirs = [conventional_stats_dir] if conventional_stats_dir.is_dir() else None
     if args.cram_dir is not None:
         cram_dir = args.cram_dir.expanduser().resolve()
     else:
@@ -716,9 +718,10 @@ def main() -> int:
         print(f"ERROR: reference FASTA not found: {reference}", file=sys.stderr)
         return 1
 
-    if stats_dir is not None and not stats_dir.is_dir():
-        print(f"ERROR: statistics directory not found: {stats_dir}", file=sys.stderr)
-        return 1
+    for stats_dir in stats_dirs or []:
+        if not stats_dir.is_dir():
+            print(f"ERROR: statistics directory not found: {stats_dir}", file=sys.stderr)
+            return 1
 
     if not cram_dir.is_dir():
         print(f"ERROR: CRAM directory not found: {cram_dir}", file=sys.stderr)
@@ -735,11 +738,12 @@ def main() -> int:
     print(f"Rows in input table: {len(rows)}")
     print(f"Rows with at least one missing indel metric: {missing_before}")
 
-    if stats_dir is not None:
-        print(f"Indexing samtools stats files under {stats_dir}...", file=sys.stderr)
+    if stats_dirs:
+        for stats_dir in stats_dirs:
+            print(f"Indexing samtools stats files under {stats_dir}...", file=sys.stderr)
     else:
         print("Indexing existing full samtools stats files...", file=sys.stderr)
-    full_stats = discover_full_stats(project, stats_dir)
+    full_stats = discover_full_stats(project, stats_dirs)
 
     print(f"Indexing CRAM files under {cram_dir}...", file=sys.stderr)
     crams = discover_crams(cram_dir)

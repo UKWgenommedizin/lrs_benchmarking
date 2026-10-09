@@ -1,0 +1,7 @@
+sample	read_technology	read_count	total_bases	N50	N50_kb	stats_file
+HG002	ONT	5203769	94189961259	29539	29.539	samtools_stats_30x_Christian/vacmap_vg_stats/HG002.ont.30x.hg38.vg-ont.cram.stats
+HG003	ONT	6938685	94906798668	32982	32.982	samtools_stats_30x_Christian/vacmap_vg_stats/HG003.ont.30x.hg38.vg-ont.cram.stats
+HG004	ONT	7046468	93459874103	32255	32.255	samtools_stats_30x_Christian/vacmap_vg_stats/HG004.ont.30x.hg38.vg-ont.cram.stats
+HG002	PacBio	6736453	94336001094	16767	16.767	alignment_analysis/statistics_cram_files/HG002.pb.30x.hg38.mm2-pb.cram.stats
+HG003	PacBio	6621583	93293694245	16776	16.776	alignment_analysis/statistics_cram_files/HG003.pb.30x.hg38.mm2-pb.cram.stats
+HG004	PacBio	6491546	93684058210	17122	17.122	alignment_analysis/statistics_cram_files/HG004.pb.30x.hg38.mm2-pb.cram.stats

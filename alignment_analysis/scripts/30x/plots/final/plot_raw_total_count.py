@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Plot raw input bases as CIGAR-aligned + CIGAR-unaligned bases (Gb).
+"""Plot raw input bases (Gb) per GIAB sample and technology.
 
-Absolute stacked bar (CIGAR-aligned bases in the sample color, CIGAR-
-unaligned bases in a lightened tint of the same color). Full stack height
-equals the verified raw input base count for that sample/technology.
+One bar per sample/technology: the input FASTQ is the same for every
+aligner, so the verified raw input base count is shown once per sample.
 
 Raw input verification
 -----------------------
@@ -34,21 +33,20 @@ import numpy as np
 import pandas as pd
 
 import matplotlib
+import matplotlib.ticker
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib import colors as mcolors
-from matplotlib.patches import Patch
 
 from utils.plot_style import (
     ALIGNER_ORDER,
-    FULL_WIDTH_IN,
     SAMPLE_COLORS,
     SAMPLE_ORDER,
     TECHNOLOGY_ORDER,
     TECHNOLOGY_TITLES,
     apply_style,
-    panel_letter,
+    rotated_xticks,
     save_figure,
 )
 
@@ -60,16 +58,12 @@ OUTPUT_SUMMARY = TABLE_DIR / "derived" / "plot_data" / "raw_base_counts_30x.tsv"
 OUTPUT_PNG = FIGURE_DIR / "10_raw_base_counts_30x.png"
 OUTPUT_PDF = OUTPUT_PNG.with_suffix(".pdf")
 
-SAMPLE_OFFSETS = {"HG002": -0.22, "HG003": 0.00, "HG004": 0.22}
-BAR_WIDTH = 0.19
+BAR_WIDTH = 1.0
 
-ROUNDING_TOLERANCE_BASES = 1.0
-
-
-def lighten_color(color, amount=0.55):
-    rgb = np.array(mcolors.to_rgb(color))
-    white = np.array([1.0, 1.0, 1.0])
-    return tuple(rgb + (white - rgb) * amount)
+# Smaller canvas + larger fonts so the text stays legible when the
+# panel is scaled to Figure 1 (b-d) in the report.
+PANEL_WIDTH_IN = 3.0
+PANEL_HEIGHT_IN = 2.7
 
 
 def darken_color(color, amount=0.35):
@@ -165,28 +159,6 @@ def load_and_verify_raw_input() -> pd.DataFrame:
         axis=1,
     )
 
-    # -----------------------------------------------------------
-    # Compute aligned / unaligned bases against the verified raw input.
-    # -----------------------------------------------------------
-
-    plot_data["cigar_aligned_bases"] = plot_data["bases_mapped_cigar"]
-    plot_data["cigar_unaligned_bases"] = plot_data["raw_input_bases"] - plot_data["cigar_aligned_bases"]
-
-    if (plot_data["cigar_unaligned_bases"] < 0).any():
-        raise ValueError(
-            "cigar_unaligned_bases is negative for at least one row -- "
-            "bases_mapped_cigar exceeds the verified raw input bases:\n"
-            + plot_data.loc[plot_data["cigar_unaligned_bases"] < 0].to_string(index=False)
-        )
-
-    reconstructed = plot_data["cigar_aligned_bases"] + plot_data["cigar_unaligned_bases"]
-    mismatch = (reconstructed - plot_data["raw_input_bases"]).abs() > ROUNDING_TOLERANCE_BASES
-    if mismatch.any():
-        raise ValueError(
-            "cigar_aligned_bases + cigar_unaligned_bases != raw_input_bases "
-            "for at least one row:\n" + plot_data.loc[mismatch].to_string(index=False)
-        )
-
     # Raw input must be identical across all aligners within a sample/technology.
     inconsistent = plot_data.groupby(["sample", "read_technology"], observed=True)["raw_input_bases"].nunique()
     if (inconsistent != 1).any():
@@ -196,31 +168,28 @@ def load_and_verify_raw_input() -> pd.DataFrame:
         )
 
     print()
-    print("Raw input bases are verified and consistent for every sample/technology group.")
+    print("Raw input is verified and consistent for every sample/technology group.")
 
-    plot_data["raw_input_gb"] = plot_data["raw_input_bases"] / 1e9
-    plot_data["cigar_aligned_gb"] = plot_data["cigar_aligned_bases"] / 1e9
-    plot_data["cigar_unaligned_gb"] = plot_data["cigar_unaligned_bases"] / 1e9
+    # The input is the same FASTQ for every aligner, so plot one bar per
+    # sample/technology rather than repeating it per aligner.
+    per_sample = (
+        plot_data.groupby(["sample", "read_technology"], observed=True)["raw_input_bases"]
+        .first()
+        .reset_index()
+    )
+    per_sample["raw_input_gb"] = per_sample["raw_input_bases"] / 1e9
 
-    plot_data["sample"] = pd.Categorical(plot_data["sample"], SAMPLE_ORDER, ordered=True)
-    plot_data["read_technology"] = pd.Categorical(plot_data["read_technology"], TECHNOLOGY_ORDER, ordered=True)
-    plot_data["aligner"] = pd.Categorical(plot_data["aligner"], ALIGNER_ORDER, ordered=True)
+    per_sample["sample"] = pd.Categorical(per_sample["sample"], SAMPLE_ORDER, ordered=True)
+    per_sample["read_technology"] = pd.Categorical(per_sample["read_technology"], TECHNOLOGY_ORDER, ordered=True)
 
-    output_columns = [
-        "sample", "read_technology", "aligner",
-        "raw_input_bases", "raw_input_gb",
-        "cigar_aligned_bases", "cigar_aligned_gb",
-        "cigar_unaligned_bases", "cigar_unaligned_gb",
-    ]
-
-    return plot_data.sort_values(["read_technology", "aligner", "sample"])[output_columns]
+    return per_sample.sort_values(["read_technology", "sample"])[["sample", "read_technology", "raw_input_bases", "raw_input_gb"]]
 
 
 def main() -> int:
     plot_data = load_and_verify_raw_input()
 
-    if len(plot_data) != len(SAMPLE_ORDER) * len(TECHNOLOGY_ORDER) * len(ALIGNER_ORDER):
-        raise ValueError(f"Expected 24 plotted combinations, found {len(plot_data)}.")
+    if len(plot_data) != len(SAMPLE_ORDER) * len(TECHNOLOGY_ORDER):
+        raise ValueError(f"Expected {len(SAMPLE_ORDER) * len(TECHNOLOGY_ORDER)} plotted combinations, found {len(plot_data)}.")
 
     OUTPUT_SUMMARY.parent.mkdir(parents=True, exist_ok=True)
     plot_data.to_csv(OUTPUT_SUMMARY, sep="\t", index=False)
@@ -231,82 +200,49 @@ def main() -> int:
 
     apply_style()
 
-    x_positions = np.arange(len(ALIGNER_ORDER))
-    figure, axes = plt.subplots(nrows=1, ncols=2, sharey=True, figsize=(FULL_WIDTH_IN, 5.0))
+    x_positions = np.arange(len(SAMPLE_ORDER))
+    figure, axes = plt.subplots(nrows=1, ncols=2, sharey=True, figsize=(PANEL_WIDTH_IN, PANEL_HEIGHT_IN))
 
-    y_max_data = plot_data["raw_input_gb"].max()
     y_min_display = 80.0
     y_max_display = 100.0
-    label_font_size = 8.0
-    # All raw-input total labels share one baseline just above the tallest
-    # bar in the figure, rotated vertically over their own bar, so they
-    # read as a tidy row instead of being staggered around each bar top.
-    label_baseline = y_max_data + (y_max_display - y_min_display) * 0.015
+    label_font_size = 9.0
 
     figure.patch.set_facecolor("white")
-    figure.subplots_adjust(left=0.09, right=0.98, bottom=0.10, top=0.86, wspace=0.10)
+    figure.subplots_adjust(left=0.19, right=0.98, bottom=0.22, top=0.88, wspace=0.12)
 
     for panel_index, technology in enumerate(TECHNOLOGY_ORDER):
         axis = axes[panel_index]
-        technology_data = plot_data[plot_data["read_technology"] == technology]
+        technology_data = (
+            plot_data[plot_data["read_technology"] == technology].set_index("sample").reindex(SAMPLE_ORDER)
+        )
+        values = technology_data["raw_input_gb"].to_numpy(dtype=float)
 
-        for sample in SAMPLE_ORDER:
-            sample_data = (
-                technology_data[technology_data["sample"] == sample].set_index("aligner").reindex(ALIGNER_ORDER)
-            )
-            aligned_values = sample_data["cigar_aligned_gb"].to_numpy(dtype=float)
-            unaligned_values = sample_data["cigar_unaligned_gb"].to_numpy(dtype=float)
-            raw_values = sample_data["raw_input_gb"].to_numpy(dtype=float)
-            positions = x_positions + SAMPLE_OFFSETS[sample]
-
-            base_color = SAMPLE_COLORS[sample]
-            light_color = lighten_color(base_color, amount=0.72)
-
+        for position, sample, value in zip(x_positions, SAMPLE_ORDER, values):
             axis.bar(
-                positions, aligned_values, width=BAR_WIDTH,
-                color=base_color, edgecolor="white", linewidth=0.6, zorder=3,
+                position, value, width=BAR_WIDTH,
+                color=SAMPLE_COLORS[sample], edgecolor="white", linewidth=0.6, zorder=3,
             )
-            axis.bar(
-                positions, unaligned_values, width=BAR_WIDTH, bottom=aligned_values,
-                color=light_color, edgecolor="white", linewidth=0.6, zorder=3,
+            axis.text(
+                position, value + (y_max_display - y_min_display) * 0.012, f"{value:.1f}",
+                ha="center", va="bottom", fontsize=label_font_size,
+                color=darken_color(SAMPLE_COLORS[sample], amount=0.15), zorder=7,
             )
 
-            for position, raw_value in zip(positions, raw_values):
-                if np.isnan(raw_value):
-                    continue
-                label = f"{raw_value:.1f} Gb"
-                axis.text(
-                    position, label_baseline, label,
-                    ha="center", va="bottom", rotation=90, fontsize=label_font_size,
-                    color=darken_color(base_color, amount=0.15), zorder=7,
-                )
 
-        axis.set_title(TECHNOLOGY_TITLES[technology], pad=6)
-        panel_letter(axis, "a" if technology == "ONT" else "b", fontsize=12)
-        axis.set_xticks(x_positions, ALIGNER_ORDER, fontsize=12, rotation=45)
-        axis.set_xlim(-0.6, len(ALIGNER_ORDER) - 0.4)
+        axis.set_title(TECHNOLOGY_TITLES[technology], fontsize=12, pad=5)
+        rotated_xticks(axis, x_positions, SAMPLE_ORDER, fontsize=10)
+        axis.set_xlim(-0.5, len(SAMPLE_ORDER) - 0.5)
         axis.set_ylim(y_min_display, y_max_display)
-        axis.tick_params(axis="y", labelsize=12)
-        axis.grid(axis="y", color="#E5E5E5", linewidth=0.45, zorder=0)
-        axis.set_axisbelow(True)
+        axis.yaxis.set_major_locator(matplotlib.ticker.MultipleLocator(5))
+        axis.yaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter("%.0f"))
+        axis.tick_params(axis="y", labelsize=10)
         for spine_name, spine in axis.spines.items():
             spine.set_visible(spine_name in ("left", "bottom"))
         axis.spines["left"].set_linewidth(0.7)
         axis.spines["bottom"].set_linewidth(0.7)
         axis.set_facecolor("white")
 
-    axes[0].set_ylabel("Base count (Gb)", fontsize=13)
-
-    legend_handles = [
-        Patch(facecolor=SAMPLE_COLORS[sample], edgecolor="white", label=sample) for sample in SAMPLE_ORDER
-    ] + [
-        Patch(facecolor="#555555", edgecolor="white", label="CIGAR-aligned bases"),
-        Patch(facecolor="#DDDDDD", edgecolor="white", label="CIGAR-unaligned bases"),
-    ]
-    figure.legend(
-        handles=legend_handles, frameon=False, ncols=5, loc="upper center",
-        bbox_to_anchor=(0.5, 1.01), columnspacing=1.3, handletextpad=0.4, fontsize=12,
-    )
+    axes[0].set_ylabel("Base count (Gb)", fontsize=11)
 
     save_figure(figure, OUTPUT_PNG, OUTPUT_PDF)
 

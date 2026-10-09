@@ -5,12 +5,8 @@ Promoted from scripts/30x/plots/exploratory/plot_cigar_yield_vs_error.py
 (only its scatter panel; that script also drew an intermediate stacked
 CIGAR-composition figure to the same output filename, which was always
 overwritten by the scatter save immediately after, so it was dead output
-and is not reproduced here). No regression line is drawn: the reported
-statistic is the Spearman rank correlation (residuals are non-normal per
-the Shapiro-Wilk diagnostics in Supplementary Table S1), and an OLS line
-would visually imply a linear/Pearson relationship this figure is not
-making. Pearson r is reported in Supplementary Table S1 rather than
-repeated on this panel.
+and is not reproduced here). No regression line or correlation statistic
+is drawn; the panel shows the relationship descriptively.
 """
 
 from __future__ import annotations
@@ -31,7 +27,6 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from scipy import stats
 
 from utils.plot_style import (
     ALIGNER_MARKERS,
@@ -133,12 +128,9 @@ def main() -> int:
                     edgecolor="black", linewidth=0.4, s=20, zorder=3,
                 )
 
-        spearman = stats.spearmanr(
-            technology_data["input_normalized_cigar_yield_percent"], technology_data["error_percent"]
-        )
         axis.text(
             0.04, 0.96,
-            f"Spearman $\\rho$ = {spearman.statistic:.2f}, $P$ = {spearman.pvalue:.3f}\n$n$ = {len(technology_data)}",
+            f"$n$ = {len(technology_data)}",
             transform=axis.transAxes, ha="left", va="top", fontsize=10,
         )
 

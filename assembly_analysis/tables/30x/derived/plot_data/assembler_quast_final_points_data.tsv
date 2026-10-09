@@ -1,0 +1,16 @@
+sample	assembler	technology	nga50	genome_fraction_pct	duplication_ratio	misassemblies	mismatches_per_100kbp	indels_per_100kbp	nga50_mb	source_file
+HG002	flye	ont	25644753	96.827	1.014	4888	144.66	31.86	25.644753	assembly_quality/quast/flye/HG002.ont.30x/report.tsv
+HG003	flye	ont	27326061	96.877	1.014	4650	143.4	31.33	27.326061	assembly_quality/quast/flye/HG003.ont.30x/report.tsv
+HG004	flye	ont	26449985	96.308	1.013	4104	140.9	31.37	26.449985	assembly_quality/quast/flye/HG004.ont.30x/report.tsv
+HG002	flye	pb	734795	98.394	1.325	10496	192.78	31.47	0.734795	assembly_quality/quast/flye/HG002.pb.30x/report.tsv
+HG003	flye	pb	652406	98.425	1.332	11087	190.92	31.36	0.652406	assembly_quality/quast/flye/HG003.pb.30x/report.tsv
+HG004	flye	pb	631902	97.758	1.342	10463	189.56	31.47	0.631902	assembly_quality/quast/flye/HG004.pb.30x/report.tsv
+HG002	goldrush	ont	215394	75.813	1.037	5081	154.86	52.17	0.215394	assembly_quality/quast/goldrush/HG002.ont.30x/report.tsv
+HG003	goldrush	ont	352711	79.422	1.041	4131	149.87	49.45	0.352711	assembly_quality/quast/goldrush/HG003.ont.30x/report.tsv
+HG004	goldrush	ont	123424	65.802	1.026	3729	154.73	51.14	0.123424	assembly_quality/quast/goldrush/HG004.ont.30x/report.tsv
+HG002	goldrush	pb	71325	67.94	1.016	2681	123.4	33.92	0.071325	assembly_quality/quast/goldrush/HG002.pb.30x/report.tsv
+HG003	goldrush	pb	65335	66.819	1.023	3498	122.56	34.02	0.065335	assembly_quality/quast/goldrush/HG003.pb.30x/report.tsv
+HG004	goldrush	pb	81724	69.245	1.02	3005	122.4	35.03	0.081724	assembly_quality/quast/goldrush/HG004.pb.30x/report.tsv
+HG002	verkko	hybrid	752240	98.81	2.048	17894	178.86	32.33	0.75224	assembly_quality/quast/verkko/HG002/report.tsv
+HG003	verkko	hybrid	810160	98.809	2.044	18792	180.39	32.26	0.81016	assembly_quality/quast/verkko/HG003/report.tsv
+HG004	verkko	hybrid	764382	98.057	2.09	16674	169.55	31.97	0.764382	assembly_quality/quast/verkko/HG004/report.tsv

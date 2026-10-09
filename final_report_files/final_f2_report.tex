@@ -1,26 +1,84 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Final report document for F2 Practicals
+
+% Benchmarking long-read aligners, assemblers and structural variant callers for the human genome
+
 %
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \documentclass[12pt, letterpaper]{article}
+
 \usepackage[utf8]{inputenc}
+
 \usepackage[T1]{fontenc}
+
 \usepackage[margin=1in]{geometry}
+
+\usepackage{changepage}
+
 \usepackage{microtype}
+
 \usepackage{graphicx}
+
+\usepackage{float}
 \usepackage{amsmath}
+
 \usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{pgfplotstable}
+\usepackage{rotating}
+% keep figures and tables inside the section they belong to
+\usepackage[section]{placeins}
+\usepackage{tikz}
+\usetikzlibrary{calc,arrows.meta}
+\usepackage{caption}
+\usepackage{subcaption}
+
+\pgfplotsset{compat=1.18}
+
 \usepackage[hidelinks]{hyperref}
 
-\title{\textbf{F2 Practicals test}}
-\author{Nicolas Andres Ardila Gonzalez\thanks{Funded by the Overleaf team.}}
+\usepackage[backend=biber,bibstyle=nature,citestyle=numeric-comp,sorting=none]{biblatex}
+\addbibresource{bibliography/references.bib}
+% Allow long DOIs/URLs in the reference list to break at any character
+\setcounter{biburlnumpenalty}{100}
+\setcounter{biburlucpenalty}{100}
+\setcounter{biburllcpenalty}{100}
+
+% Draft "Notes for discussion" section is hidden unless this is set to true
+\newif\ifshownotes
+\shownotesfalse
+
+\title{\textbf{Benchmarking long-read aligners, assemblers, and structural variant callers for the human genome}}
+
+\author{\textbf{Nicolas Andres Ardila Gonzalez}}
+
 \date{July 2026}
 
-\graphicspath{{images/}}
+\graphicspath{{figures/}}
+
+\DeclareCaptionLabelSeparator{pipe}{\enspace|\enspace}
+
+\captionsetup[figure]{name=Fig.,labelsep=pipe,labelfont=bf}
+\captionsetup[table]{labelsep=pipe,labelfont=bf,skip=6pt}
+% Orange border of the alignment boxes in Figure 1a, reused for Figure 2's frame
+\definecolor{fig1orange}{HTML}{ED7D31}
+% Technology colours used for the paired connector in Figure 1
+\definecolor{workflowontblue}{HTML}{4D8DFF}
+\definecolor{workflowhifipink}{HTML}{E650C6}
+% Green border for the de novo assembly figure -- reuses HG004's sample color
+% from the QUAST panels themselves, distinguishing it from the alignment figures above
+\definecolor{figassemblygreen}{HTML}{009E73}
+\captionsetup[subfigure]{labelformat=simple,labelsep=space,labelfont=bf}
 
 \setlength{\parindent}{0pt}
+
 \setlength{\parskip}{0.75em}
+
+\setcounter{tocdepth}{2}
+
 \begin{document}
 
 \maketitle
@@ -28,198 +86,859 @@
 \newpage
 
 \begin{abstract}
-This document presents a short introduction to the practical exercises and the structure used in the final report.
 
-The abstract summarizes the key sections, including formatted text, figures, lists, mathematics, and tables.
+Long-read sequencing from Oxford Nanopore Technologies (ONT) and PacBio High-Fidelity (HiFi) enables the analysis of repetitive regions and complex structural variants, but the choice of downstream aligner and assembler affects the final results. In this study, four long-read aligners (minimap2, pbmm2, VACmap and VG Giraffe) and three de novo assemblers (Flye, GoldRush and the hybrid assembler Verkko) were benchmarked using 30$\times$ ONT and PacBio HiFi whole-genome datasets of the Genome in a Bottle samples HG002, HG003 and HG004 against GRCh38.
 
-A clean layout helps make the content easier to read and the technical examples simpler to follow.
+PacBio HiFi showed higher base quality and higher mapping rates than ONT for all aligners. VACmap presented the lowest alignment error rate in both technologies (1.59 $\pm$ 0.18\% in ONT and 0.68 $\pm$ 0.03\% in HiFi), at the cost of the highest MQ0 read fraction and runtime, whereas minimap2 presented the highest CIGAR-aligned yield together with the highest error rate. VG Giraffe was particularly sensitive to ONT data, with the lowest mapped bases (95.31 $\pm$ 0.29\%). Among the assemblers, Flye ONT produced the most contiguous assemblies (NGA50 26.47 $\pm$ 0.84 Mb), Verkko and Flye HiFi the highest genome fraction (>98\%), and GoldRush the most fragmented assemblies with the fewest misassemblies when run with default parameters at 30$\times$ coverage.
+
+These results show a trade-off between mapping yield, accuracy and computational cost, and indicate that the sequencing technology, computational resources and study aim should guide the choice of long-read tools.
+
 \end{abstract}
 
 \newpage
+
 \tableofcontents
 
 \newpage
 
 %Introduction section
+
 \section{Introduction}
 
-Long-read sequencing has advanced through High Fidelity (HiFi) sequencing technology developed by Pacific Biosciences, producing read lengths of 10--25 kbp with an accuracy of 99.95\%. The most recent release from Oxford Nanopore Technologies is the R10 chemistry, which can achieve reads of up to 882 kbp and accuracy above 99\%. Its implementation has been relevant for resolving complex and large structural variants (SVs), repetitive regions, and human chromosomes from telomere to telomere~\cite{Chang2025}. Long reads are important because they can resolve repetitive and complex regions with sufficient accuracy to assemble, for instance, human chromosomes from telomere to telomere, and they are especially valuable for structural variant detection~\cite{Rausch2025}.
+Long-read sequencing has advanced through High Fidelity (HiFi) sequencing technology developed by Pacific Biosciences, producing read lengths of 10--25~kbp with an accuracy of 99.95\%. The most recent release from Oxford Nanopore Technologies is the R10 chemistry, which can achieve reads of up to 882 kbp and accuracy above 99\%. Their implementation has been relevant for resolving complex and large structural variants (SVs), repetitive regions, and human chromosomes from telomere to telomere~\cite{Chang2025,Rausch2025,Mahmoud2025}.
 
-Structural variants are significant types of DNA mutations larger than 50 bp. They are described as one of the most relevant causes of genetic variation and may contribute to disease-associated phenotypic characteristics, including cancer, infection, and response to treatment. Their detection requires high alignment accuracy to identify duplications, inversions, translocations, and complex clustered rearrangements. Inadequate detection may represent a genomic barrier to understanding genetic variation and the role of SVs in patient disease~\cite{Helal2024}~\cite{vacmap2025}~\cite{Sirén2025}. Long-read sequencing analysis is commonly used in genomic regions with tandem repeats, where SVs are predominantly observed and require high resolution. However, long reads face the challenge of high sequencing error rates due to their length~\cite{vacmap2025}. Therefore, the use of effective downstream aligners is important to address this detection issue.
+Structural variants are heterogeneous genomic alterations over approximately 50 bp, including duplications, inversions, translocations, and complex clustered rearrangements. They might contribute to genetic variation and disease-associated phenotypic characteristics~\cite{Helal2024,vacmap2025,Zook2020}. Repetitive regions, such as tandem repeats and segmental duplications, might contribute to ambiguity during read alignment, and long reads also have high error rates~\cite{vacmap2025}. Modern long-read callers such as Sniffles2 are focused on repeat-aware and coverage-aware strategies, while VACmap is focused on complex rearrangement identification~\cite{Smolka2024}. Therefore, the use of effective downstream aligners is important to address this detection issue.
 
-Sequence alignment is a critical step during downstream analysis in genomic research and clinical diagnostics. Its accuracy is required to ensure correct variant detection, genome assembly, personalized medicine, and comparative genomics. Historically, these tools have relied on a reference genome and performed subalignments using a seed-chain approach based on minimizers. This consists of seeds or matches of k-mers with the reference genome, which are selected co-linearly to form chains. These chains are then extended bidirectionally until significant differences between the reads and the reference sequence are found~\cite{vacmap2025}. Multiple types of genomic algorithms have been developed, but this study focuses mainly on minimizer-based aligners, graph aligners, and SV-aware aligners.
+Accurate read mapping is a critical component of long-read analysis. Mapping errors can be propagated into downstream analysis and influence variant discovery, allele phenotyping and interpretation. Modern long-read algorithms approach this problem with different computational strategies. Minimap2 is a universal linear-reference mapper that uses a seed-chain approach based on minimizers to identify candidate anchors and form chains of collinear anchors, which are finally extended bidirectionally to obtain base-level alignments~\cite{Li2018_Minimap2,vacmap2025}. pbmm2 is based on minimap2 but focuses on PacBio presets and input/output handling for processing PacBio sequencing data. Although this approach is computationally efficient, complex rearrangements require split alignment, especially for repetitive or highly polymorphic regions~\cite{vacmap2025,Liyanage2024,Wang2026}.
+
+On the other hand, algorithms such as YAHA and NGMLR work similarly to Minimap2 through a graph-based alignment approach, where subalignment combinations are used to determine the optimal joint score. However, they fail especially with inversions, translocations, and duplications. They commonly misalign insertions because they use a linear alignment algorithm that selectively decides on a single continuous alignment and treats duplications, which commonly require two split reads, as insertions. Inversions and translocations are commonly misaligned and penalized, and are therefore avoided~\cite{vacmap2025}.
 
 %TYPES OF ALIGNERS
-Seed-and-chain aligners implement a co-linear chaining algorithm. Chain selection is performed through a primary chain selection process. A relevant method based on this approach is Minimap2, which implements a seed-chain-align strategy. In this strategy, minimizers are used as seeds to rapidly identify potential alignments, form chains, and finally fill the gaps using base-level alignment with algorithms such as Smith-Waterman-Gotoh~\cite{Liyanage2024}. One limitation of the reference genome approach is that it can generate multiple redundant subalignments, which require an additional step to categorize rearrangements. For example, an inversion requires multiple chain alignments to flank the affected regions~\cite{vacmap2025}. Another example is pbmm2, a wrapper around minimap2 that optimizes alignment parameters, generates sorted output files, and performs an additional post-processing step for PacBio reads~\cite{Wang2026}.
 
-Graph aligner algorithms initially align reads to partial order alignment (POA) graphs and then align them to acyclic graphs. Graph chaining algorithms generally use distance calculations obtained from a linear approach to the graph. Vacmap-Giraffe is an updated version in which long and short reads can be analyzed, and it uses a seed-chain-extend framework based on a new data structure for chaining distance calculations. It is considered one of the fastest graph or linear read mappers, with high accuracy and useful downstream variant calling performance and distingish structural variants . Although GraphAligner is a useful method, it is limited by slow processing due to the use of arbitrary graphs, whose complexity can increase substantially~\cite{Chang2025}~\cite{Sirén2025}.
+Graph aligner algorithms initially align reads to partial order alignment (POA) graphs and then align them to acyclic graphs. Graph chaining algorithms generally use distance calculations obtained from a linear approach to the graph. Other methods implement algorithms designed by Mäkinen et al., where a minimum path cover in a graph determines distance and reachability. In other cases, implementations use shortest-length walks within graph positions, as in Minigraph, or linear distance through reference chains in snarl decomposition, as in GraphAligner. Although GraphAligner is a useful method, it is limited by slow processing due to the use of arbitrary graphs, whose complexity can increase substantially. Giraffe is an updated version in which long and short reads can be analyzed, and it uses a seed-chain-extend framework based on a new data structure for chaining distance calculations. It is considered one of the fastest graph or linear read mappers, with high accuracy and useful downstream variant calling performance~\cite{Chang2025}.
 
-SV-aware aligners such as VACmap includes matches as quadruples called anchors that contain the start positions of the long read and reference sequence, the strand match, and the anchor length. It orders the end positions of the long read. Then, the non-linear chaining algorithm promotes extension of the chain to subsequent anchors that preserve a linear relationship with the preceding anchor. This enhances the connection with a positive score and penalizes extension to anchors that disrupt linearity by assigning a negative score. Thus, the optimal non-linear alignment is the chain with the highest aggregate score, corresponding to the longest path. To determine each linear subalignment, this non-linear alignment can be subdivided at a non-linear junction, eliminating the traditional necessity of post-alignment steps to reconstruct the rearrangement from a pool of error-prone independent subalignments~\cite{vacmap2025}.
+SV-aware aligners such as VACmap represent matches as quadruples called anchors that contain the start positions of the long read and reference sequence, the strand match, and the anchor length. Then, the non-linear chaining algorithm promotes extension of the chain to subsequent anchors that preserve a linear relationship with the preceding anchor. This connection receives a positive score, while extension to anchors that disrupt linearity receives a negative score. Thus, the optimal non-linear alignment is the chain with the highest aggregate score, corresponding to the longest path. To determine each linear subalignment, this non-linear alignment can be subdivided at a non-linear junction, eliminating the traditional need for post-alignment steps to reconstruct the rearrangement from a pool of error-prone independent subalignments. This approach is useful for distinguishing complex SVs, such as duplications, inversions, translocations or clustered combinations~\cite{vacmap2025,Mahmoud2025}.
 
-These different types of aligners may produce different variant-calling outcomes and performance profiles, including differences in sequencing quality, variant-calling performance, phasing performance, computational cost, F1 score, precision and recall, false discovery rate, false negative rate, and switch error rate~\cite{Wang2026}. Thus, the scope of this study was to implement a benchmark comparing performance using human genome samples obtained from the Genome in a Bottle website and the aligners minimap2, pbmm2, VG Giraffe, and VACmap.
+%TYPES OF ASSEMBLERS
 
+Repeat graphs, such as those used by Flye, are built from approximate sequence matches. The edges represent the genomic sequences classified as unique or repetitive, while nodes represent junctions~\cite{Kolmogorov2020}. First, Flye concatenates multiple disjoint genomic segments using disjointigs derived from error-prone long reads. These disjointigs are then used to build an approximate repeat graph. Long reads are mapped to the graph based on these concatenates and used to untangle the graph, allowing bridged repeats to be resolved. Finally, the repeat graph uses small differences between repeat copies to resolve unbridged repeats. The resulting contigs are then presented as paths in the repeat graph~\cite{Kolmogorov2019}. Repeat sites in the genome structure are thereby easier to distinguish, enabling the construction of an optimal assembly~\cite{Kolmogorov2020}.
 
-\section{Add images or figures}
+Similarly, Verkko is an iterative, multi-step graph-based hybrid assembler built to generate highly contiguous diploid genome assemblies by combining Oxford Nanopore Technologies (ONT) and PacBio HiFi reads. ONT reads are used to generate a graph using GraphAligner, whose paths are able to resolve small variants, including ambiguous structures such as bubbles, loops, repeat tangles and gaps. This builds a simplified ultra-long-read-assisted graph (ULA) to resolve haplotype paths. Finally, selected graph paths are used to generate nucleotide sequences from the long reads, restoring sequence information such as homopolymer lengths that were obscured during graph construction~\cite{Rautiainen2023,Bankevich2022}.
 
-% The example figure is commented out because the image file is missing.
-%\begin{figure}[h]
-%    \centeringDing, H., Sedlazeck, F. J., Proukakis, C., Morley, C., Toffoli, M., Schapira, A. H., ... & Zhu, S. (2025). VACmap: an accurate long-read aligner for unraveling complex genomic rearrangements. Nature Communications, 16(1), 11198.
-%    \includegraphics[width=0.75\textwidth]{Paper journal logo.png}
-%    \caption{This is an example of figure}
-%    \label{fig:placeholder}
-%\end{figure}
+GoldRush is a memory-efficient haploid de novo genome assembler. It first iterates through the long reads to build filtered sequences, called silver paths, based on a dynamic probabilistic multi-index Bloom filter with about 1$\times$ coverage of the genome. The raw sequences output by GoldPath are called goltigs. GoldPolish is then implemented to correct base errors. Misassemblies are corrected using Tigmint-long~\cite{Wong2023}. By default, ntLink is run for 5 rounds to adapt overlap detection, gap filling and scaffolding, specifically through the liftover of sequence mappings, to reduce the introduction of regions with lower base quality~\cite{Wong2023,Wong2022,Zhang2025}. Finally, using GoldChain, the corrected gold path is scaffolded to generate the output genome assembly~\cite{Wong2023,Wong2022}.
 
-\section{Using lists}
+Although these important bioinformatics tools, including mappers and de novo assemblers, are widely used, there is not much available information regarding the advantages and limitations of each, especially regarding their performance across different technologies such as ONT and PacBio. Sequencing errors are a routine part of any dataset, which has led to the development of different methods aimed at addressing this issue, including comparisons of de novo assemblers~\cite{Cosma2023}. Despite this, de novo assembly evaluation remains challenging because it depends on the goal of an assembly and the existence of a ground truth, the latter being achievable with mappers such as minimap2~\cite{Cosma2023}. Their interplay is important because multiple workflows use them at different steps before structural variant calling, and different performances have been reported~\cite{Helal2024,Wang2026}. Initiatives such as the Genome in a Bottle (GIAB) Consortium provide datasets to perform this benchmarking, not just on individual technologies or by comparing short and long reads, as many studies do, but across bioinformatics tools and sequencing technologies, including ONT and PacBio~\cite{Munoz2025}. Thus, benchmarking the different technologies using a ground truth might be a relevant approach to understand how to overcome their limitations and in which cases they should be implemented~\cite{vacmap2025,Cosma2023}.
 
-\begin{enumerate}
-    \item This is the first entry in our list.
-    \item The list numbers increase with each entry we add.
-\end{enumerate}
+In this study, four aligners and three assemblers were systematically benchmarked using human whole-genome long-read datasets provided by the Genome in a Bottle Consortium (GIAB): HG002, HG003 and HG004. The two aims of this study were (I) to evaluate and compare the long-read mappers minimap2, pbmm2, VG and VACmap; and (II) to evaluate the long-read de novo genome assemblers GoldRush and Flye2, and the hybrid assembler Verkko2 (Table~\ref{tab:tool_overview}). The evaluation parameters were mapping performance, mapping confidence, alignment accuracy and computational performance for the aligners, and contiguity, reference coverage and assembly correctness for the assemblers, across the sequencing technologies Oxford Nanopore Technologies and PacBio High-Fidelity (HiFi). Together, this benchmarking aims to understand the limitations of each tool and in which cases they should be implemented.
 
-\vspace{20pt}
+\section{Materials and methods}
 
-\section{Math Mode}
+\subsection{Selection of the alignment and assembly tools}
 
-In physics, the mass-energy equivalence is stated by the equation $E=mc^2$, discovered in 1895 by Albert Einstein.
+The tools were selected according to their relevance to human whole-genome long-read analysis, their suitability for approximately 30$\times$ ONT and PacBio HiFi datasets, and their ability to run with the computational resources available for this study. They also had to produce standard alignment or assembly formats that could be assessed using a common set of metrics. Reproducibility was considered through the availability of open-source code in a public GitHub repository, clear installation documentation, and the possibility of fixing the evaluated version through Conda or a container. GitHub release history and recent updates were also reviewed as indicators of software accessibility and maintenance. The final set was chosen to represent complementary alignment and assembly strategies.
 
-This is also typeset in inline math mode as $E=mc^2$ and display math mode as:
-\[
-E = mc^2
-\]
+The alignment benchmark included minimap2 as the established linear-reference baseline~\cite{Li2018_Minimap2}; pbmm2 to assess the effect of PacBio-oriented presets and input/output processing built around the minimap2 engine; VG Giraffe as the pangenome-graph aligner~\cite{Chang2025,Sirén2021}; and VACmap as the SV-aware aligner based on non-linear chaining~\cite{vacmap2025}. For the ONT datasets, pbmm2 was run with the high-error \texttt{SUBREAD} preset. Together, these tools provided linear-reference, platform-oriented, pangenome-graph and SV-aware alignment approaches.
 
-In natural units ($c = 1$), the formula expresses the identity:
-\begin{equation}
-E = m
-\end{equation}
+The assembly benchmark included Flye as an established repeat-graph assembler for separate ONT and PacBio HiFi assemblies~\cite{Kolmogorov2019,Kolmogorov2020}; GoldRush as a memory-efficient assembler based on a Bloom-filter golden-path approach~\cite{Wong2022,Wong2023}; and Verkko as a hybrid assembler that combines PacBio HiFi and ONT reads to resolve assembly graphs and generate diploid assemblies~\cite{Rautiainen2023,Bankevich2022}. This selection provided two single-technology assembly strategies and one hybrid strategy. The principal inputs, algorithmic approaches, outputs and configurations of the four aligners and three assemblers are summarized in Table~\ref{tab:tool_overview}.
 
-Subscripts in math mode are written as $a_b$ and superscripts as $a^b$. These can be combined and nested to write expressions such as:
-\[
-T^{i_1 i_2 \dots i_p}_{j_1 j_2 \dots j_q} = T(x^{i_1}, \dots, x^{i_p}, e_{j_1}, \dots, e_{j_q})
-\]
-
-We write integrals using $\int$ and fractions using $\frac{a}{b}$:
-\[
-\int_0^1 \frac{dx}{e^x} = \frac{e-1}{e}
-\]
-
-Lower case Greek letters are written as $\omega$, $\delta$, etc., while upper case Greek letters are written as $\Omega$, $\Delta$.
-
-Mathematical operators are prefixed with a backslash, e.g. $\sin(\beta)$, $\cos(\alpha)$, $\log(x)$.
-
-\subsection{First example}
-
-The well-known Pythagorean theorem
-\[x^2 + y^2 = z^2\]
-was proved to be invalid for other exponents, meaning there are no integer solutions for $n > 2$ in:
-\[x^n + y^n = z^n\]
-
-\subsection{Second example}
-
-This is a simple math expression $\sqrt{x^2+1}$ inside text.
-
-\begin{displaymath}
-\sqrt{x^2+1}
-\end{displaymath}
-
-\begin{equation*}
-\sqrt{x^2+1}
-\end{equation*}
-
-\section{Basic document structure}
-
-Paragraphs are separated by leaving a blank line between them, instead of using manual line breaks. This keeps the text readable and the layout consistent.
-
-In normal text, use a blank line to start a new paragraph. Use line breaks such as \\\\ only for short explicit breaks within the same paragraph when needed.
-
-\section{Creating tables}
-
-\begin{center}
-\begin{tabular}{c c c}
- cell1 & cell2 & cell3 \\
- cell4 & cell5 & cell6 \\
- cell7 & cell8 & cell9
-\end{tabular}
-\end{center}
-
-\begin{center}
-\begin{tabular}{|c|c|c|}
- \hline
- cell1 & cell2 & cell3 \\
- cell4 & cell5 & cell6 \\
- cell7 & cell8 & cell9 \\
- \hline
-\end{tabular}
-\end{center}
-
-% Create a table with cleaner formatting
-\begin{center}
- \begin{tabular}{cccc}
- \toprule
- Col1 & Col2 & Col3 & Col4 \\
- \midrule
- 1 & 6 & 87837 & 787 \\
- 2 & 7 & 78 & 5415 \\
- 3 & 545 & 778 & 7507 \\
- 4 & 545 & 18744 & 7560 \\
- 5 & 88 & 788 & 6344 \\
- \bottomrule
-\end{tabular}
-\end{center}
-
-Table \ref{table:data} shows how to add a table caption and reference a table.
-\begin{table}[h!]
+% ============================================================
+% TABLE 1: OVERVIEW OF ALIGNERS AND ASSEMBLERS
+% ============================================================
+\begin{table}[!tbp]
 \centering
-\begin{tabular}{cccc}
- \toprule
- Col1 & Col2 & Col3 & Col4 \\
- \midrule
- 1 & 6 & 87837 & 787 \\
- 2 & 7 & 78 & 5415 \\
- 3 & 545 & 778 & 7507 \\
- 4 & 545 & 18744 & 7560 \\
- 5 & 88 & 788 & 6344 \\
- \bottomrule
+\footnotesize
+\caption{\textbf{Long-read aligners and \textit{de novo} assemblers evaluated in this study.}}
+\label{tab:tool_overview}
+\microtypesetup{protrusion=false}
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{1.65cm}>{\raggedright\arraybackslash}p{2.15cm}>{\raggedright\arraybackslash}p{2.85cm}>{\raggedright\arraybackslash}p{3.10cm}>{\raggedright\arraybackslash}p{3.25cm}>{\raggedright\arraybackslash}p{1.65cm}}
+\toprule
+\textbf{Tool} & \textbf{Reference or input} & \textbf{Algorithmic approach} & \textbf{Output} & \textbf{Principal preset or parameter} & \textbf{Latest GitHub commit} \\
+\midrule
+\multicolumn{6}{l}{\textbf{Read aligners}} \\
+\addlinespace[1pt]
+minimap2 & Linear GRCh38 & Seed--chain--extend on a linear reference & Sorted GRCh38 BAM & ONT: \texttt{map-ont}\par\vspace{2pt}HiFi: \texttt{map-hifi} & \href{https://github.com/lh3/minimap2}{May 2026} \\
+\addlinespace[6pt]
+pbmm2 & Linear GRCh38 & minimap2 wrapper tuned for PacBio data & Sorted GRCh38 BAM & ONT: \texttt{SUBREAD}\par\vspace{2pt}HiFi: \texttt{HIFI} & \href{https://github.com/PacificBiosciences/pbmm2}{Mar 2026} \\
+\addlinespace[6pt]
+VACmap & Linear GRCh38 & Non-linear anchor chaining & Sorted GRCh38 BAM & ONT: \texttt{-mode~H}\par\vspace{2pt}HiFi: \texttt{-mode~L} & \href{https://github.com/micahvista/VACmap}{Apr 2026} \\
+\addlinespace[6pt]
+VG Giraffe & Pangenome graph (GBZ and indexes) & Seed--chain--extend on a pangenome graph & GRCh38-projected BAM & ONT: \texttt{r10}\par\vspace{2pt}HiFi: \texttt{hifi} & \href{https://github.com/vgteam/vg}{May 2024} \\
+\midrule
+\multicolumn{6}{l}{\textbf{\textit{De novo} assemblers}} \\
+\addlinespace[1pt]
+Flye & ONT or HiFi reads & Repeat graph built from disjointigs & Collapsed haploid FASTA & ONT: \texttt{-{}-nano-raw}\par\vspace{2pt}HiFi: \texttt{-{}-pacbio-hifi} & \href{https://github.com/mikolmogorov/Flye}{May 2025} \\
+\addlinespace[6pt]
+GoldRush & ONT or HiFi reads & Bloom-filter golden-path assembly & Scaffolded haploid FASTA & ONT: \texttt{m=5000}\par\vspace{2pt}HiFi: \texttt{m=10000} & \href{https://github.com/bcgsc/goldrush}{Mar 2026} \\
+\addlinespace[6pt]
+Verkko & HiFi + ONT reads (hybrid) & HiFi de Bruijn graph resolved with ONT reads & Unphased diploid FASTA & Hybrid: \texttt{-{}-hifi} + \texttt{-{}-nano} & \href{https://github.com/marbl/verkko}{Apr 2026} \\
+\bottomrule
 \end{tabular}
-\caption{Table to test captions and labels.}
-\label{table:data}
+
+\vspace{3pt}
+\begin{minipage}{\linewidth}\footnotesize
+Modes indicate the principal presets or technology-specific parameters used in the Snakemake workflows; complete configurations are described in the Methods and workflow files. Latest GitHub commit indicates the month of the most recent commit to the default branch of each public repository, checked on 20 May 2026. BAM, Binary Alignment/Map format; FASTA, sequence file format; GBZ, GBWT-backed graph format; GRCh38, Genome Reference Consortium Human Build 38; HiFi, PacBio high-fidelity sequencing; \texttt{m}, GoldRush minimum read length (bp); ONT, Oxford Nanopore Technologies.
+\end{minipage}
 \end{table}
 
-\section*{References}
-\begin{thebibliography}{9}
-\bibitem{latexcompanion}
-Michel Goossens, Frank Mittelbach, and Alexander Samarin.
-\textit{The \LaTeX{} Companion}.
-Addison-Wesley, 1993.
+\subsection{Read alignment workflow}
 
-\bibitem{vacmap2025}
-H. Ding, F. J. Sedlazeck, C. Proukakis, C. Morley, M. Toffoli, A. H. Schapira, S. Zhu.
-"VACmap: an accurate long-read aligner for unraveling complex genomic rearrangements." \textit{Nature Communications}, 16(1), 11198, 2025.
+The DNA long-read sequencing data from Oxford Nanopore Technologies (ONT) and PacBio were obtained from the Genome in a Bottle (GIAB) Consortium hosted by NIST. The HG002, HG003 and HG004 samples were used as 30$\times$ FASTQ.gz input files from the ONT and PacBio technologies, for a total of 6 datasets. Initial quality control (Q20, Q30 and N50) was applied through TSV file extraction, including read counts, total bases, and mean and maximum read lengths. The alignment workflow was implemented in a Snakemake file, where a YAML configuration file defined the sample sheet, reference genome, aligners and VG graph index files, and YAML Conda environment files defined the software used for each aligner. Reference indexes from FASTA input files were calculated using the minimap2, pbmm2, VG and VACmap aligner configurations to obtain a complete benchmark of 3 samples, 2 sequencing technologies and 4 aligners, for a total of 24 alignment runs that produced SAM and/or BAM files.
 
-\bibitem{Liyanage2024}
-K. Liyanage.
-"Acceleration of DNA Sequence Alignment Tools Using Hardware-Software Co-Design." Doctoral dissertation, University of New South Wales, 2024.
+Alignment statistics were extracted to obtain flagstat.txt, idxstats.tsv and samtools stats.txt files using a samtools Python script, followed by refinement to validate file names, configurations, duplicates and missing combinations. The Pandas library was used to obtain string values and pivot tables, and NumPy was used to obtain arrays. Final plotting was done with Python scripts using the Matplotlib library, including statistical comparisons ($p<0.05$) between PacBio and ONT based on FASTQ QC, median N50, Q20/Q30, mapped bases, CIGAR-mapped bases and error rate.
 
-\bibitem{Chang2025}
-X. Chang, A. M. Novak, J. M. Eizenga, J. Sir\'en, J. Monlong, S. Negi, ... Human Pangenome Reference Consortium.
-"Rapid, accurate long- and short-read mapping to large pangenome graphs with vg Giraffe." bioRxiv, 2025-09.
+\subsection{\textit{De novo} assembly workflow}
 
-\bibitem{Rausch2025}
-Rausch, T., Marschall, T., \& Korbel, J. O. (2025). The impact of long-read sequencing on human population-scale genomics. Genome research, 35(4), 593-598.
+The same input files were used to benchmark the assemblers Flye2, GoldRush and Verkko2. The benchmark included 2 individual de novo assemblers, 1 hybrid assembler, 3 reference samples and 2 sequencing technologies, for a total of 15 assemblies. Flye and GoldRush were executed individually, while Verkko was executed as a hybrid assembly using ONT and PacBio samples. A patched ntLink-fix GoldRush v1.2.2 was used to avoid internal assembler issues caused by attempts to read uncompressed FASTQ files by default. The ntLink step was therefore modified to pass directly to the minimizer-based mapping step. The assembly workflow was also implemented in a Snakemake file with a YAML configuration file defining the sample sheet, active assemblers, genome size and threads. Snakemake wildcards were implemented to identify any available ONT and PacBio samples, and versioned Docker images were used to ensure reproducibility of the computational environment.
 
-\bibitem{Wang2026}
-Wang, J., \& Robinson, M. D. (2026). Systematic benchmarking of small variant calling pipelines for long-read RNA sequencing data. bioRxiv, 2026-04.
+Reference-independent assembly statistics were calculated from the output assembly.fasta file and then combined into a single TSV for benchmarking analysis. The parameters evaluated included assembly size, contiguity, fragmentation, sequence-length distribution and nucleotide composition. Specifically, these included assembly length, number of assembled sequences, longest and shortest sequence lengths, mean and median sequence lengths, N50/L50 and N90/L90 statistics, nucleotide counts for A, C, G, T and N, GC percentage, and the percentage of ambiguous bases (N percentage). Final plots were generated for total assembly size, sequence count, N50/N90, maximum sequence length and sequence composition metrics based on samples and assembly strategies. NGA50, genome fraction, duplication ratio, misassemblies, mismatches and indels were obtained with QUAST v5.3.0 against GRCh38, and the QUAST reports were combined and plotted with Python scripts using the Pandas and Matplotlib libraries.
+
+%------------------------------
+% Workflow method png
+%-----------------------------
+\section{Results}
+
+The general workflow shows 4 steps: input, analysis, evaluation and benchmark output. Five metrics were used for input QC and normalization of the ONT and PacBio HiFi FASTQ files (Fig.~\ref{fig:raw_read_counts}--\subref{fig:read_n50}). After quality assessment, two paths were used: alignment and de novo assembly. The alignment used four aligners, minimap2, pbmm2, VACmap and VG Giraffe, while de novo assembly used Flye2, GoldRush and Verkko. For the alignments, a total of 12 parameters were extracted: 3 for mapping performance, 2 for mapping confidence, 4 for alignment and 3 for computational performance. For the assemblers, a total of 6 parameters were used: 3 for contiguity and reference coverage, and 3 for assembly correctness (Fig.~\ref{fig:method_workflow_a}).
+
+\begin{figure}[!tbp]
+    \centering
+    \begin{subfigure}{\linewidth}
+        \phantomcaption
+        \label{fig:method_workflow_a}
+        {\raggedright\textbf{\large a}\par}
+        \centering
+        \begin{tikzpicture}[remember picture]
+            \node[inner sep=0pt, anchor=south west] (wfimg) at (0,0)
+                {\includegraphics[width=0.78\linewidth]{method_benchmarking.pdf}};
+            % Connection points for the input-QC box and its black metrics box
+            \begin{scope}[x={(wfimg.south east)}, y={(wfimg.north west)}]
+                \coordinate (qcbox) at (0.996,0.859);
+                % Mask the original black connector without covering either box.
+                \fill[white] (0.681,0.839) rectangle (0.719,0.879);
+                \coordinate (qcinputright) at (0.684,0.859);
+                \coordinate (qcmetricsleft) at (0.715,0.859);
+            \end{scope}
+            \draw[workflowontblue, line width=0.9pt,
+                  -{Stealth[length=2.0mm,width=1.6mm]}]
+                ($(qcinputright)+(0,0.85mm)$) -- ($(qcmetricsleft)+(0,0.85mm)$);
+            \draw[workflowhifipink, line width=0.9pt,
+                  -{Stealth[length=2.0mm,width=1.6mm]}]
+                ($(qcinputright)+(0,-0.85mm)$) -- ($(qcmetricsleft)+(0,-0.85mm)$);
+        \end{tikzpicture}
+    \end{subfigure}
+
+    \vspace{0.6em}
+
+    \begin{tikzpicture}[remember picture]
+    \node[draw=black, line width=0.6pt, rounded corners=4mm, fill=white,
+          inner sep=2.5mm, text width=\linewidth-5mm-0.6pt] (inputpanels) {%
+
+    \begin{subfigure}[t]{0.32\linewidth}
+        \phantomcaption
+        \label{fig:raw_read_counts}
+        {\raggedright\textbf{\large b}\strut\par}
+        \centering
+        \includegraphics[width=\linewidth]{14_raw_read_counts_30x.pdf}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.32\linewidth}
+        \phantomcaption
+        \label{fig:raw_base_counts}
+        {\raggedright\textbf{\large c}\strut\par}
+        \centering
+        \includegraphics[width=\linewidth]{10_raw_base_counts_30x.pdf}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.32\linewidth}
+        \phantomcaption
+        \label{fig:mean_read_length}
+        {\raggedright\textbf{\large d}\strut\par}
+        \centering
+        \includegraphics[width=\linewidth]{15_mean_read_length_30x.pdf}
+    \end{subfigure}
+
+    \vspace{0.1em}
+
+    {\centering
+    \begin{subfigure}[t]{0.32\linewidth}
+        \phantomcaption
+        \label{fig:q20_q30_reads}
+        {\raggedright\textbf{\large e}\strut\par}
+        \centering
+        \includegraphics[width=\linewidth]{16_q20_q30_reads_30x.pdf}
+    \end{subfigure}
+    \hspace{0.12\linewidth}
+    \begin{subfigure}[t]{0.32\linewidth}
+        \phantomcaption
+        \label{fig:read_n50}
+        {\raggedright\textbf{\large f}\strut\par}
+        \centering
+        \includegraphics[width=\linewidth]{17_read_n50_30x.pdf}
+    \end{subfigure}
+    \par}
+    };
+    \end{tikzpicture}
+    % Paired technology connector: QC metrics box (panel a) -> input panels (b--f)
+    \begin{tikzpicture}[remember picture, overlay]
+        \draw[workflowontblue, line width=0.9pt, rounded corners=1.2mm,
+              -{Stealth[length=2.2mm,width=1.7mm]}]
+            ($(qcbox)+(0.8mm,0.9mm)$) -- ++(2.2mm,0)
+            |- ($(inputpanels.north east)+(-20mm,4mm)$)
+            -- ($(inputpanels.north east)+(-20mm,1.2mm)$);
+        \draw[workflowhifipink, line width=0.9pt, rounded corners=1.2mm,
+              -{Stealth[length=2.2mm,width=1.7mm]}]
+            ($(qcbox)+(0.8mm,-0.9mm)$) -- ++(4.2mm,0)
+            |- ($(inputpanels.north east)+(-17mm,4mm)$)
+            -- ($(inputpanels.north east)+(-17mm,1.2mm)$);
+    \end{tikzpicture}
+
+    \captionsetup{singlelinecheck=false}
+    \caption{
+        \textbf{Method benchmarking workflow and input sequencing data metrics.}}
+    \label{fig:method_workflow}
+    \begin{minipage}{\linewidth}\footnotesize\noindent General benchmarking workflow for each aligner, assembler and GIAB sample (a). Input sequencing data per GIAB sample, for each sequencing technology (ONT, left; PacBio HiFi, right) (b--f): raw input reads in millions (b); raw input bases (c); mean input read length (kb; total input bases divided by total input reads) (d); percentage of bases with base quality $\geq$Q20 (dark bars) and $\geq$Q30 (light bars) (e); read-length N50 (f). All GIAB sample datasets had 30.1--30.6$\times$ input coverage and were used for the aligner and assembler benchmarks.
+    \end{minipage}
+\end{figure}
+
+\subsection{Input sequencing data quality control}
+
+All six datasets showed a comparable sequencing depth of 30.1--30.6$\times$ (Supplementary Table~\ref{tab:input_data}). ONT had 6.99 $\pm$ 0.08 million reads, except for HG002, which had the lowest count at 5.20 million reads, 1.79 million fewer. PacBio HiFi had 6.62 $\pm$ 0.12 million reads across the three samples (Fig.~\ref{fig:raw_read_counts}). The base counts were generally similar, with 94.19 $\pm$ 0.72 Gb in ONT and 93.77 $\pm$ 0.53 Gb in PacBio HiFi (Fig.~\ref{fig:raw_base_counts}). The mean read length in ONT was 13.47 $\pm$ 0.29 kb, except for HG002, which had longer reads with a mean of 18.10 kb, while the value in PacBio HiFi was 14.17 $\pm$ 0.23 kb (Fig.~\ref{fig:mean_read_length}). For ONT, the proportion of bases by base-calling quality was 92.89 $\pm$ 1.19\% at Q20 and 88.48 $\pm$ 1.75\% at Q30, while PacBio HiFi showed higher proportions of 97.32 $\pm$ 0.12\% at Q20 and 93.49 $\pm$ 0.26\% at Q30 (Fig.~\ref{fig:q20_q30_reads}). The read N50 was 31.59 $\pm$ 1.81 kb in ONT, which was longer than the PacBio HiFi value of 16.89 $\pm$ 0.20 kb (Fig.~\ref{fig:read_n50}).
+
+\subsection{Alignment performance}
+
+In general, mean values showed similar performance for all the aligners in mapped reads, mapped bases, CIGAR-aligned yield rate and MQ0 reads (Table~\ref{tab:alignment_summary}). However, VG Giraffe showed the lowest performance for these same parameters (Fig.~\ref{fig:mapped_unmapped_reads}--\subref{fig:cigar_composition}), which is addressed further in the Discussion.
+
+% ============================================================
+% TABLE 2: ALIGNMENT PERFORMANCE SUMMARY
+% ============================================================
+
+\pgfplotstableread[
+    col sep=tab
+]{tables/alignment_summary_table_30x.tsv}
+\alignmentsummarytable
+
+\begin{sidewaystable}
+\centering
+
+\caption{
+\textbf{Summary of alignment performance of minimap2, pbmm2, VACmap and
+VG Giraffe.}
+Mean values of error rate, mapped reads, mapped bases, CIGAR-aligned yield, reads with mapping quality equal to zero, runtime and peak RAM per aligner for each sequencing technology (ONT and PacBio HiFi). Standard deviation ($\pm$) is given for each mean value obtained across the GIAB samples for each sequencing technology. Runtime includes wall-clock time with 64 threads used for minimap2 and pbmm2, while 16 threads were used for VACmap and VG Giraffe; thread-hours are shown in Fig.~\ref{fig:thread_hours} and Supplementary Table~\ref{tab:thread_hours} to make the aligners comparable. Values that were not measured are displayed as n.m.
+}
+
+\label{tab:alignment_summary}
+
+\footnotesize
+\setlength{\tabcolsep}{3.4pt}
+\pgfplotstabletypeset[
+columns={technology,aligner,threads,error_percent,mapped_reads_percent,mapped_bases_percent,cigar_yield_percent,mq0_reads_percent,runtime_hours,peak_ram_gb},
+columns/technology/.style={column name={Technology},string type,column type=l},
+columns/aligner/.style={column name={Aligner},string type,column type=l},
+columns/threads/.style={column name={Threads},string type},
+columns/error_percent/.style={column name={\shortstack{Error rate\\(\%)}},string type},
+columns/mapped_reads_percent/.style={column name={\shortstack{Mapped reads\\(\%)}},string type},
+columns/mapped_bases_percent/.style={column name={\shortstack{Mapped bases\\(\%)}},string type},
+columns/cigar_yield_percent/.style={column name={\shortstack{CIGAR-aligned\\yield (\%)}},string type},
+columns/mq0_reads_percent/.style={column name={\shortstack{MQ0 reads\\(\%)}},string type},
+columns/runtime_hours/.style={column name={\shortstack{Runtime\\(h)}},string type},
+columns/peak_ram_gb/.style={column name={\shortstack{Peak RAM\\(GB)}},string type},
+every head row/.style={before row=\toprule,after row=\midrule},
+every row no 3/.style={after row=\midrule},
+every last row/.style={after row=\bottomrule},
+column type=c
+]{\alignmentsummarytable}
+
+\vspace{3pt}
+\begin{minipage}{\linewidth}\footnotesize
+CIGAR, Compact Idiosyncratic Gapped Alignment Report; MQ0, mapping quality of zero; n.m., not measured.
+\end{minipage}
+
+\end{sidewaystable}
+
+Among minimap2, pbmm2, VACmap and VG Giraffe, VACmap showed the lowest alignment error rate in both ONT and PacBio HiFi, with average values across the three GIAB samples of 1.59 $\pm$ 0.18\% and 0.68 $\pm$ 0.03\%, respectively. In contrast, minimap2 showed the highest error rate in both sequencing technologies across the three samples, with an average of 2.95 $\pm$ 0.24\% in ONT and 1.34 $\pm$ 0.06\% in PacBio. The HG002 sample showed, on average, the highest error across all four mappers (Fig.~\ref{fig:alignment_error_rate}).
+
+%-------------------------------------
+%Second compound figure
+%-------------------------------------
+
+\begin{figure}[!tbp]
+    \centering
+    \begin{tikzpicture}
+    \node[draw=fig1orange, line width=0.8pt, rounded corners=4mm, fill=white,
+          inner sep=2.5mm, text width=\linewidth-5mm-0.8pt] {%
+        % Single compound image (panel letters drawn in matplotlib); the
+        % zero-width subfigures only register the a--e labels for \ref.
+        \begin{subfigure}{0pt}\phantomcaption\label{fig:alignment_error_rate}\end{subfigure}%
+        \begin{subfigure}{0pt}\phantomcaption\label{fig:mapped_unmapped_reads}\end{subfigure}%
+        \begin{subfigure}{0pt}\phantomcaption\label{fig:mapped_unmapped_bases}\end{subfigure}%
+        \begin{subfigure}{0pt}\phantomcaption\label{fig:cigar_composition}\end{subfigure}%
+        \begin{subfigure}{0pt}\phantomcaption\label{fig:cigar_yield_error}\end{subfigure}%
+        \centering
+        \includegraphics[width=\linewidth]{fig2_alignment_performance_30x.pdf}
+    };
+    \end{tikzpicture}
+
+    \captionsetup{singlelinecheck=false}
+    \caption{
+        \textbf{Read and base mapping accuracy per aligner.}}
+    \label{fig:alignment_performance}
+    \begin{minipage}{\linewidth}\footnotesize\noindent Horizontal bars show the performance per aligner for the three GIAB samples; rows share a common aligner axis for each sequencing technology (ONT, top; PacBio HiFi, bottom). Alignment error rate (a); VACmap was normalized using the total raw counts for comparability with other aligners. Percentage of mapped and unmapped reads (b); dark segments represent mapped reads and lighter segments unmapped reads. Percentage of mapped and unmapped bases (c); dark segments represent mapped bases and lighter segments unmapped bases. CIGAR composition of mapped bases; segments represent: aligned non-mismatch bases (dark), mismatch bases (medium) and CIGAR-unaligned bases (light) (d); values inside or beside the mismatch segment give the mismatch percentage (where the segment is too narrow, the value is shown on a white tag with a leader line to its segment) and values to the right of the bars give the total CIGAR-mapped yield. Mismatch error (\%) versus input-normalized CIGAR-aligned yield (\%) (e); point color defines GIAB sample and point shape encodes aligner. The x-axes in b--d start at 88\% to resolve differences between aligners.
+    \end{minipage}
+\end{figure}
+
+Minimap2 and pbmm2 showed the highest percentages of mapped reads in both technologies, with averages of 96.07 $\pm$ 2.12\% and 95.77 $\pm$ 2.21\% in ONT and 99.77 $\pm$ 0.02\% and 99.96 $\pm$ 0.00\% in PacBio HiFi, respectively, while VACmap showed 94.66 $\pm$ 2.34\% in ONT and 99.54 $\pm$ 0.06\% in PacBio HiFi. In contrast, the lowest percentage of mapped reads in ONT was obtained with VG Giraffe, with an average value of 93.73 $\pm$ 0.86\% across the three samples. This parameter, in particular, showed variability among the samples. HG003 presented the lowest percentage of mapped reads compared with the other GIAB samples, specifically for ONT, with values of 94.17\% in minimap2, 93.81\% in pbmm2, 92.65\% in VACmap and 92.80\% in VG Giraffe. The highest mapping rate was obtained for the HG002 sample across all ONT mappers. Therefore, the highest percentage of unmapped reads was generally observed with VG Giraffe and in the HG003 sample (Fig.~\ref{fig:mapped_unmapped_reads}).
+
+Minimap2, pbmm2 and VACmap showed the highest percentages of mapped bases for ONT and PacBio. For ONT, average values were 99.80 $\pm$ 0.09\% for minimap2, 99.72 $\pm$ 0.11\% for pbmm2 and 99.30 $\pm$ 0.09\% for VACmap, while for PacBio HiFi they were 99.84 $\pm$ 0.02\%, 99.98 $\pm$ 0.00\% and 99.63 $\pm$ 0.06\%, respectively. In contrast, VG Giraffe showed the lowest percentage of mapped bases in ONT, with 95.31 $\pm$ 0.29\%, while all aligners exceeded 99.6\% in PacBio HiFi (VG Giraffe 99.76 $\pm$ 0.02\%). Therefore, the highest percentage of unmapped bases was obtained with VG Giraffe for ONT (4.69 $\pm$ 0.29\%), whereas for PacBio HiFi it was obtained with VACmap (0.37 $\pm$ 0.06\%) (Fig.~\ref{fig:mapped_unmapped_bases}).
+
+CIGAR alignment composition showed the highest CIGAR-mapped-base yield with minimap2 for both technologies, with an average of 99.38 $\pm$ 0.06\% for ONT and 99.76 $\pm$ 0.03\% for PacBio HiFi. In contrast, the lowest CIGAR-mapped-base yield was obtained using VG Giraffe, with 92.73 $\pm$ 0.72\% in ONT and 99.04 $\pm$ 0.04\% in PacBio. Although minimap2 showed the best CIGAR-mapped-base yield, it had the highest proportion of aligned mismatch bases, with 2.93 $\pm$ 0.24\% in ONT and 1.33 $\pm$ 0.06\% in PacBio. VACmap showed the lowest average proportion of mismatch bases, with 1.55 $\pm$ 0.18\% for ONT and 0.67 $\pm$ 0.03\% for PacBio HiFi (Fig.~\ref{fig:cigar_composition}).
+
+Higher CIGAR-aligned yield tended to coincide with higher mismatch error in both technologies. Minimap2 showed the highest CIGAR yield, with 99.38 $\pm$ 0.06\% for ONT and 99.76 $\pm$ 0.03\% for PacBio HiFi, while also showing the highest mismatch error, with 2.95 $\pm$ 0.24\% in ONT and 1.34 $\pm$ 0.06\% in PacBio. In contrast, VACmap showed a moderate yield, with 98.06 $\pm$ 0.06\% in ONT and 99.42 $\pm$ 0.09\% in PacBio, while also showing the lowest mismatch error, with 1.59 $\pm$ 0.18\% in ONT and 0.68 $\pm$ 0.03\% in PacBio. VG Giraffe was an exception to the trend, showing the lowest yield of all four aligners, with 92.73 $\pm$ 0.72\% in ONT and 99.04 $\pm$ 0.04\% in PacBio, yet without a correspondingly low error rate, with 2.12 $\pm$ 0.16\% in ONT and 1.04 $\pm$ 0.03\% in PacBio (Fig.~\ref{fig:cigar_yield_error}).
+
+%-------------------------------------
+%Third compound figure
+%-------------------------------------
+
+\begin{figure}[!tbp]
+    \centering
+    \begin{tikzpicture}
+    \node[draw=fig1orange, line width=0.8pt, rounded corners=4mm, fill=white,
+          inner sep=2.5mm, text width=\linewidth-5mm-0.8pt] {%
+        {\centering\includegraphics{fig3_legend_30x.pdf}\par}
+        \vspace{-0.9em}
+
+        \begin{subfigure}[t]{0.49\linewidth}
+            \phantomcaption
+            \label{fig:insertion_events}
+            {\raggedright\textbf{\large a}\strut\par}
+            \centering
+            \includegraphics[width=\linewidth]{fig3f_insertions_30x.pdf}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[t]{0.49\linewidth}
+            \phantomcaption
+            \label{fig:deletion_events}
+            {\raggedright\textbf{\large b}\strut\par}
+            \centering
+            \includegraphics[width=\linewidth]{fig3g_deletions_30x.pdf}
+        \end{subfigure}
+
+        \vspace{0.3em}
+
+        \begin{subfigure}[t]{0.49\linewidth}
+            \phantomcaption
+            \label{fig:mq0_reads}
+            {\raggedright\textbf{\large c}\strut\par}
+            \centering
+            \includegraphics[width=\linewidth]{fig3b_mq0_reads_30x.pdf}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[t]{0.49\linewidth}
+            \phantomcaption
+            \label{fig:memory_usage}
+            {\raggedright\textbf{\large d}\strut\par}
+            \centering
+            \includegraphics[width=\linewidth]{fig3c_memory_30x.pdf}
+        \end{subfigure}
+
+        \vspace{0.3em}
+
+        \begin{subfigure}[t]{0.49\linewidth}
+            \phantomcaption
+            \label{fig:runtime}
+            {\raggedright\textbf{\large e}\strut\par}
+            \centering
+            \includegraphics[width=\linewidth]{fig3d_runtime_30x.pdf}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[t]{0.49\linewidth}
+            \phantomcaption
+            \label{fig:thread_hours}
+            {\raggedright\textbf{\large f}\strut\par}
+            \centering
+            \includegraphics[width=\linewidth]{fig3e_thread_hours_30x.pdf}
+        \end{subfigure}
+    };
+    \end{tikzpicture}
+
+    \captionsetup{singlelinecheck=false}
+    \caption{
+        \textbf{Indel events, mapping confidence and computational performance per aligner.}}
+    \label{fig:confidence_resources}
+    \begin{minipage}{\linewidth}\footnotesize\noindent Bars represent metrics of indel events, mapping confidence and computational performance separated by sequencing technology (ONT, left; PacBio HiFi, right). Insertion (a) and deletion (b) events per 100 kb of CIGAR-mapped bases, counted from the samtools stats indel-size (ID) records; panels a and b share a common y-axis. Percentage of mapped reads with mapping quality equal to zero (MQ0) (c). Measured peak RAM for minimap2 and pbmm2 (bars) and configured RAM limit per aligner (dashed lines) (d); peak RAM was not measured (n.m.) for VACmap and VG Giraffe. Observed wall-clock runtime and thread counts were used for the performance evaluation (e). Thread-hours were used as a comparable measure of the cost of running the different aligners (f); thread-hours represent allocated rather than measured CPU time (mean $\pm$ SD values in Supplementary Table~\ref{tab:thread_hours}).
+    \end{minipage}
+\end{figure}
+
+The indels showed a similar pattern across the aligners. In ONT, minimap2 presented the most insertions per 100 kb with 203.36 $\pm$ 31.93 and VG Giraffe the fewest with 165.31 $\pm$ 25.55, whereas in PacBio HiFi the order was reversed, with VG Giraffe presenting the most insertions (85.99 $\pm$ 1.80) and VACmap the fewest (80.72 $\pm$ 1.68). Deletions followed the same tendency: in ONT, the highest value was obtained with minimap2 at 283.76 $\pm$ 49.82 and the lowest with VG Giraffe at 216.14 $\pm$ 35.45 per 100 kb, while in PacBio HiFi, VG Giraffe had the highest value at 76.33 $\pm$ 4.35 and minimap2 the lowest at 71.11 $\pm$ 4.59. In general, all aligners presented more deletions than insertions in ONT, whereas the opposite was observed in PacBio HiFi (Fig.~\ref{fig:insertion_events},~\subref{fig:deletion_events}).
+
+ONT showed a higher MQ0 read percentage than PacBio HiFi. The graph aligners VACmap and VG Giraffe showed higher MQ0 read percentages than the classical seed--chain--extend aligners minimap2 and pbmm2. Among the aligners, VACmap showed the highest percentage of MQ0 reads in both technologies, with 1.79 $\pm$ 0.17\% for ONT and 1.18 $\pm$ 0.15\% for PacBio. In contrast, the lowest MQ0 read rates were obtained with minimap2 and pbmm2, with values of 0.75 $\pm$ 0.28\% and 0.67 $\pm$ 0.25\% in ONT and 0.14 $\pm$ 0.01\% and 0.15 $\pm$ 0.01\% in PacBio, respectively (Fig.~\ref{fig:mq0_reads}).
+
+The main alignment performance parameters of the four aligners are summarized in Table~\ref{tab:alignment_summary}.
+
+\subsection{De novo assembly performance}
+
+%-------------------------------------
+%Fourth compound figure
+%-------------------------------------
+The QUAST evaluation of the Flye, GoldRush and Verkko de novo assemblies was divided into two main configurations based on the ONT and PacBio HiFi technologies: Flye and GoldRush, with each technology analyzed separately, and Verkko, as a hybrid diploid assembler using both technologies. Two main groups of parameters were obtained: the first was contiguity and reference coverage, including the metrics NGA50, genome fraction and duplication ratio; the second was assembly correctness, including structural errors (misassemblies) and base-level errors (mismatches and indels) (Fig.~\ref{fig:denovo_assembly_performance}).
+
+Regarding contiguity and reference coverage, Flye ONT presented the largest NGA50 of the assemblers with 26.47 $\pm$ 0.84 Mb, whereas GoldRush HiFi presented the lowest with 0.07 $\pm$ 0.01 Mb. Hybrid Verkko used a diploid approach and showed 0.78 $\pm$ 0.03 Mb (Fig.~\ref{fig:quast_nga50}). Flye ONT, Flye PacBio HiFi and Verkko presented the highest genome fraction values: 96.67 $\pm$ 0.32\%, 98.19 $\pm$ 0.38\% and 98.56 $\pm$ 0.43\%, respectively. GoldRush presented the lowest genome fraction of the three assemblers, with values of 73.68 $\pm$ 7.06\% in ONT and 68.00 $\pm$ 1.21\% in HiFi (Fig.~\ref{fig:quast_genome_fraction}). Among the single-technology configurations, the duplication ratio was highest in Flye HiFi with 1.33 $\pm$ 0.01, whereas the other configurations showed the expected collapsed-haploid values of 1.01--1.03; hybrid Verkko presented a duplication ratio of 2.06 $\pm$ 0.03, as expected due to its diploidy (Fig.~\ref{fig:quast_duplication_ratio}).
+
+Regarding assembly correctness metrics, misassembly counts were highest in Flye HiFi with 10,682 $\pm$ 351, whereas the lowest were in GoldRush ONT with 4,314 $\pm$ 694 and GoldRush HiFi with 3,061 $\pm$ 411; hybrid Verkko presented 17,787 $\pm$ 1,063, which is expected due to its diploid representation (Fig.~\ref{fig:quast_misassemblies}). Among single-technology configurations, mismatches per 100 kbp were highest in Flye HiFi with 191.09 $\pm$ 1.62, while the lowest value was observed in GoldRush HiFi with 122.79 $\pm$ 0.54; hybrid Verkko presented 176.27 $\pm$ 5.87 (Fig.~\ref{fig:quast_mismatches}). Among single-technology configurations, indels per 100 kbp were highest in GoldRush ONT with 50.92 $\pm$ 1.37, while the other assemblers presented an average value of 32.43 $\pm$ 1.46; hybrid Verkko presented 32.19 $\pm$ 0.19, similar to the other assemblers (Fig.~\ref{fig:quast_indels}).
+
+\begin{figure}[!tbp]
+    \centering
+    \begin{tikzpicture}
+    \node[draw=figassemblygreen, line width=0.8pt, rounded corners=4mm, fill=white,
+          inner sep=2.5mm, text width=\linewidth-5mm-0.8pt] {%
+        {\centering\includegraphics{assembler_quast_legend.pdf}\par}
+        \vspace{-0.9em}
+
+        \begin{subfigure}[t]{0.32\linewidth}
+            \phantomcaption
+            \label{fig:quast_nga50}
+            {\raggedright\textbf{\large a}\strut\par}
+            \centering
+            \includegraphics[width=\linewidth]{assembler_quast_nga50.pdf}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[t]{0.32\linewidth}
+            \phantomcaption
+            \label{fig:quast_genome_fraction}
+            {\raggedright\textbf{\large b}\strut\par}
+            \centering
+            \includegraphics[width=\linewidth]{assembler_quast_genome_fraction.pdf}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[t]{0.32\linewidth}
+            \phantomcaption
+            \label{fig:quast_duplication_ratio}
+            {\raggedright\textbf{\large c}\strut\par}
+            \centering
+            \includegraphics[width=\linewidth]{assembler_quast_duplication_ratio.pdf}
+        \end{subfigure}
+
+        \vspace{0.6em}
+
+        \begin{subfigure}[t]{0.32\linewidth}
+            \phantomcaption
+            \label{fig:quast_misassemblies}
+            {\raggedright\textbf{\large d}\strut\par}
+            \centering
+            \includegraphics[width=\linewidth]{assembler_quast_misassemblies.pdf}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[t]{0.32\linewidth}
+            \phantomcaption
+            \label{fig:quast_mismatches}
+            {\raggedright\textbf{\large e}\strut\par}
+            \centering
+            \includegraphics[width=\linewidth]{assembler_quast_mismatches.pdf}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[t]{0.32\linewidth}
+            \phantomcaption
+            \label{fig:quast_indels}
+            {\raggedright\textbf{\large f}\strut\par}
+            \centering
+            \includegraphics[width=\linewidth]{assembler_quast_indels.pdf}
+        \end{subfigure}
+    };
+    \end{tikzpicture}
+
+    \captionsetup{singlelinecheck=false}
+    \caption{
+        \textbf{QUAST-based de novo assembly performance of Flye, GoldRush and Verkko.}}
+    \label{fig:denovo_assembly_performance}
+    \begin{minipage}{\linewidth}\footnotesize\noindent Bars show each of the three GIAB samples (HG002, HG003, HG004; color-coded) per assembler and technology configuration. Configurations are grouped by input strategy: single-technology (Flye and GoldRush, using ONT and PacBio HiFi input separately) and hybrid (Verkko$^\dagger$, run on combined ONT and HiFi; right of the vertical line). NGA50 (a), genome fraction (b) and duplication ratio (c) represent contiguity and reference coverage; misassemblies (d), mismatches (e) and indels (f) represent assembly correctness, all compared to GRCh38. The NGA50 y-axis in panel a is split, jumping from 1 to 24 Mb, to simplify comparison. Flye and GoldRush produced collapsed-haploid assemblies, whereas Verkko produced a diploid assembly.
+    \end{minipage}
+\end{figure}
+
+\subsection{Cross-strategy comparison of alignment and de novo assembly}
+
+The alignment- and assembly-based strategies were placed side by side using metrics that describe the same aspect of the analysis while keeping their definitions separate (Fig.~\ref{fig:cross_strategy}). Alignment metrics were taken from samtools stats run without flag or MAPQ filters, so secondary alignments were skipped by default while supplementary and MAPQ 0 alignments were included; contig metrics were taken from QUAST 5.3.0 run with \texttt{-{}-large} (minimum contig and alignment length 500 bp, minimum alignment identity 95\%). To compare substitutions only, the inserted and deleted bases of 1--300 bp recorded by samtools stats were subtracted from the NM edit distance of the alignments; because samtools stats does not record longer indels, the result is an upper bound on the substitution rate. Substitutions ranged from 416.00 $\pm$ 32.72 (VACmap HiFi) to 1,810.33 $\pm$ 121.18 (minimap2 ONT) per 100 kbp of CIGAR-mapped read bases, and from 122.79 $\pm$ 0.54 (GoldRush HiFi) to 191.09 $\pm$ 1.62 (Flye HiFi) QUAST mismatches per 100 kbp of aligned contig bases. Because the alignment values come from individual raw reads that retain their sequencing errors, whereas the contigs are consensus sequences, both were plotted on independent axes (Fig.~\ref{fig:cross_strategy}a). Indel events were 381.44--487.11 per 100 kbp for ONT alignments and 152.35--162.32 for HiFi alignments, compared with 31.43--50.92 per 100 kbp for the assemblies (Fig.~\ref{fig:cross_strategy}b). Alignment yield and assembly completeness were described by CIGAR-aligned yield for the aligners (92.73--99.76\% of the input sequencing bases) and by genome fraction for the assemblers (68.00--98.56\% of GRCh38); these percentages have different denominators and were not compared directly (Fig.~\ref{fig:cross_strategy}c). The computational cost of the assemblers was not yet measured, so a cross-strategy comparison of thread-hours could not be made.
+
+%-------------------------------------
+%Fifth compound figure
+%-------------------------------------
+\begin{figure}[!tbp]
+    \centering
+    \includegraphics[width=\linewidth]{cross_strategy_comparison_30x.pdf}
+    \captionsetup{singlelinecheck=false}
+    \caption{
+        \textbf{Alignment and de novo assembly performance across GIAB samples.}}
+    \label{fig:cross_strategy}
+    \begin{minipage}{\linewidth}\footnotesize\noindent Points show individual GIAB samples (color) per method and sequencing input (marker shape); grey bars show the mean $\pm$ SD ($n=3$). Each subpanel has an independent linear y-axis starting at zero. (a) Substitutions per 100 kbp of CIGAR-mapped read bases for the aligners, calculated as the NM edit distance minus the inserted and deleted bases of 1--300 bp from samtools stats (an upper bound, as longer indels are not recorded), and QUAST mismatches (substitutions only) per 100 kbp of aligned contig bases for the assemblers. (b) CIGAR insertion and deletion operations of 1--300 bp per 100 kbp of CIGAR-mapped read bases, and QUAST indel events per 100 kbp of aligned contig bases. (c) CIGAR-mapped bases as a percentage of input sequencing bases, and QUAST genome fraction as a percentage of GRCh38. Paired metrics differ in definition and denominator and are not directly interchangeable. $^\dagger$Verkko (ONT + HiFi, without trio or Hi-C data) was evaluated as one combined diploid FASTA (6.08--6.14 Gb; duplication ratio 2.04--2.09), whereas Flye and GoldRush produced collapsed haploid assemblies; its values are therefore hatched.
+    \end{minipage}
+\end{figure}
+
+\section{Discussion}
+\subsection{Quality control and normalization input dataset}
+High-quality reads are required as input material in next-generation sequencing studies; coverage is often described as the average raw or aligned read depth, and the expected number and length of reads can be defined from it before or after alignment to a reference genome. The general workflow presented in this study implements recommended parameters for whole-genome analysis by using quality metrics including mapped reads, average read length, total reads, average base quality and sequencing error rate, which were also included in the samtools analysis~\cite{Wang2026}. The initial depth range of 30.1--30.6$\times$ represents an adequate and commonly used average depth for a whole-genome study (Supplementary Table~\ref{tab:input_data})~\cite{Sims2014}. The base count was adequate in both technologies (Fig.~\ref{fig:raw_base_counts}), and base quality was consistent with the normally reported read accuracy ranges of 87--98\% in ONT and >99\% in PacBio HiFi, showing higher accuracy in PacBio HiFi than in ONT (Fig.~\ref{fig:q20_q30_reads})~\cite{Logsdon2020}. Mean read length showed similar values in both technologies, consistent with the values described previously (Fig.~\ref{fig:mean_read_length}). Read N50 values were within the ranges reported for ONT (10--60~kb) and PacBio HiFi (10--20~kb), meaning that ONT had higher read contiguity than PacBio HiFi (Fig.~\ref{fig:read_n50})~\cite{Logsdon2020}.
+
+The relationship between the base count and the mean read length (base count in Gb/mean read length in kb) reflects the read count presented in each of the GIAB samples (Fig.~\ref{fig:raw_read_counts}--\subref{fig:mean_read_length}). The lower read count of HG002 is consistent with its base count and the high mean read length obtained, in line with reports of HG002 having the highest mean ONT read length of the trio (Fig.~\ref{fig:mean_read_length}), whereas HG003 and HG004 presented slightly higher read N50 values (Fig.~\ref{fig:read_n50}), indicating differences in the shape of read-length distributions among the GIAB samples~\cite{Logsdon2020}.
+
+\subsection{Aligners}
+\subsubsection{Error rate and mapping yield}
+In terms of error rate, VG Giraffe and VACmap performed better in both technologies, presenting the lowest values compared with minimap2 and pbmm2 (Fig.~\ref{fig:alignment_error_rate}). Although minimap2 and pbmm2, which is also based on minimap2, have become the most widely adopted aligners for long reads, they still struggle to map reads accurately within repetitive genomic regions (5\%–10\% of the human genome) and regions affected by rearrangements (e.g., inversions)~\cite{vacmap2025}. Newer aligners, including Winnowmap2~\cite{Jain2022} and VACmap~\cite{vacmap2025}, have demonstrated improved accuracy in challenging genomic regions compared with minimap2. This accuracy might be explained by the fact that mappers such as VG Giraffe are reported to use an improved algorithm that expands on the classical seed-chain-extend algorithm~\cite{Chang2025}. This improvement has shown higher accuracy in long-read mapping because it is based on acyclic graphs that use distance calculations to extend a linear approach to the graph~\cite{Chang2025}. A study performed by Rautiainen et al.~\cite{Rautiainen2020} showed that another graph aligner, GraphAligner, presented similar accuracy to minimap2 (using the GRCh38 reference genome), with minimap2 aligning slightly more reads correctly: 95\% for GraphAligner and 95.1\% for minimap2. Another study by Delahaye et al.~\cite{Delahaye2021} reported an ONT error rate of about 6\% in raw read quality after assembly with modern approaches in Phase I. The results of this study showed lower error rates than this reported value, ranging from 0.68 $\pm$ 0.03\% to 2.95 $\pm$ 0.24\% (Fig.~\ref{fig:alignment_error_rate}).
+
+In general terms, the mapped reads showed a higher mapping rate in PacBio HiFi than in ONT (Fig.~\ref{fig:mapped_unmapped_reads}). VACmap was the exception, with 100\% mapping before normalization was applied, but its results should be interpreted carefully because its ``unmapcountlist'' log files are excluded by default and were not included in the final results, causing this apparent 100\% mapping~\cite{vacmap2025}. For this reason, the raw input data counts were used to normalize the mapping performance analysis. Regarding ONT technology, high error rates are still a challenge during sequencing~\cite{Zhang2022}. This issue might be influenced by the ONT mechanism. ONT employs a different sequencing strategy based on nanopores, in which reads are influenced by short k-mers (5 bp) rather than a single nucleotide. Its performance might vary based on the configuration and platform~\cite{Zheng2026}. Also, the ONT long-read mechanism uses nanoscale protein pores, or nanopores, which might vary due to their biological component, possibly explaining the difference in aligner performance between ONT and PacBio HiFi (Wang et al., 2021). In contrast, PacBio HiFi reads are based on reading the same circular DNA molecule multiple times and collapsing the passes into a consensus sequence of accurate long reads. The reported accuracy value for HiFi is 99.9\%~\cite{Zheng2026}.
+
+For mapped and unmapped bases, all the aligners showed values of 99.30--99.98\%, except for VG Giraffe in ONT with 95.31 $\pm$ 0.29\%. The PacBio HiFi results reflect its consistency and agree with the mapped read rates, while ONT showed a difference because minimap2, pbmm2 and VACmap had higher mapped base rates than read mapping rates (Fig.~\ref{fig:mapped_unmapped_bases}). These results might be associated with shorter reads that were unmapped, probably due to low quality, while longer reads were retained, increasing the proportion of mapped bases. VG Giraffe in particular has been described as able to account for read quality and sequencing bias, which might be positive~\cite{Liu2024}. However, the results show that it is particularly sensitive to ONT technology (Fig.~\ref{fig:mapped_unmapped_bases}). The Giraffe study describes how its HiFi mapping model was trained on reads mapped by Giraffe. In the same study, Chang et al.~\cite{Chang2025} reported a higher proportion of unmapped bases in ONT than in PacBio during the alignment of chromosome 13, used as a negative control and obtained from the HG002 R10 reads, with about 5\% for ONT and 0.2\% for PacBio HiFi. For minimap2, about 4.1\% was reported in ONT and 0.3\% in HiFi, while pbmm2 showed a similar but slightly lower proportion of unmapped bases. These results are similar to the values obtained in this study, and Giraffe's mapped and unmapped base results might be explained by its model trained with HiFi reads, which might lead to better results in HiFi than in ONT~\cite{Chang2025}.
+
+\subsubsection{CIGAR composition and the yield--accuracy trade-off}
+CIGAR-aligned and unaligned bases showed a yield of 98.06--99.38\% in ONT for the aligners, except for VG Giraffe, with the highest CIGAR yield obtained by minimap2 at 99.38 $\pm$ 0.06\%. In PacBio HiFi, all aligners showed a yield of 99.04--99.76\%, with the best performance also obtained by minimap2 at 99.76 $\pm$ 0.03\% (Fig.~\ref{fig:cigar_composition}). In ONT, although minimap2 showed the highest CIGAR yield, its mismatch proportion was also the highest at 2.93 $\pm$ 0.24\%. Regarding CIGAR-unaligned bases, the highest proportion was found in VG Giraffe, with an average value of 7.27 $\pm$ 0.72\% in ONT and 0.96 $\pm$ 0.04\% in PacBio HiFi (Fig.~\ref{fig:cigar_composition}). This proportion is consistent with the results reported by Chang et al.~\cite{Chang2025}, but shows slightly higher average unmapped bases in ONT and PacBio HiFi. These results suggest that minimap2 might map a higher proportion of the genome at the cost of lower accuracy, based on the high CIGAR mismatch rates in both technologies. VACmap had a slightly lower CIGAR-mapped yield of 98.06 $\pm$ 0.06\% in ONT and showed the lowest average mismatch rate of 1.55 $\pm$ 0.18\%. In PacBio HiFi, it had a yield of 99.42 $\pm$ 0.09\% and the lowest mismatch rate of 0.67 $\pm$ 0.03\% (Fig.~\ref{fig:cigar_composition}); this suggests that VACmap offers the best balance between CIGAR-mapped yield and high accuracy.
+
+Similarly, a higher normalized CIGAR-aligned yield tended to coincide with a higher mismatch error rate in both ONT and PacBio HiFi (Fig.~\ref{fig:cigar_yield_error}). The points show VG Giraffe in particular with the lowest mapping rate and an intermediate mismatch error rate, considerably different from the other aligners. Minimap2 and pbmm2 showed similar performance, with the highest CIGAR-aligned yield and the highest mismatch error rate. VACmap presented a slightly lower mapping rate than minimap2 and pbmm2, but the lowest mismatch error rate in both technologies. Other studies have aligned PacBio HiFi and ONT sequencing input datasets of CHM13 and HG002 using the GRCh38 reference genome. The results showed that other aligners, including minimap2, were less informative in coverage and less reliable because they presented more mismatches~\cite{vacmap2025}.
+
+\subsubsection{Indel events}
+In general, all aligners presented more deletions than insertions in ONT, whereas in PacBio HiFi insertions exceeded deletions (Fig.~\ref{fig:insertion_events},~\subref{fig:deletion_events}), consistent with deletions being the dominant error type of nanopore reads~\cite{Delahaye2021}. In ONT, minimap2 presented the highest insertion and deletion rates and VG Giraffe the lowest, in line with minimap2 also showing the highest CIGAR-aligned yield and mismatch rate (Fig.~\ref{fig:cigar_composition}). HG002 showed higher indel rates than HG003 and HG004 in ONT for every aligner, but not in PacBio HiFi, where HG002 presented the lowest deletion rates. Since the observed ONT rates (150--340 events per 100 kb) are far above the rates observed in HiFi with the same samples, this sample effect most likely reflects differences in the ONT read data (e.g.\ the longer HG002 reads, Fig.~\ref{fig:mean_read_length}) rather than differences between the genomes themselves. In contrast, in PacBio HiFi insertion and deletion rates were similar across the four aligners, suggesting a higher dependency on the aligner in ONT than in HiFi.
+
+\subsubsection{Mapping confidence}
+The proportion of MAPQ0 reads (mapping quality equal to zero) was higher in ONT than in PacBio HiFi. MAPQ0 reads reflect multiple alignment positions rather than a specific unique site. Among the aligners, the highest value was obtained with VACmap, showing an average of 1.79 $\pm$ 0.17\% in ONT and 1.18 $\pm$ 0.15\% in PacBio HiFi. In contrast, minimap2 and pbmm2 showed the lowest proportions of reads with mapping quality equal to zero (Fig.~\ref{fig:mq0_reads}). These results suggest that the aligners might have different criteria for assigning a mapping quality of zero. Surprisingly, VACmap mapping quality calculations are based on the minimap2 equation. However, its mechanism works differently from those of other aligners, including the graph aligner VG Giraffe, because it focuses on complex structural variants and uses hybrid linear and non-linear scoring to build a Variant-aware Chaining (VAC) algorithm within a weighted directed acyclic graph (DAG). These graphs are especially useful in regions with sequencing errors and SNPs where few anchors can be generated; the use of smaller k-mers, typically 9, helps increase the number of matches and thus anchors~\cite{vacmap2025}. However, this reduction in k-mer size might cause multiple alignments instead of unique ones, as can occur with larger k-mers, leading to a possible increase in MAPQ0 reads and even mapping rates.
+
+\subsubsection{Computational performance}
+In general, the RAM usage showed that the RAM limit was not exceeded by the aligners, with the exception of pbmm2 in HG002 with a slightly higher RAM of 67.14 GB in ONT and 65.78 GB in PacBio HiFi (Fig.~\ref{fig:memory_usage}). VG Giraffe had the highest RAM limit with 160 GB, but its peak was not measured, while the lowest measured was minimap2 with 37.42 $\pm$ 0.84 GB in ONT and 38.21 $\pm$ 3.10 GB in PacBio HiFi (Fig.~\ref{fig:memory_usage}). Regarding the wall-clock time, VACmap presented the highest runtime with 13.74 $\pm$ 0.29 h in ONT, while the lowest values were obtained in pbmm2 with 1.61 $\pm$ 0.13 h in ONT and 1.45 $\pm$ 0.08 h in PacBio HiFi (Fig.~\ref{fig:runtime}). The thread-hours results showed VACmap with the highest computational cost and VG Giraffe with the lowest (Fig.~\ref{fig:thread_hours}). Studies regarding the comparison of genome graphers have mentioned how GraphAligner presented 3$\times$ the runtime of minimap2, associated with building graphs compared to an optimized aligner, also reporting a peak memory of 20 GB for minimap2 and 72.1 GB for GraphAligner~\cite{Rautiainen2020}. Sirén et al.~\cite{Sirén2021} mentioned VG Giraffe uses memory indexes, which increase its memory consumption above that of other mappers, a statement consistent with the 160 GB limit needed in this study~\cite{Chang2025}. In general, as described in other studies, graph aligners and ONT data showed a higher computational cost; VACmap in ONT presented the highest value with 13.74 $\pm$ 0.29 h and 219.90 $\pm$ 4.59 thread-hours (Fig.~\ref{fig:runtime},~\subref{fig:thread_hours}).
+
+%General interpretation of the discussion:
+\subsubsection{General interpretation}
+Minimap2 is one of the most widely adopted aligners for long reads, but it struggles with accurately mapping repetitive regions and genomic rearrangements~\cite{Mahmoud2025,vacmap2025}. The improved accuracy of newer aligners such as VACmap in challenging genomic regions compared to minimap2 was also observed in this study (Fig.~\ref{fig:alignment_error_rate}). For instance, in a study based on CHM13 and HG002 against the GRCh38 reference genome, VACmap was more reliable than other aligners such as minimap2, since these mappers generated more mismatches and less informative coverage than VACmap, which might affect downstream variant calling in complex rearrangement studies~\cite{vacmap2025}.
+
+However, graph aligners do not necessarily always show the best performance. VG Giraffe has been described to be able to map both long and short reads with fast graph-based modeling and good accuracy~\cite{Chang2025}. In this study, this was found to be relative, because VG Giraffe is sensitive to ONT technology (Fig.~\ref{fig:mapped_unmapped_reads}--\subref{fig:cigar_composition}) similar to the findings of Chang et al.~\cite{Chang2025}, where more true positives were found with PacBio HiFi than with ONT. Also, it has been described that Giraffe showed a better calibration than other mappers and the incorrectly mapped reads have a quality of MAPQ 60, meaning it has a lower probability of overestimating its accuracy~\cite{Chang2025}. The obtained results here showed VG Giraffe might not be as accurate as described (Fig.~\ref{fig:alignment_error_rate},~\subref{fig:cigar_yield_error}). Another assumption in VG Giraffe is that true variations will be counted as read errors in the scoring~\cite{Liu2024}. In addition, gapped alignment is a challenge in long reads, including in a linear context, since it can produce several large dynamic programming matrices which might generate large and complex graph topologies, which might be computationally expensive~\cite{Liu2024}. Genome graphs different from VACmap are based on co-linear matching during the graph generation and read alignment, leading to error-prone topologies and misinterpretation of non-linear structural variations (SVs)~\cite{vacmap2025}. This is an upside of other graph aligners such as VACmap, where higher accuracy in difficult mapping genomic regions is found compared to other graphers and minimizers~\cite{Mahmoud2025}.
+
+In this study, the results point to PacBio HiFi as a more precise technology with higher mapping rates in the four aligners compared to ONT (Fig.~\ref{fig:mapped_unmapped_reads}). The classical minimizers minimap2 and pbmm2 had a similar performance with a high read mapping rate slightly lower than the mapped bases rate (Fig.~\ref{fig:mapped_unmapped_reads},~\subref{fig:mapped_unmapped_bases}), but were not as accurate as genome graphers due to their higher mismatch proportion in the CIGAR yield (Fig.~\ref{fig:cigar_composition}).
+Classical reliance on a reference assembly might lead to bias in difficult-to-map regions, such as repetitive regions where structural variations (SVs) are commonly found~\cite{Sirén2021}. Graph aligners might solve these complex regions, but differences within the genome graphers were found too. VACmap showed a higher mapping rate in ONT with lower mismatches in the CIGAR yield compared to VG Giraffe (Fig.~\ref{fig:mapped_unmapped_reads},~\subref{fig:cigar_composition}); the latter was particularly sensitive to ONT technology, showing low performance with it. Computational cost was higher in the graph aligners compared to the optimized minimizers, associated with their mechanisms where complex graphs are used (Fig.~\ref{fig:runtime},~\subref{fig:thread_hours})~\cite{Mahmoud2025}. Based on these results, it is recommended to consider the type of sequencing technology, computational resources, sequencing depth, read length, cohort size and main aim (for instance, SV detection or mapping depth), while understanding the trade-off of each tool~\cite{Rausch2025}.
+
+\subsection{Assemblers}
+\subsubsection{Contiguity (NGA50)}
+The highest NGA50, obtained by Flye ONT with 26.47 $\pm$ 0.84 Mb, indicates that half of the reference genome length is covered by aligned blocks of at least this length, in contrast to the HiFi results (Fig.~\ref{fig:quast_nga50}). A study of human assembly using uncorrected Flye with HG002 against the T2T-CHM13v2.0 reference genome reported an NA50 of 31.42 Mb~\cite{Munoz2025}; although this is not exactly the same metric and uses a different reference, it also shows a tendency towards high contiguity with ONT. The lowest value, 0.07 $\pm$ 0.01 Mb in GoldRush HiFi (Fig.~\ref{fig:quast_nga50}), is considerably low compared to the 18.3--22.2 Mb GoldRush ONT NGA50 reported in other studies with other GIAB samples at a coverage of 67--72$\times$~\cite{Wong2023}. Kazemi et al.~\cite{Kazemi2026} reported 12.3 Mbp in ONT and 7.9 Mbp in PacBio HiFi after assembling a whole genome at 67$\times$ coverage using GoldRush. The lower coverage of $\sim$30$\times$ used in this study probably caused lower GoldRush contiguity and more fragmented assemblies, which together with the low genome fraction might explain the low NGA50, while GoldRush showed the fewest misassemblies (Fig.~\ref{fig:quast_genome_fraction},~\subref{fig:quast_misassemblies}; Supplementary Fig.~\ref{fig:supp_nga50_misassemblies}). 
+
+Regarding the configuration, the optimized GoldRush configuration described uses $m=2000$, $k_{\text{ntLink}}=72$, $w_{\text{ntLink}}=500$ to obtain enough GoldPaths and thus contiguity in the assemblies~\cite{Kazemi2026}. In contrast, the actual configuration used in this study for GoldRush was the default mode, using the following parameters: $m=5000$, $k_{\text{ntLink}}=40$, $w_{\text{ntLink}}=250$ for ONT and $m=10000$, $k_{\text{ntLink}}=40$, $w_{\text{ntLink}}=250$ for PacBio HiFi, whose smaller k-mer and window sizes might have caused a lower density of k-mers for the generation of GoldPaths for further scaffolding, probably affecting the contiguity in the final results.
+
+\subsubsection{Genome fraction}
+Genome fraction showed the highest value in Flye HiFi among the single-technology configurations and the lowest in GoldRush in both technologies, whereas the hybrid Verkko genome fraction was >98\% (Fig.~\ref{fig:quast_genome_fraction}). Other studies have described a genome fraction of 91.25\% for Flye ONT based on HG002 against the T2T-CHM13v2.0 reference genome~\cite{Munoz2025}. Similarly, Wong et al.~\cite{Wong2023} reported a genome fraction of 96.3\% for Flye ONT, whereas Chen et al.~\cite{Chen2021} described 90.36\% for Flye HiFi. The values obtained in this study were similar to the reported values for Flye ONT, but slightly better for HiFi, which might be due to improvements in the HiFi mode of Flye, such as those in version 2.9.2 (March 2023). A study of HG002 reported a genome fraction of 95.389\% for Verkko, close to the value obtained in this study, which might suggest a consistency of this assembler across different GIAB samples~\cite{Espinosa2023}. Compared with the alignment strategy, the genome fraction of the assemblers was more variable (68.00--98.56\%) than the CIGAR-aligned yield of the aligners (92.73--99.76\%), although both percentages have different denominators and describe the reference representation from a different perspective (Fig.~\ref{fig:cross_strategy}c).
+
+\subsubsection{Duplication ratio}
+The duplication ratio was highest in Flye HiFi among the single-technology configurations and in Verkko overall (Fig.~\ref{fig:quast_duplication_ratio}). Each GIAB sample was assembled individually. The slightly higher ratio in Flye HiFi suggests a partial retention of haplotypic sequences or overlapping contigs, probably due to heterozygous sites that generated variant alleles that were not collapsed in the assembly graph~\cite{Guan2020,Nurk2020}. The Verkko ratio of about 2.0 reflects the representation of both maternal and paternal haplotypes aligned against the haploid GRCh38~\cite{Rautiainen2023}. Verkko assemblies have been described as highly complete, recovering slightly more multi-copy genes but at the expense of a slightly higher false-duplication rate within individual haplotypes, similar to the results found in this study~\cite{Rautiainen2023}. High duplication might therefore indicate the retention of both haplotypes, but this is hard to establish because the QUAST metrics do not distinguish alternate contig sets from primary assemblies (see Section~\ref{sec:assembler_recommendations}).
+
+\subsubsection{Misassemblies and mismatches}
+The QUAST misassembly metric counts breakpoints relative to the GRCh38 reference, so it includes both genetic differences and assembly errors, whereas insertion and deletion events are reported as a separate metric. Flye HiFi presented the highest misassembly count among the single-technology configurations (10,463--11,087), together with higher mismatches than Flye ONT, while indels remained similar (Fig.~\ref{fig:quast_misassemblies}--\subref{fig:quast_indels}). This points to differences relative to GRCh38 rather than to an intrinsic lack of HiFi accuracy. The higher misassembly and mismatch values are probably associated with the partial retention of haplotigs observed in the duplication ratio~\cite{Wong2023,Munoz2025}. Other studies have reported 14,478 events for Flye HiFi including local and extensive misassemblies, where extensive misassemblies are translocations, inversions and relocations of >1~kb and local misassemblies are <1~kb~\cite{Chen2021}. When both metrics are combined in this study, the count for HG002 is 25,389, which is higher than the value reported by Chen et al.~\cite{Chen2021}, although the values might not be directly comparable due to differences in coverage and sequencing data; but also this might be caused by the partial retention of haplotypes. The hybrid Verkko presented the highest misassembly and mismatch counts of all the assemblers, probably as a result of including both maternal and paternal haplotypes~\cite{Rautiainen2023}.
+
+\subsubsection{Indel events and comparison with read alignments}
+Regarding the indels, GoldRush ONT presented the highest values with 50.92 $\pm$ 1.37 per 100 kbp compared to the other assemblers. Other studies reported 241.01 indels per 100 kbp for \textit{H. sapiens}, but the coverage of 67$\times$ might cause an increase in this value~\cite{Kazemi2026}. Zhang et al. described how the GoldRush pipeline might produce regions with high error rates due to its scaffolding stage, where ntLink joins contigs, often leaving gaps or ambiguous bases between them. An extra ntLink gap-filling step can be done, but filled gaps are never polished in the GoldRush workflow, which introduces low base quality in these regions~\cite{Zhang2025}. This error in the mechanism was not confirmed, but it might give a plausible explanation for the value obtained. An alternative to correct this issue is adding a correction step using GoldPolish base error correction, which may improve the performance in terms of indels and mismatches~\cite{Zhang2025}. In general, the assemblies presented considerably fewer indel events (31.43--50.92 per 100 kbp) and mismatches (122.79--191.09 per 100 kbp) than the read alignments (152.35--487.11 indel events and 676.01--2,952.81 NM edit distance per 100 kbp), which is expected since the consensus of the assembly reduces the random sequencing errors present in the individual reads (Fig.~\ref{fig:cross_strategy}a,~b).
+
+\subsubsection{Assembler recommendations}
+\label{sec:assembler_recommendations}
+Based on the assembler results, there are alternatives and extra steps advisable for further studies. For the duplication correction it is recommended to use BUSCO to detect duplicated genes and to identify whether alleles belong to alternate and/or primary contig sets. Also, purge\_dups can be used to reduce duplication, but the redundant regions should be analyzed instead of only being collapsed to obtain lower duplication values~\cite{Guan2020,Nurk2020}. For GoldRush, it would be important to use the optimized GoldRush configuration with larger window and k-mer sizes to increase GoldPaths and contiguity in the assemblies; the configuration may include $m=2000$, $k_{\text{ntLink}}=72$, $w_{\text{ntLink}}=500$~\cite{Kazemi2026}. Other extra steps include correction steps, especially for the high indel and mismatch values of GoldRush, by the use of GoldPolish base error correction~\cite{Zhang2025}. In this way, benchmarking can be expanded to correction steps to verify possible alternatives to solve the limitations found in this study, such as the high duplication, mismatches and misassemblies. 
 
 
-\bibitem{Helal2024}
-Helal, A. A., Saad, B. T., Saad, M. T., Mosaad, G. S., \& Aboshanab, K. M. (2024). Benchmarking long-read aligners and SV callers for structural variation detection in Oxford nanopore sequencing data. Scientific Reports, 14(1), 6160.
+% Draft notes: set \shownotestrue in the preamble to print them again
+\ifshownotes
+\section{Notes for discussion}
+%Important for Flye ONT
+Flye presented in this study using the reference T2T-CHM13v2.0 genome based on HG002~\cite{Munoz2025}:
+Contigs of 845~\cite{Munoz2025}
+Mismatches 141.24~\cite{Munoz2025}
+Indels 107.35~\cite{Munoz2025}
+Genome fraction 91.25\%~\cite{Munoz2025}
+NA50 31.42 Mbp,~\cite{Munoz2025}
+Total length 2.85885202~\cite{Munoz2025}
 
-\bibitem{Mahmoud2025}
-Mahmoud, M., Agustinho, D. P., \& Sedlazeck, F. J. (2025). A Hitchhiker's Guide to long-read genomic analysis. Genome research, 35(4), 545-558.
+%Flye ONT 
+Flye presented in this study using filtered, uncorrected long reads from HG002 and evaluated against the T2T-CHM13v2.0 reference genome~\cite{Munoz2025} (67x COVERAGE):
+Total assembly length of 2.85885202 Gbp~\cite{Munoz2025}
+845 contigs~\cite{Munoz2025}
+N50 of 38.287351 Mbp~\cite{Munoz2025}
+L50 of 23 contigs~\cite{Munoz2025}
+Largest contig of 108.413336 Mbp~\cite{Munoz2025}
+Genome fraction of 91.251\%~\cite{Munoz2025}
+NA50 of 31.423272 Mbp~\cite{Munoz2025}
+925 misassemblies~\cite{Munoz2025}
+141.24 mismatches per 100 kbp~\cite{Munoz2025}
+107.35 indels per 100 kbp~\cite{Munoz2025}
+K-mer completeness of 96.1756\%~\cite{Munoz2025}
+Quality value (QV) of 33.7261~\cite{Munoz2025}
+12,249 complete BUSCOs (C)~\cite{Munoz2025}
+12,024 complete single-copy BUSCOs (S)~\cite{Munoz2025}
+225 complete duplicated BUSCOs (D)~\cite{Munoz2025}
+552 fragmented BUSCOs (F)~\cite{Munoz2025}
+979 missing BUSCOs (M)~\cite{Munoz2025}
 
-\bibitem{Sirén2025}
-Sirén, J., Monlong, J., Chang, X., Novak, A. M., Eizenga, J. M., Markello, C., ... & Paten, B. (2021). Pangenomics enables genotyping of known structural variants in 5202 diverse genomes. Science, 374(6574), abg8871.
+%Flye ONT
+Flye \cite{Wong2023}:
+Contig NGA50 26.1 \cite{Wong2023}
+Missasemblies 940 \cite{Wong2023}
+Genome fraction 96.3 \cite{Wong2023}
+Total length 2.9  \cite{Wong2023}
+Duplication 1.0 \cite{Wong2023}
+Mismatches per 100 kps 140.6 \cite{Wong2023}
+Indels per 100 kbp 54.5 \cite{Wong2023}
+Number of N per 100 kbp0 \cite{Wong2023}
 
-\end{thebibliography}
+% Flye ONT
+Flye \cite{Chen2021}:
+Contig NA50 1.48 Mbp \cite{Chen2021}
+Misassemblies (extensive + local) 7688 \cite{Chen2021}
+Reference coverage 89.80\% \cite{Chen2021}
+Total length 2.87 Gbp \cite{Chen2021}
+Mismatches + indels per 100 kbp 3.394 \cite{Chen2021}
+Number of contigs 584 \cite{Chen2021}
+Contig N50 51.7 Mbp \cite{Chen2021}
 
+% Flye HiFi
+Flye \cite{Chen2021}:
+Contig NA50 2.28 Mbp \cite{Chen2021}
+Misassemblies (extensive + local) 14478 \cite{Chen2021}
+Reference coverage 90.36\% \cite{Chen2021}
+Total length 2.96 Gbp \cite{Chen2021}
+Mismatches + indels per 100 kbp 1.734 \cite{Chen2021}
+Number of contigs 2379 \cite{Chen2021}
+Contig N50 35.1 Mbp \cite{Chen2021}
+
+% Flye HiFi
+Flye \cite{GTasm2024}:
+Contig NGA50 0.11 Mbp \cite{GTasm2024}
+Contig NA50 0.38 Mbp \cite{GTasm2024}
+Misassemblies 880 \cite{GTasm2024}
+Genome fraction 64.013\% \cite{GTasm2024}
+Number of contigs 29666 \cite{GTasm2024}
+Largest contig 40.40 Mbp \cite{GTasm2024}
+
+
+%Goldrush ONT
+GoldRush presented in this study for the \textit{H. sapiens} ONT dataset~\cite{Kazemi2026} (67x COVERAGE):
+Mismatches of 172.66 per 100 kbp~\cite{Kazemi2026}
+Indels of 241.01 per 100 kbp~\cite{Kazemi2026}
+53.74 N's per 100 kbp~\cite{Kazemi2026}
+NG50 of 28.0 Mbp~\cite{Kazemi2026}
+NGA50 of 12.3 Mbp~\cite{Kazemi2026}
+1,925 misassemblies~\cite{Kazemi2026}
+4,159 local misassemblies~\cite{Kazemi2026}
+Genome fraction of 90.6\%~\cite{Kazemi2026}
+Total assembly length of 2,871.90 Mbp~\cite{Kazemi2026}
+Duplication ratio of 1.03~\cite{Kazemi2026}
+
+%Goldrush PacBio
+GoldRush presented in this study for the \textit{H. sapiens} PacBio dataset~\cite{Kazemi2026}:
+Mismatches of 82.35 per 100 kbp~\cite{Kazemi2026}
+Indels of 36.67 per 100 kbp~\cite{Kazemi2026}
+113.39 N's per 100 kbp~\cite{Kazemi2026}
+NG50 of 8.7 Mbp~\cite{Kazemi2026}
+NGA50 of 7.9 Mbp~\cite{Kazemi2026}
+880 misassemblies~\cite{Kazemi2026}
+575 local misassemblies~\cite{Kazemi2026}
+Genome fraction of 89.9\%~\cite{Kazemi2026}
+Total assembly length of 2,838.10 Mbp~\cite{Kazemi2026}
+
+%Verkko Hybrid
+Verkko presented in this study for the \textit{H. sapiens} hybrid
+PacBio HiFi + Oxford Nanopore dataset~\cite{Espinosa2023}:
+Verkko \cite{Espinosa2023}:
+Misassemblies 27130 \cite{Espinosa2023}
+Genome fraction 95.389\% \cite{Espinosa2023}
+Total length 5.83896 Gbp \cite{Espinosa2023}
+Number of contigs 23945 \cite{Espinosa2023}
+Contig N50 0.86 Mbp \cite{Espinosa2023}
+Contig NG50 1.47 Mbp \cite{Espinosa2023}
+Largest contig 50.03 Mbp \cite{Espinosa2023}
+Total aligned length 5.68168 Gbp \cite{Espinosa2023}
+Total mismatches 9301410 \cite{Espinosa2023}
+
+
+%-------------------------------------------------------------------------------------------------------
+%Recommendations in the end for future quality assessment for the benchmarking
+
+Other tools for the assessment of the quality metrics are NanoPlot~\cite{Mahmoud2025}.
+
+For further studies it will be recommended the use of correctors. In this correctors it has been pointed out how the ONT has higher correction than the pb reads~\cite{Mahmoud2025}.
+
+Other applications such as the graph-based hybrid genome assembly might be also an interesting approach to align reads to a graph~\cite{Mahmoud2025}.
+
+It has been found that HiFi reads is good strategy for obtaining high-quality de novo assembly with affordable cost, but this hybrid strategies require improvement to obtain higher precise assemblies~\cite{Espinosa2023}. 
+
+%Last paragraph of importance to close and conclude
+Different challenges that might have existing alignments methods, show the importance of their comparison to understand how to overcome their limitations and in which cases they should be implemented~\cite{vacmap2025}.
+
+%-------------------------------------------------------------------------------------------------------
+%Factors that might influence the final alignment process 
+Graphaligner in this case showed a similar accurately compared to minimap2 with aligned slightly more reads correctly (used the GRCh38 reference genome)~\cite{Rautiainen2020}. 
+
+%mapping rate note
+The sequencing throughput, mapping rate and read length might influence downstream analysis~\cite{Wang2026}.
+
+Those reads which are not included in the total mapped reads are excluded due to their lower scoring mapping and low mapping quality~\cite{Wilton2022}.
+
+%Error rate importance
+
+The increased read length and their different error characteristics might be challenging to the accurate alignment. The development of new approaches to improve efficiency and accuracy of reference genomes is important. This mapping step is the base before many studies, being essential to outlook different errors that might impact the final results~\cite{Mahmoud2025}.
+
+The GG captures the complete genomic variation, allowing the construction of de novo assemblies for genome graph representations and the alignment of reads to existing graphs. An example is VG Giraffe, which can be used to construct graphs specifically for the purposes of variant identification in further structural variant analyses~\cite{Mahmoud2025}.
+
+%Limitations of graph aligners
+The inclusion of alternative contigs in the reference genome has been described to impact the alignment precision negatively~\cite{Mahmoud2025}.
+
+%-------------------------------------------------------------------------------------------------------
+%graph aligners how they are positive and better than the traditional mappers 
+%Graph genome references might introduce bias, specifically in genetically diverse population and nonmodel organisms studies~\cite{Mahmoud2025}.$
+
+The GG captures the complete genomic variation, allowing the construction of de novo assemblies for genome graph representations and the alignment of reads to existing graphs. An example is VG Giraffe, which can be used to construct graphs specifically for the purposes of variant identification in further structural variant analyses~\cite{Mahmoud2025}.
+
+%Scaffolding upside and downside
+Scaffolding methods provide additional information to combine contig and using unresolved sequences. The gap filling strategies can replace this difficult to define sequences by the use of unmmaped parts of reads in the same region~\cite{Mahmoud2025}.
+
+However, the scaffolding outside the assembly graph might introduce issues~\cite{Mahmoud2025}.
+
+%Limitations of the seed-chain-extend
+Chaining requires an specific ordering and a distance within the seeds which makes it compute expensive in a graph~\cite{Chang2025}. 
+
+%Limitations of graph aligners
+GraphAligner is useful methods with the limitation of a slow processivity due to its arbitrary graphs which increase with complexity. Despite minigraph is based on the structural variants (SV), it struggles with small insertions and deletions~\cite{Chang2025}. 
+
+%-------------------------------------------------------------------------------------------------------
+%Discussion of minimap2 vs Graph aligners
+
+%------------------------------------------------------------------------------------------------------
+%Considerations for hybrid aligners (Verkko)
+Other applications such as the graph-based hybrid genome assembly might be also an interesting approach to align reads to a graph~\cite{Rautiainen2023}.
+
+Verkko has been described with lower contiguity and higher computational cost specially when genome complexity is higher.
+
+%Benchmarking metrics used in other Samtools metrics studies
+Benchmarking implement comparison within the sequencing quality metrics using Samtools (mapped reads, average read length, total reads, average base quality and sequencing error rate)~\cite{Wang2026}. 
+
+The sequencing throughput, mapping rate and read length might influence downstream analysis~\cite{Wang2026}.
+
+%Graph aligners in general how they work and how their problem might be solved
+Most part of the graph aligners are based on a seed-and-extend strategy by which the seeding is based on the reads matches with the graph for the graph indexing. Multiple strategies include:
+
+\begin{itemize}
+\item De Bruijn graph alignment tools based on K-mer indices, positional Burrows--Wheeler transform based on the indexation of multiple sequence alignments within genomes. Indexing variation graph are challenging due to the paths creation is possible to be exponential because of the variants presence.
+\end{itemize}
+
+To avoid the exponential issue the use of a limited variants for the heuristical index paths is necessary or using specific haplotypes panels~\cite{Rautiainen2023}.
+
+Giraffe implement a graph Burrows--Wheeler transform (GBWT) index to store the query the efficiency of haplotype~\cite{Sirén2021}.
+
+%Positive advantages of Giraffe 
+Giraffe is based on path of pangenomes of individual genomes, use as reference haplotypes. This allow to prioritize alignments where known sequences are consistent, not focusing in the unlikely biological alleles and limiting the sequence space by which the reads might be aligned to reduce the size of the issue In this way complex graph regions where paths represent rare or absence sequences~\cite{Sirén2021}.
+
+Giraffe has been described with other high quality mappers such as VG-MAP with high precision or higher call in the different read technologies~\cite{Sirén2021}.
+
+The advantages from using a genome graph are important specially during cases of samples were the linear reference results are different and a genome graph might solve this issues~\cite{Sirén2021}.
+
+
+%Solutions for error rates problems
+The ONT and HiFi technologies still has higher errors during the sequencing. Some strategies to reduce this error issue is the use of higher coverage in the prealignment phase or polishing the draft sequence post-alignment phase~\cite{Zhang2022}.
+
+Error corrections can be done by the implementation of de novo assemblers NECAT or Canu, useful for noisy ONT signals. Canu is based on a two-step progressive selection reducing noisy ONT and increasing accuracy~\cite{Zhang2022}.
+
+% TODO: Relevant information about the ONT vs PacBio memory and time use -- check Figure 4 of Chang2025.
+\fi
+
+\printbibliography[title={References}]
+
+% ============================================================
+% SUPPLEMENTARY INFORMATION
+% ============================================================
+
+\clearpage
+\section*{Supplementary Information}
+\addcontentsline{toc}{section}{Supplementary Information}
+\setcounter{figure}{0}
+\captionsetup[figure]{name={Supplementary Fig.}}
+
+\setcounter{table}{0}
+\captionsetup[table]{name={Supplementary Table}}
+
+% ============================================================
+% SUPPLEMENTARY TABLE S1: INPUT SEQUENCING DATA
+% ============================================================
+
+\pgfplotstableread[
+    col sep=tab
+]{tables/input_sequencing_data_30x.tsv}
+\inputdatatable
+
+\begin{table}[H]
+\centering
+
+\caption{
+\textbf{Input raw sequencing data per GIAB sample and sequencing technology.}
+Raw input reads and bases obtained for each GIAB sample and sequencing technology with approximately 30$\times$ coverage (3.1~Gb genome). The HG002, HG003 and HG004 datasets were used as input for all four aligners.}
+
+\label{tab:input_data}
+
+\footnotesize
+\pgfplotstabletypeset[
+columns={technology,sample,reads_m,bases_gb,coverage_x,mean_read_length_kb},
+columns/technology/.style={column name={Technology},string type,column type=l,
+    % show the technology only on the first row of each block
+    postproc cell content/.code={\ifnum\pgfplotstablerow=0 \else\ifnum\pgfplotstablerow=3 \else\pgfkeyssetvalue{/pgfplots/table/@cell content}{}\fi\fi}},
+columns/sample/.style={column name={Sample},string type,column type=l},
+columns/reads_m/.style={column name={Reads (M)},fixed,fixed zerofill,precision=2},
+columns/bases_gb/.style={column name={Bases (Gb)},fixed,fixed zerofill,precision=2},
+columns/coverage_x/.style={column name={Coverage ($\times$)},fixed,fixed zerofill,precision=1},
+columns/mean_read_length_kb/.style={column name={Mean read length (kb)},fixed,fixed zerofill,precision=1},
+every head row/.style={before row=\toprule,after row=\midrule},
+every row no 2/.style={after row=\midrule},
+every last row/.style={after row=\bottomrule},
+column type=c
+]{\inputdatatable}
+
+\end{table}
+
+\subsection*{Computational resources}
+\addcontentsline{toc}{subsection}{Computational resources}
+
+% ============================================================
+% SUPPLEMENTARY TABLE S2: THREAD-HOURS (CPU ALLOCATION) PER ALIGNER
+% ============================================================
+
+\pgfplotstableread[
+    col sep=tab
+]{tables/thread_hours_30x.tsv}
+\threadhourstable
+
+\begin{table}[H]
+\centering
+
+\caption{
+\textbf{Wall-clock runtime and thread-hours of minimap2, pbmm2, VACmap and VG Giraffe.}
+Values are mean $\pm$ standard deviation across the GIAB samples for each sequencing technology. Thread-hours represent the number of allocated threads multiplied by the hours of wall-clock runtime for each aligner and reflect allocated rather than measured CPU time. Per-sample values are shown in Fig.~\ref{fig:thread_hours}.}
+
+\label{tab:thread_hours}
+
+\footnotesize
+\pgfplotstabletypeset[
+columns={technology,aligner,threads,runtime_hours,thread_hours},
+columns/technology/.style={column name={Technology},string type,column type=l},
+columns/aligner/.style={column name={Aligner},string type,column type=l},
+columns/threads/.style={column name={Threads},string type},
+columns/runtime_hours/.style={column name={Runtime (h)},string type},
+columns/thread_hours/.style={column name={Thread-hours},string type},
+every head row/.style={before row=\toprule,after row=\midrule},
+every row no 3/.style={after row=\midrule},
+every last row/.style={after row=\bottomrule},
+column type=c
+]{\threadhourstable}
+
+\end{table}
+
+\subsection*{\textit{De novo} assembly performance}
+\addcontentsline{toc}{subsection}{\textit{De novo} assembly performance}
+
+% ============================================================
+% SUPPLEMENTARY FIGURE: NGA50 VS QUAST MISASSEMBLIES
+% ============================================================
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\linewidth]{assembler_nga50_vs_misassemblies.pdf}
+    \caption{
+        \textbf{Contiguity versus assembly correctness trade-off for Flye, GoldRush and Verkko.}}
+    \label{fig:supp_nga50_misassemblies}
+\end{figure}
+\vspace{-0.8em}
+{\small\noindent One point per HG002/HG003/HG004 assembly: $x$ = QUAST misassemblies, $y$ = QUAST NGA50 (Mb, log scale). Color denotes GIAB sample; marker shape denotes assembler (circle = Flye, square = GoldRush, diamond = Verkko$^\dagger$); filled markers denote ONT input and open markers denote PacBio HiFi input. $^\dagger$Verkko was assembled using combined 30$\times$ ONT and 30$\times$ PacBio HiFi input and produces haplotype-resolved assemblies; it is therefore shown separately from the single-technology Flye and GoldRush runs, and its reference-based statistics should be interpreted in the context of this different assembly representation. NGA50 is computed against the haploid GRCh38 length: for assemblies with duplication ratio $>1$ (Verkko $\sim$2.06, Flye HiFi $\sim$1.33; see Fig.~\ref{fig:quast_duplication_ratio}), redundant aligned blocks count toward that length and misassemblies are absolute counts over more sequence, so both axes favor or penalize those assemblies relative to a collapsed haploid assembly.\par}
+\medskip
 
 \end{document}

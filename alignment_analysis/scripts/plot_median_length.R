@@ -4,60 +4,51 @@ input_file <- file.path(
   project_dir,
   "alignment_analysis",
   "tables",
-  "fastq_summary.tsv"
-)
+  "fastq_summary.tsv")
 
 output_file <- file.path(
   project_dir,
   "alignment_analysis",
   "figures",
-  "median_read_length.png"
-)
+  "median_read_length.png")
 
 # Check that the table exists
 if (!file.exists(input_file)) {
-  stop("Input table not found: ", input_file)
-}
+  stop("Input table not found: ", input_file)}
 
 # Read the summary table
 fastq <- read.delim(
   input_file,
   header = TRUE,
   sep = "\t",
-  stringsAsFactors = FALSE
-)
+  stringsAsFactors = FALSE)
 
 # Select the necessary columns
 ont <- fastq[
   fastq$technology == "ont",
-  c("sample", "median_length")
-]
+  c("sample", "median_length")]
 
 pb <- fastq[
   fastq$technology == "pb",
-  c("sample", "median_length")
-]
+  c("sample", "median_length")]
 
 # Match ONT and PacBio by sample
 paired <- merge(
   ont,
   pb,
   by = "sample",
-  suffixes = c("_ONT", "_PacBio")
-)
+  suffixes = c("_ONT", "_PacBio"))
 
 # Create the PNG figure
 png(
   filename = output_file,
   width = 1800,
   height = 1400,
-  res = 250
-)
+  res = 250)
 
 y_values <- c(
   paired$median_length_ONT,
-  paired$median_length_PacBio
-)
+  paired$median_length_PacBio)
 
 plot(
   NA,
@@ -66,14 +57,12 @@ plot(
   xaxt = "n",
   xlab = "Sequencing technology",
   ylab = "Median read length (bp)",
-  main = "Median read length: ONT versus PacBio"
-)
+  main = "Median read length: ONT versus PacBio")
 
 axis(
   side = 1,
   at = c(1, 2),
-  labels = c("ONT", "PacBio")
-)
+  labels = c("ONT", "PacBio"))
 
 for (i in seq_len(nrow(paired))) {
 
@@ -86,8 +75,7 @@ for (i in seq_len(nrow(paired))) {
     type = "b",
     pch = i,
     lwd = 2
-  )
-}
+  )}
 
 legend(
   "topright",
@@ -95,8 +83,7 @@ legend(
   pch = seq_len(nrow(paired)),
   lty = 1,
   lwd = 2,
-  bty = "n"
-)
+  bty = "n")
 
 dev.off()
 

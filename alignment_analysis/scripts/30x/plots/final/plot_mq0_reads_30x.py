@@ -31,6 +31,7 @@ from utils.plot_style import (
     TECHNOLOGY_ORDER,
     TECHNOLOGY_TITLES,
     apply_style,
+    rotated_xticks,
     clean_spines,
     panel_letter,
     sample_legend_handles,
@@ -130,11 +131,11 @@ def main() -> int:
 
         axis.set_title(TECHNOLOGY_TITLES[technology], pad=6)
         panel_letter(axis, "a" if technology == "ONT" else "b", fontsize=12)
-        axis.set_xticks(x_positions, ALIGNER_ORDER, fontsize=12, rotation=45)
+        rotated_xticks(axis, x_positions, ALIGNER_ORDER, fontsize=12)
         axis.set_xlim(-0.6, len(ALIGNER_ORDER) - 0.4)
         axis.set_ylim(0, y_max)
         axis.tick_params(axis="y", labelsize=12)
-        subtle_grid(axis, "y")
+        #subtle_grid(axis, "y")
         clean_spines(axis)
         axis.set_facecolor("white")
 

@@ -112,6 +112,17 @@ LEGEND_SIZE = 9.0
 PANEL_LABEL_SIZE = 8.5
 
 
+# Compound-figure panels: drawn at their printed size (half of the report's
+# 6.5 in text block), so these font sizes are the final sizes on the page.
+HALF_WIDTH_IN = 3.2
+
+PANEL_TICK_SIZE = 6.0
+PANEL_LABEL_SIZE_PT = 6.5
+PANEL_TITLE_SIZE = 6.5
+PANEL_LEGEND_SIZE = 6.0
+PANEL_VALUE_SIZE = 5.5
+
+
 def apply_style() -> None:
     """Set the shared rcParams. Call once near the top of each script."""
 
@@ -148,6 +159,9 @@ def clean_spines(axis: plt.Axes, keep=("left", "bottom")) -> None:
     for spine_name in keep:
         axis.spines[spine_name].set_color("black")
         axis.spines[spine_name].set_linewidth(0.7)
+        # Keep the axis line above bars, whose white edges would otherwise
+        # paint over it and make the baseline look broken.
+        axis.spines[spine_name].set_zorder(5)
 
 
 def subtle_grid(axis: plt.Axes, axis_direction: str = "y") -> None:
@@ -178,6 +192,53 @@ def panel_letter(
         fontstyle="normal",
         ha="left",
         va="bottom",
+    )
+
+
+def rotated_xticks(
+    axis: plt.Axes,
+    positions,
+    labels,
+    fontsize: float | None = None,
+    rotation: float = 45,
+    tick_length: float | None = None,
+) -> None:
+    """Rotated tick labels whose right end sits exactly under the tick.
+
+    rotation_mode="anchor" rotates around the label's anchor point, so
+    with ha="right" the end of each name lines up with its tick instead of
+    the label's center (the matplotlib default, which drifts right).
+    fontsize=None keeps the xtick.labelsize in effect.
+    """
+    axis.set_xticks(positions, labels)
+    for label in axis.get_xticklabels():
+        label.set_rotation(rotation)
+        label.set_rotation_mode("anchor")
+        label.set_horizontalalignment("right")
+        label.set_verticalalignment("center")
+        if fontsize is not None:
+            label.set_fontsize(fontsize)
+    axis.tick_params(axis="x", pad=3)
+    if tick_length is not None:
+        axis.tick_params(axis="x", length=tick_length)
+
+
+def panel_legend(figure: plt.Figure, handles, y: float, ncols: int | None = None,
+                 fontsize: float | None = None) -> None:
+    """Compact, frameless figure-level legend row centered at height y."""
+    figure.legend(
+        handles=handles,
+        frameon=False,
+        ncols=ncols or len(handles),
+        loc="lower center",
+        bbox_to_anchor=(0.5, y),
+        fontsize=fontsize or PANEL_LEGEND_SIZE,
+        handlelength=0.9,
+        handleheight=0.9,
+        handletextpad=0.35,
+        columnspacing=0.9,
+        borderaxespad=0,
+        borderpad=0,
     )
 
 
@@ -246,6 +307,25 @@ REPORT_FIGURE_MAP = {
     "11_mapped_unmapped_reads_30x.pdf": "figures/11_mapped_unmapped_reads_30x.pdf",
     "12_mapped_unmapped_bases_30x.pdf": "figures/12_mapped_unmapped_bases_30x.pdf",
     "13_cigar_yield_vs_error_30x.pdf": "figures/13_cigar_yield_vs_error_30x.pdf",
+    "10_raw_base_counts_30x.pdf": "figures/10_raw_base_counts_30x.pdf",
+    "14_raw_read_counts_30x.pdf": "figures/14_raw_read_counts_30x.pdf",
+    "15_mean_read_length_30x.pdf": "figures/15_mean_read_length_30x.pdf",
+    "16_q20_q30_reads_30x.pdf": "figures/16_q20_q30_reads_30x.pdf",
+    "17_read_n50_30x.pdf": "figures/17_read_n50_30x.pdf",
+    "fig2_alignment_performance_30x.pdf": "figures/fig2_alignment_performance_30x.pdf",
+    "fig3a_cigar_yield_vs_error_30x.pdf": "figures/fig3a_cigar_yield_vs_error_30x.pdf",
+    "fig3b_mq0_reads_30x.pdf": "figures/fig3b_mq0_reads_30x.pdf",
+    "fig3c_memory_30x.pdf": "figures/fig3c_memory_30x.pdf",
+    "fig3d_runtime_30x.pdf": "figures/fig3d_runtime_30x.pdf",
+    "fig3e_thread_hours_30x.pdf": "figures/fig3e_thread_hours_30x.pdf",
+    "fig3_legend_30x.pdf": "figures/fig3_legend_30x.pdf",
+    "fig5a_read_edit_distance_30x.pdf": "figures/fig5a_read_edit_distance_30x.pdf",
+    "fig5b_contig_mismatches_30x.pdf": "figures/fig5b_contig_mismatches_30x.pdf",
+    "fig5c_read_indels_30x.pdf": "figures/fig5c_read_indels_30x.pdf",
+    "fig5d_contig_indels_30x.pdf": "figures/fig5d_contig_indels_30x.pdf",
+    "fig5e_read_yield_30x.pdf": "figures/fig5e_read_yield_30x.pdf",
+    "fig5f_contig_genome_fraction_30x.pdf": "figures/fig5f_contig_genome_fraction_30x.pdf",
+    "fig5_legend_30x.pdf": "figures/fig5_legend_30x.pdf",
     "cigar_yield_error_diagnostics_combined.pdf": "figures/correlation_diagnostics/cigar_yield_error_diagnostics_combined.pdf",
     "cigar_yield_error_correlation_diagnostics.tsv": "tables/cigar_yield_error_correlation_diagnostics.tsv",
 }
