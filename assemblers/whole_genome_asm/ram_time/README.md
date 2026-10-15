@@ -96,6 +96,12 @@ you launch Snakemake from (the repository root). Optional `--config` keys:
 | `ram_time_threads` | `64` | Threads given to the assembler and to `docker --cpus` |
 | `ram_time_dir` | `assemblers_ram_time` | Where `.ram_time.tsv` files and rule logs are written |
 | `ram_time_scratch_dir` | `assemblers_ram_time/scratch` | Temporary assembly workspace, deleted after each run |
+| `verkko_ovb_run` | `8 32 24` | Verkko only: `--ovb-run` cpus, mem_gb, hours for the overlap jobs |
+
+Verkko exception: at its default estimate of 16 GB per `computeOverlaps` job,
+`--local-memory 64` runs 4 jobs at once, and half of them died (HG003, 30x),
+most likely killed at the 72 GB container memory limit. `--ovb-run 8 32 24` limits this step to 2 concurrent jobs. This
+is the one Verkko setting that differs from `hybrid.assembly.verkko.smk`.
 
 Both directories must stay **inside** the repository root
 (CONSTITUTION I.1); the workflow refuses to start otherwise. No
