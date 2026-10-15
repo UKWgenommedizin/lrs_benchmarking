@@ -23,6 +23,8 @@
 #   ram_time_threads      (default 64)
 #   ram_time_dir          (default assemblers_ram_time)          -- ram_time TSVs + logs
 #   ram_time_scratch_dir  (default assemblers_ram_time/scratch)  -- deleted automatically after each run
+#   verkko_ovb_run        (default "8 32 24")                    -- Verkko --ovb-run: cpus mem_gb hours
+#                                                                   for prepareOverlaps/computeOverlaps
 # Relative paths are resolved against the repository root (the working directory).
 # ************************************************************************************************
 
@@ -63,6 +65,19 @@ if not os.path.isfile(SAMPLER):
     raise FileNotFoundError("Resource sampler not found: " + SAMPLER)
 
 print("Verkko version: " + VERKKO_VERSION)
+
+# Overlap-job resources passed to Verkko as --ovb-run <cpus> <mem_gb> <hours>.
+# Verkko's own estimate (16 GB per computeOverlaps job) let 4 jobs run at once
+# under --local-memory 64; half of them died after ~6 min (HG003, 30x), most
+# likely killed at the 72 GB container memory limit.
+# 32 GB per job limits it to 2 concurrent overlap jobs.
+VERKKO_OVB_RUN = str(config.get("verkko_ovb_run", "8 32 24")).split()
+if len(VERKKO_OVB_RUN) != 3 or not all(v.isdigit() and int(v) > 0 for v in VERKKO_OVB_RUN):
+    raise ValueError("verkko_ovb_run must be three positive integers 'cpus mem_gb hours', got: "
+                     + str(config.get("verkko_ovb_run")))
+VERKKO_OVB_RUN = " ".join(VERKKO_OVB_RUN)
+
+print("Verkko --ovb-run: " + VERKKO_OVB_RUN)
 
 #####################
 # Discover samples and create wildcards (identical to hybrid.assembly.verkko.smk)
@@ -165,6 +180,7 @@ rule verkko_run:
             echo "Threads: {threads}"
             echo "Memory: {resources.mem_mb} MB"
             echo "Scratch: {output.scratch}"
+            echo "Verkko --ovb-run: {VERKKO_OVB_RUN}"
 
             [[ {threads} -eq {RAM_TIME_THREADS} ]] || {{
                 echo "ERROR: Snakemake granted {threads} threads, expected {RAM_TIME_THREADS}."
@@ -213,7 +229,8 @@ rule verkko_run:
                     --nano "{input.ont}" \
                     --local \
                     --local-cpus {threads} \
-                    --local-memory {params.local_memory_gb}
+                    --local-memory {params.local_memory_gb} \
+                    --ovb-run {VERKKO_OVB_RUN}
 
             kill $SAMPLER_PID 2>/dev/null || true
             wait $SAMPLER_PID 2>/dev/null || true
