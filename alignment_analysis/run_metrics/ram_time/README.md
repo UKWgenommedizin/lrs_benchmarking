@@ -48,13 +48,13 @@ missing; see [`containers/`](../../../containers/README.md):
 
 | Workflow | Image | Mapping step | Mapping memory limit | Threads (production -> here) |
 |---|---|---|---|---|
-| VG ONT | `nicolasardila1/lrs-vg:v1.73.0` | `vg giraffe -b r10 -o BAM` | 160 GB | 16 -> 64 |
-| VG PacBio HiFi | `nicolasardila1/lrs-vg:v1.73.0` | `vg giraffe -b hifi --output-format SAM` | 160 GB | 16 -> 64 |
+| VG ONT | `nicolasardila1/lrs-vg:v1.73.0` | `vg giraffe -b r10 -o BAM` | 240 GB (production 160) | 16 -> 64 |
+| VG PacBio HiFi | `nicolasardila1/lrs-vg:v1.73.0` | `vg giraffe -b hifi --output-format SAM` | 240 GB (production 160) | 16 -> 64 |
 | VACmap ONT | `nicolasardila1/lrs-vacmap:v1.2.0` | `vacmap -mode H` | 48 GB | 16 -> 64 |
 | VACmap PacBio HiFi | `nicolasardila1/lrs-vacmap:v1.2.0` | `vacmap -mode L` | 48 GB | 16 -> 64 |
 
 Sort (`samtools sort -@ 4`, 4 CPUs, 16 GB) and index (`samtools index`,
-4 CPUs, 8 GB) are also identical to production. The only difference is the
+4 CPUs, 8 GB) are also identical to production. The main difference is the
 mapping thread count: **64 threads** (`ram_time_threads`) instead of the
 production 16, the same as the assembler ram_time runs, so all tools are
 measured at 64 threads and are directly comparable. Because of this, the new
@@ -62,9 +62,17 @@ wall-clock times are expected to be **shorter** than the 16-thread
 `*_30x_runtime.tsv` tables next to this folder; `cpu_hours` barely depends on
 the thread count and stays comparable with them.
 
-The memory limits are unchanged (160 GB VG, 48 GB VACmap). If a 64-thread
+The memory limits are unchanged except VG mapping (see below; 48 GB VACmap). If a 64-thread
 run is killed for memory (docker exit 137, or `container_peak_mem_gb`
 close to the limit), that limit, not the aligner, is the bottleneck.
+
+VG exception: HG004 ONT was killed at production's 160 GB limit with 64
+threads on 2026-10-14 (exit 137), while HG002 and HG003 ONT finished under it.
+The VG mapping limit here is therefore **240 GB** (`vg_map_mem_gb`; the
+server has about 500 GB). A higher ceiling does not change the peak RAM
+measured for runs that never reach it, so HG002/HG003 stay comparable. Each run
+checks the host's RAM before mapping and stops (exit 107) if the limit does
+not fit.
 
 The local root workflows are the reference. The older copies on the upstream
 branch `feature/new-mappers-bm` use `-m 64g` for VG and SAM output for VG
@@ -148,6 +156,7 @@ you launch Snakemake from (the repository root). Optional `--config` keys:
 | `ram_time_dir` | `aligners_ram_time` | Where `.ram_time.tsv` files and rule logs are written |
 | `ram_time_scratch_dir` | `aligners_ram_time/scratch` | Temporary mapping workspace, deleted after each run |
 | `reference` | `reference/GRCh38_GIABv3_..._KCNJ18.fasta` | Same key and default as production |
+| `vg_map_mem_gb` | `240` | VG only: `docker -m` (GB) for the `vg giraffe` stage, and the rule's `mem_mb`. Production uses 160; HG004 ONT was killed at 160 with 64 threads. The run stops at the start (exit 107) if this is more than the host's RAM |
 | `vg_index_dir` | `vg_index` | VG only: directory with the four pre-built Giraffe indexes; may be an absolute path outside the repository (read-only input) |
 | `dataset_filter` | none | Only datasets whose name contains this string, as in production |
 
@@ -292,15 +301,55 @@ repository root, or `fastq/` is missing.
 
 Always do a dry run first (add `--dry-run`), then the real run.
 
+### On the server (tmux + orchestrator container)
+
+The runs take hours, so start them inside `tmux` and run Snakemake from the
+`snakemake-orchestrator` container, which drives the host's Docker daemon
+through the mounted socket:
+
+```bash
+tmux new -s lrs                 # later: tmux attach -t lrs   (detach: Ctrl+B, then D)
+
+docker run --rm -it \
+    -v /data/genmedbfx/yu_j/lrs_benchmarking/:/data/genmedbfx/yu_j/lrs_benchmarking/ \
+    -v /home/yu_j/smbshare/lrs_benchmarking/fastq/:/home/yu_j/smbshare/lrs_benchmarking/fastq/ \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    snakemake-orchestrator
+
+# inside the orchestrator container: always the repository root
+cd /data/genmedbfx/yu_j/lrs_benchmarking
+```
+
+Then run the commands below from there.
+
 ### VG Giraffe 1.73.0 (`nicolasardila1/lrs-vg:v1.73.0`)
+
+`vg giraffe` runs in a container limited to `vg_map_mem_gb` (default
+**240 GB**), and the job reserves the same amount from Snakemake, so
+`--resources mem_mb` must be **at least `vg_map_mem_gb` x 1024 = 245760**.
+With less, Snakemake will not start the job. If you change `vg_map_mem_gb`,
+change `mem_mb` to match.
 
 ```bash
 # ONT
-snakemake --snakefile alignment_analysis/run_metrics/ram_time/ont.read_mapping.vg.ram_time.smk --cores 64 --resources mem_mb=163840 --rerun-incomplete --printshellcmds --show-failed-logs
+snakemake --snakefile alignment_analysis/run_metrics/ram_time/ont.read_mapping.vg.ram_time.smk --cores 64 --resources mem_mb=245760 --rerun-incomplete --printshellcmds --show-failed-logs
 
 # PacBio HiFi
-snakemake --snakefile alignment_analysis/run_metrics/ram_time/pb.read_mapping.vg.ram_time.smk --cores 64 --resources mem_mb=163840 --rerun-incomplete --printshellcmds --show-failed-logs
+snakemake --snakefile alignment_analysis/run_metrics/ram_time/pb.read_mapping.vg.ram_time.smk --cores 64 --resources mem_mb=245760 --rerun-incomplete --printshellcmds --show-failed-logs
 ```
+
+Already finished datasets are skipped (their `.ram_time.tsv` exists). To re-run
+**only one dataset**, e.g. HG004 ONT after it was killed at the old 160 GB
+limit (exit 137, 2026-10-14):
+
+```bash
+snakemake --snakefile alignment_analysis/run_metrics/ram_time/ont.read_mapping.vg.ram_time.smk --cores 64 --resources mem_mb=245760 --config dataset_filter=HG004 --rerun-incomplete --printshellcmds --show-failed-logs
+```
+
+Check the start of `aligners_ram_time/vg_giraffe/<dataset>.run.log`: it prints
+`VG map memory limit: 240 GB` and `Host RAM: ... GB`. If the limit is more than
+the host's RAM, the run stops there with exit 107; re-run with a smaller
+`--config vg_map_mem_gb=<GB>` and `--resources mem_mb=<GB x 1024>`.
 
 ### VACmap 1.2.0 image (`nicolasardila1/lrs-vacmap:v1.2.0`)
 

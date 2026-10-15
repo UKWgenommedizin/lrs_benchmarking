@@ -28,6 +28,8 @@
 #   ram_time_threads      (default 64, production used 16; same as the assembler ram_time runs)
 #   ram_time_dir          (default aligners_ram_time)          -- ram_time TSVs + logs
 #   ram_time_scratch_dir  (default aligners_ram_time/scratch)  -- deleted automatically after each run
+#   vg_map_mem_gb         (default 240; production 160)        -- docker -m for the vg giraffe stage;
+#                                                                 must fit in the host's RAM (checked at start)
 #   vg_index_dir          (default vg_index)                   -- pre-built indexes, may be outside the repo (read-only input)
 # Relative paths are resolved against the repository root (the working directory).
 # ************************************************************************************************
@@ -46,6 +48,13 @@ except (KeyError, NameError):
 # RAM / time measurement settings
 
 RAM_TIME_THREADS = int(config.get("ram_time_threads", 64))
+# Memory ceiling of the vg giraffe container. Production uses 160 GB at 16 threads; at 64
+# threads the ONT run of HG004 was killed at 160 GB (exit 137, 2026-10-14), so the default is 240.
+# A higher ceiling does not change the peak RAM measured for runs that stay below it.
+# vg_run checks it against the host's RAM before mapping (exit 107).
+VG_MAP_MEM_GB = int(config.get("vg_map_mem_gb", 240))
+if VG_MAP_MEM_GB <= 0:
+    raise ValueError("vg_map_mem_gb must be a positive integer, got: " + str(config.get("vg_map_mem_gb")))
 RAM_TIME_DIR = os.path.join(CWD, config.get("ram_time_dir", "aligners_ram_time"), "vg_giraffe")
 SCRATCH_DIR = os.path.join(CWD, config.get("ram_time_scratch_dir", "aligners_ram_time/scratch"), "vg_giraffe")
 
@@ -54,6 +63,7 @@ for _path in (RAM_TIME_DIR, SCRATCH_DIR):
         raise ValueError("Constitution I.1: ram_time paths must be inside the repository root: " + _path)
 
 print("RAM/time threads: " + str(RAM_TIME_THREADS))
+print("VG map memory limit: " + str(VG_MAP_MEM_GB) + " GB")
 print("RAM/time results: " + RAM_TIME_DIR)
 print("RAM/time scratch: " + SCRATCH_DIR)
 
@@ -151,7 +161,7 @@ rule vg_run:
     threads: RAM_TIME_THREADS
 
     resources:
-        mem_mb = 163840,
+        mem_mb = VG_MAP_MEM_GB * 1024,
 
     shell:
         """
@@ -165,6 +175,7 @@ rule vg_run:
             echo "Dataset: {wildcards.dataset}"
             echo "Read technology: PacBio HiFi (-b hifi)"
             echo "Threads: {threads}"
+            echo "VG map memory limit: {VG_MAP_MEM_GB} GB"
             echo "Scratch: {output.scratch}"
 
             [[ {threads} -eq {RAM_TIME_THREADS} ]] || {{
@@ -185,6 +196,15 @@ rule vg_run:
             docker stats --no-stream >/dev/null || {{
                 echo "ERROR: docker stats does not work on this host; the resource sampler needs it"
                 exit 105;
+            }}
+
+            # The giraffe ceiling must fit in the host's RAM, or the host (not the container) runs out.
+            HOST_MEM_GB=$(awk '/^MemTotal:/ {{print int($2 / 1024 / 1024)}}' /proc/meminfo)
+            echo "Host RAM: $HOST_MEM_GB GB"
+            [[ {VG_MAP_MEM_GB} -le $HOST_MEM_GB ]] || {{
+                echo "ERROR: vg_map_mem_gb={VG_MAP_MEM_GB} is more than the host's $HOST_MEM_GB GB of RAM."
+                echo "Re-run with --config vg_map_mem_gb=<at most $HOST_MEM_GB>."
+                exit 107;
             }}
 
             # One sampler per stage, each watching that stage's named container.
@@ -217,7 +237,7 @@ rule vg_run:
                 --tmpfs /tmp:size=50g,exec \
                 -u $UID:$(id -g) \
                 --cpus {threads} \
-                -m 160g \
+                -m {VG_MAP_MEM_GB}g \
                 -v {CWD}:{CWD} \
                 -v {input.ref}:{input.ref}:ro \
                 -v {VG_INDEX_DIR}:{VG_INDEX_DIR}:ro \
