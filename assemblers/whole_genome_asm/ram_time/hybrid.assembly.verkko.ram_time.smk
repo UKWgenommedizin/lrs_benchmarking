@@ -66,11 +66,8 @@ if not os.path.isfile(SAMPLER):
 
 print("Verkko version: " + VERKKO_VERSION)
 
-# Overlap-job resources passed to Verkko as --ovb-run <cpus> <mem_gb> <hours>.
-# Verkko's own estimate (16 GB per computeOverlaps job) let 4 jobs run at once
-# under --local-memory 64; half of them died after ~6 min (HG003, 30x), most
-# likely killed at the 72 GB container memory limit.
-# 32 GB per job limits it to 2 concurrent overlap jobs.
+# Overlap-job resources were modified with --ovb-run <cpus> <mem_gb> <hours>. Verkko's own estimate (16 GB per computeOverlaps job) let 4 jobs run at once migth likely killed at the 72 GB container memory limit.
+# Using a 32 GB per job limits it to 2 concurrent overlap jobs.
 VERKKO_OVB_RUN = str(config.get("verkko_ovb_run", "8 32 24")).split()
 if len(VERKKO_OVB_RUN) != 3 or not all(v.isdigit() and int(v) > 0 for v in VERKKO_OVB_RUN):
     raise ValueError("verkko_ovb_run must be three positive integers 'cpus mem_gb hours', got: "
