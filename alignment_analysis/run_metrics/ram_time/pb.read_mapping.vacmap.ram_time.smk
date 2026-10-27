@@ -28,6 +28,8 @@
 #   ram_time_threads      (default 64, production used 16; same as the assembler ram_time runs)
 #   ram_time_dir          (default aligners_ram_time)          -- ram_time TSVs + logs
 #   ram_time_scratch_dir  (default aligners_ram_time/scratch)  -- deleted automatically after each run
+#   vacmap_map_mem_gb     (default 240; production 48)         -- docker -m for the vacmap stage;
+#                                                                 must fit in the host's RAM (checked at start)
 # Relative paths are resolved against the repository root (the working directory).
 # ************************************************************************************************
 
@@ -45,6 +47,15 @@ except (KeyError, NameError):
 # RAM / time measurement settings
 
 RAM_TIME_THREADS = int(config.get("ram_time_threads", 64))
+# Production's 48 GB VACmap limit was sized for 16 threads. VACmap starts one Python
+# worker process per thread, so at 64 threads HG003.ont.30x and HG002.pb.30x were killed
+# at 48 GB within minutes of starting to read (manager process died -> EOFError /
+# BrokenPipeError in every worker, 2026-10-27). The default is 240 GB, the same as VG mapping.
+# A higher ceiling does not change the peak RAM measured for runs that stay below it.
+# vacmap_run checks it against the host's RAM before mapping (exit 107).
+VACMAP_MAP_MEM_GB = int(config.get("vacmap_map_mem_gb", 240))
+if VACMAP_MAP_MEM_GB <= 0:
+    raise ValueError("vacmap_map_mem_gb must be a positive integer, got: " + str(config.get("vacmap_map_mem_gb")))
 RAM_TIME_DIR = os.path.join(CWD, config.get("ram_time_dir", "aligners_ram_time"), "vacmap")
 SCRATCH_DIR = os.path.join(CWD, config.get("ram_time_scratch_dir", "aligners_ram_time/scratch"), "vacmap")
 
@@ -53,6 +64,7 @@ for _path in (RAM_TIME_DIR, SCRATCH_DIR):
         raise ValueError("Constitution I.1: ram_time paths must be inside the repository root: " + _path)
 
 print("RAM/time threads: " + str(RAM_TIME_THREADS))
+print("VACmap map memory limit: " + str(VACMAP_MAP_MEM_GB) + " GB")
 print("RAM/time results: " + RAM_TIME_DIR)
 print("RAM/time scratch: " + SCRATCH_DIR)
 
@@ -131,6 +143,9 @@ rule vacmap_run:
 
     threads: RAM_TIME_THREADS
 
+    resources:
+        mem_mb = VACMAP_MAP_MEM_GB * 1024,
+
     shell:
         """
         mkdir -p "$(dirname "{log}")"
@@ -143,6 +158,7 @@ rule vacmap_run:
             echo "Dataset: {wildcards.dataset}"
             echo "Read technology: PacBio HiFi (-mode L)"
             echo "Threads: {threads}"
+            echo "VACmap map memory limit: {VACMAP_MAP_MEM_GB} GB"
             echo "Scratch: {output.scratch}"
 
             [[ {threads} -eq {RAM_TIME_THREADS} ]] || {{
@@ -163,6 +179,14 @@ rule vacmap_run:
             docker stats --no-stream >/dev/null || {{
                 echo "ERROR: docker stats does not work on this host; the resource sampler needs it"
                 exit 105;
+            }}
+
+            HOST_MEM_GB=$(awk '/^MemTotal:/ {{print int($2 / 1024 / 1024)}}' /proc/meminfo)
+            echo "Host RAM: $HOST_MEM_GB GB"
+            [[ {VACMAP_MAP_MEM_GB} -le $HOST_MEM_GB ]] || {{
+                echo "ERROR: vacmap_map_mem_gb={VACMAP_MAP_MEM_GB} is more than the host's $HOST_MEM_GB GB of RAM."
+                echo "Re-run with --config vacmap_map_mem_gb=<at most $HOST_MEM_GB>."
+                exit 107;
             }}
 
             # One sampler per stage, each watching that stage's named container.
@@ -194,7 +218,7 @@ rule vacmap_run:
                 --workdir /tmp \
                 -u $UID:$(id -g) \
                 --cpus {threads} \
-                -m 48g \
+                -m {VACMAP_MAP_MEM_GB}g \
                 -v {CWD}:{CWD} \
                 -v {input.ref}:{input.ref}:ro \
                 --entrypoint /usr/bin/time \
@@ -208,7 +232,20 @@ rule vacmap_run:
                 --rg-id {wildcards.dataset} \
                 --rg-sm {wildcards.dataset} \
                 --force \
-                -o "$TMP_SAM"
+                -o "$TMP_SAM" || {{
+                MAP_RC=$?
+                stop_sampler
+                # The scratch dir (and its resource_samples) is deleted on failure, so put the evidence in this log.
+                PEAK_MAP_GB=$(awk -F '\\t' 'NR > 1 && $2 != "NA" && $2 > m {{m = $2}} END {{printf "%.1f", m / 1024^3}}' \
+                    "{output.scratch}/resource_samples.map.tsv" 2>/dev/null || echo NA)
+                echo "ERROR: VACmap exited with code $MAP_RC."
+                echo "Peak sampled container memory (30 s samples): $PEAK_MAP_GB GB of the {VACMAP_MAP_MEM_GB} GB limit."
+                echo "EOFError / BrokenPipeError from the worker processes usually means the container hit its"
+                echo "memory limit and the OOM killer took VACmap's multiprocessing manager; confirm with"
+                echo "'docker events --since <start> --until <end> --filter event=oom' (or 'dmesg | grep -i oom')"
+                echo "and re-run with a larger --config vacmap_map_mem_gb=<GB>."
+                exit $MAP_RC;
+            }}
             stop_sampler
 
             [[ -s "$TMP_SAM" ]] || {{ echo "ERROR: VACmap produced empty/missing $TMP_SAM"; exit 101; }}
