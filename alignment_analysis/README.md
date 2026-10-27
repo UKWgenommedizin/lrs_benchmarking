@@ -25,8 +25,7 @@ Generated from version-control candidates. Directories remain compact; use this 
 - **run_metrics/** — 9 files
 - **scripts/** — 93 files; [`guide`](scripts/README.md)
 - **side_analyses/** — 6 files
-- **statistics_cram_files/** — 1 file
-- **tables/** — 129 files; [`guide`](tables/README.md)
+- **tables/** — 124 files; [`guide`](tables/README.md)
 - **tests/** — 5 files; [`guide`](tests/README.md)
 
 <!-- AUTO_REPOSITORY_TREE_END -->

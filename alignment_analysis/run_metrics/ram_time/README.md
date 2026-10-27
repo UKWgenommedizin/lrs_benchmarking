@@ -50,8 +50,8 @@ missing; see [`containers/`](../../../containers/README.md):
 |---|---|---|---|---|
 | VG ONT | `nicolasardila1/lrs-vg:v1.73.0` | `vg giraffe -b r10 -o BAM` | 240 GB (production 160) | 16 -> 64 |
 | VG PacBio HiFi | `nicolasardila1/lrs-vg:v1.73.0` | `vg giraffe -b hifi --output-format SAM` | 240 GB (production 160) | 16 -> 64 |
-| VACmap ONT | `nicolasardila1/lrs-vacmap:v1.2.0` | `vacmap -mode H` | 48 GB | 16 -> 64 |
-| VACmap PacBio HiFi | `nicolasardila1/lrs-vacmap:v1.2.0` | `vacmap -mode L` | 48 GB | 16 -> 64 |
+| VACmap ONT | `nicolasardila1/lrs-vacmap:v1.2.0` | `vacmap -mode H` | 240 GB (production 48) | 16 -> 64 |
+| VACmap PacBio HiFi | `nicolasardila1/lrs-vacmap:v1.2.0` | `vacmap -mode L` | 240 GB (production 48) | 16 -> 64 |
 
 Sort (`samtools sort -@ 4`, 4 CPUs, 16 GB) and index (`samtools index`,
 4 CPUs, 8 GB) are also identical to production. The main difference is the
@@ -62,7 +62,7 @@ wall-clock times are expected to be **shorter** than the 16-thread
 `*_30x_runtime.tsv` tables next to this folder; `cpu_hours` barely depends on
 the thread count and stays comparable with them.
 
-The memory limits are unchanged except VG mapping (see below; 48 GB VACmap). If a 64-thread
+The memory limits are unchanged except VG and VACmap mapping (see below). If a 64-thread
 run is killed for memory (docker exit 137, or `container_peak_mem_gb`
 close to the limit), that limit, not the aligner, is the bottleneck.
 
@@ -396,3 +396,11 @@ From the repository root, for every modified workflow:
 git diff --check
 snakemake --snakefile alignment_analysis/run_metrics/ram_time/<workflow>.ram_time.smk --cores 64 --dry-run --printshellcmds
 ```
+
+VACmap exception: VACmap starts one Python worker process per thread, so
+production's 48 GB limit (sized for 16 threads) is too small at 64 threads.
+HG003 ONT and HG002 PacBio HiFi were killed at 48 GB on 2026-10-27, within minutes of starting
+reading. The OOM killer took VACmap's multiprocessing manager, so the log shows
+`EOFError` / `BrokenPipeError` in every worker instead of exit 137. The VACmap
+mapping limit here is therefore **240 GB** (`vacmap_map_mem_gb`), with the same
+host-RAM check (exit 107) as VG.
